@@ -1,11 +1,20 @@
 export default [
   {
     path: '/',
+    name: 'Landing',
+    component: () => import('./components/StartPage.vue'),
+    meta: {
+      requiresAuth: true // Requires authentication or guest mode
+    }
+  },
+  {
+    path: '/login',
     name: 'Login',
     component: () => import('./components/LoginPage.vue'),
     meta: {
+      requiresAuth: false,
       isAuthPage: true,
-      requiresAuth: false
+      isPublicPage: true
     }
   },
   {
@@ -13,33 +22,49 @@ export default [
     name: 'SignUp',
     component: () => import('./components/SignUpPage.vue'),
     meta: {
+      requiresAuth: false,
       isAuthPage: true,
-      requiresAuth: false
+      isPublicPage: true
     }
   },
   {
-    path: '/texts',
-    name: 'TextList',
-    component: () => import('./components/TextListPage.vue'),
+    path: '/session/:id',
+    name: 'TextSession',
+    component: () => import('./components/TextSessionPage.vue'),
     meta: {
-      requiresAuth: true
+      requiresAuth: true // Requires authentication or guest mode
     }
   },
   {
-    path: '/reader/:id',
-    name: 'TextReader',
-    component: () => import('./components/TextReaderPage.vue'),
-    props: true,
+    path: '/result',
+    name: 'Result',
+    component: () => import('./components/ResultPage.vue'),
     meta: {
-      requiresAuth: true
+      requiresAuth: true // Requires authentication or guest mode
     }
   },
   {
-    path: '/dictionary',
-    name: 'DictionaryManager',
-    component: () => import('./components/DictionaryManager.vue'),
+    path: '/feedback',
+    name: 'Feedback',
+    component: () => import('./components/FeedbackPage.vue'),
     meta: {
-      requiresAuth: true
+      requiresAuth: true // Requires authentication or guest mode
+    }
+  },
+  {
+    path: '/admin/feedback',
+    name: 'AdminFeedback',
+    component: () => import('./components/AdminFeedbackPage.vue'),
+    meta: {
+      requiresAuth: true // Requires authentication or guest mode
+    }
+  },
+  {
+    path: '/import',
+    name: 'TextImporter',
+    component: () => import('./components/TextImporter.vue'),
+    meta: {
+      requiresAuth: true // Requires authentication or guest mode
     }
   },
   {
@@ -47,7 +72,8 @@ export default [
     name: 'NotFound',
     component: () => import('./components/NotFoundPage.vue'),
     meta: {
-      requiresAuth: false
+      requiresAuth: false,
+      isPublicPage: true
     }
   }
 ] 

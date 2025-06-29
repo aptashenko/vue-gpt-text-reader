@@ -1,131 +1,408 @@
 <template>
-  <div class="login-container">
-    <h2>Welcome Back</h2>
-    <form @submit.prevent="login">
-      <input v-model="email" type="email" placeholder="Email" required />
-      <input v-model="password" type="password" placeholder="Password" required />
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Logging in...' : 'Login' }}
-      </button>
-      <div v-if="error" class="error">{{ error }}</div>
-    </form>
-    <div class="signup-link">
-      Don't have an account?
-      <router-link to="/signup">Sign up here</router-link>
+  <div class="login-page">
+    <div class="login-container">
+      <div class="login-card">
+        <!-- Header -->
+        <header class="login-header">
+          <h1 class="app-title">{{ $t('app.title') }}</h1>
+          <p class="app-description">
+            {{ $t('auth.loginDescription') }}
+          </p>
+        </header>
+
+        <!-- Login Form -->
+        <form @submit.prevent="handleLogin" class="login-form">
+          <div class="form-group">
+            <label for="email" class="form-label">{{ $t('auth.email') }}</label>
+            <input
+              id="email"
+              v-model="email"
+              type="email"
+              class="form-input"
+              :class="{ 'error': emailError }"
+              placeholder="Enter your email"
+              required
+              @blur="validateEmail"
+            />
+            <span v-if="emailError" class="error-message">{{ emailError }}</span>
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">{{ $t('auth.password') }}</label>
+            <input
+              id="password"
+              v-model="password"
+              type="password"
+              class="form-input"
+              :class="{ 'error': passwordError }"
+              placeholder="Enter your password"
+              required
+              @blur="validatePassword"
+            />
+            <span v-if="passwordError" class="error-message">{{ passwordError }}</span>
+          </div>
+
+          <!-- Error Message -->
+          <div v-if="loginError" class="login-error">
+            {{ loginError }}
+          </div>
+
+          <!-- Login Button -->
+          <button
+            type="submit"
+            class="login-button"
+            :disabled="loading || !isFormValid"
+            :class="{ 'loading': loading }"
+          >
+            <span v-if="loading" class="spinner"></span>
+            {{ loading ? $t('app.loading') : $t('auth.login') }}
+          </button>
+
+          <!-- Guest Mode Button -->
+          <button
+            type="button"
+            @click="continueAsGuest"
+            class="guest-button"
+            :disabled="loading"
+          >
+            {{ $t('auth.continueAsGuest') }}
+          </button>
+        </form>
+
+        <!-- Sign Up Link -->
+        <div class="signup-link">
+          {{ $t('auth.dontHaveAccount') }} 
+          <router-link to="/signup" class="signup-text">{{ $t('auth.signup') }}</router-link>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth.js'
+import { useAuthStore } from '../stores/auth'
 
-const email = ref('')
-const password = ref('')
-const error = ref('')
-const loading = ref(false)
 const router = useRouter()
 const authStore = useAuthStore()
 
-const login = async () => {
+// Form data
+const email = ref('')
+const password = ref('')
+const loading = ref(false)
+const loginError = ref('')
+
+// Validation errors
+const emailError = ref('')
+const passwordError = ref('')
+
+// Computed properties
+const isFormValid = computed(() => {
+  return email.value.trim() && 
+         password.value.trim() && 
+         !emailError.value && 
+         !passwordError.value
+})
+
+// Validation methods
+function validateEmail() {
+  emailError.value = ''
+  const emailValue = email.value.trim()
+  
+  if (!emailValue) {
+    emailError.value = $t('auth.emailRequired')
+    return false
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(emailValue)) {
+    emailError.value = $t('auth.invalidEmail')
+    return false
+  }
+  
+  return true
+}
+
+function validatePassword() {
+  passwordError.value = ''
+  const passwordValue = password.value.trim()
+  
+  if (!passwordValue) {
+    passwordError.value = $t('auth.passwordRequired')
+    return false
+  }
+  
+  if (passwordValue.length < 6) {
+    passwordError.value = $t('auth.passwordTooShort')
+    return false
+  }
+  
+  return true
+}
+
+// Login method
+async function handleLogin() {
+  if (!isFormValid.value) return
+  
   loading.value = true
-  error.value = ''
+  loginError.value = ''
   
-  const { error: loginError } = await authStore.signIn(email.value, password.value)
+  try {
+    const result = await authStore.signIn(email.value, password.value)
+    
+    if (result.error) {
+      if (result.error.includes('Invalid login credentials')) {
+        loginError.value = $t('auth.invalidCredentials')
+      } else {
+        loginError.value = result.error
+      }
+      return
+    }
+    
+    if (result.success) {
+      // Successful login
+      router.push('/')
+    }
+  } catch (error) {
+    console.error('Login error:', error)
+    loginError.value = $t('auth.unexpectedError')
+  } finally {
+    loading.value = false
+  }
+}
+
+// Guest mode
+async function continueAsGuest() {
+  loading.value = true
   
-  loading.value = false
-  
-  if (loginError) {
-    error.value = loginError.message
-  } else {
-    router.push('/texts')
+  try {
+    const result = authStore.enableGuestMode()
+    
+    if (result.success) {
+      router.push('/')
+    }
+  } catch (error) {
+    console.error('Guest mode error:', error)
+    loginError.value = $t('auth.guestModeError')
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
 <style scoped>
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
 .login-container {
+  width: 100%;
   max-width: 400px;
-  margin: 60px auto;
-  padding: 2rem;
+}
+
+.login-card {
+  background: white;
   border-radius: 16px;
-  background: #fffaf6;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
-  color: #3b3b3b;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-h2 {
+.login-header {
   text-align: center;
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
-  color: #5a4a42;
+  margin-bottom: 32px;
 }
 
-form {
+.app-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+.app-description {
+  color: #718096;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.login-form {
   display: flex;
   flex-direction: column;
+  gap: 20px;
 }
 
-input {
-  padding: 0.8rem;
-  margin-bottom: 1rem;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.9rem;
+}
+
+.form-input {
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
   border-radius: 8px;
-  border: 1px solid #d8cfc7;
   font-size: 1rem;
-  background: #fffaf6;
-  color: #3b3b3b;
+  transition: all 0.2s ease;
+  background: white;
+  color: #2d3748;
 }
 
-input:focus {
+.form-input:focus {
   outline: none;
-  border-color: #d8a48f;
-  background: #fff5ee;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-button {
-  padding: 0.75rem;
-  background-color: #98c9a3;
+.form-input.error {
+  border-color: #e53e3e;
+}
+
+.form-input.error:focus {
+  border-color: #e53e3e;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+}
+
+.error-message {
+  color: #e53e3e;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.login-error {
+  background: #fed7d7;
+  color: #742a2a;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #feb2b2;
+  font-size: 0.9rem;
+}
+
+.login-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  font-size: 1rem;
   border: none;
   border-radius: 8px;
+  padding: 14px 24px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
-button:hover {
-  background-color: #82b28d;
+
+.login-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
 }
-button:disabled {
-  background-color: #b7d2bf;
+
+.login-button:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.login-button.loading {
   cursor: not-allowed;
 }
 
-.error {
-  margin-top: 1rem;
-  color: #a94442;
-  background-color: #fcebea;
-  border: 1px solid #f5c6cb;
-  padding: 0.75rem;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  text-align: center;
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.guest-button {
+  background: #f7fafc;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.guest-button:hover:not(:disabled) {
+  background: #edf2f7;
+  border-color: #cbd5e0;
+  transform: translateY(-1px);
+}
+
+.guest-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .signup-link {
-  margin-top: 1.5rem;
+  color: #2d3748;
   text-align: center;
-  font-size: 0.95rem;
-  color: #6e5c52;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
 }
 
-.signup-link a {
-  color: #d08a6e;
-  font-weight: 500;
-  text-decoration: none;
+.signup-link p {
+  color: #718096;
+  font-size: 0.9rem;
+  margin: 0;
 }
-.signup-link a:hover {
+
+.signup-text {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.signup-text:hover {
+  color: #5a67d8;
   text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 24px;
+  }
+  
+  .app-title {
+    font-size: 1.75rem;
+  }
+  
+  .app-description {
+    font-size: 0.9rem;
+  }
+  
+  .login-button,
+  .guest-button {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
 }
 </style>

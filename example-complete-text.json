@@ -1,0 +1,173 @@
+{
+  "text": {
+    "title": "The Little Red Hen",
+    "content": "Once upon a time, there was a little red hen who lived on a farm. She was a very busy hen and always liked to do things by herself. One day, she found some wheat seeds in the barnyard. \"Who will help me plant these seeds?\" she asked. \"Not I,\" said the cat. \"Not I,\" said the dog. \"Not I,\" said the pig. \"Then I will plant them myself,\" said the little red hen. And she did. The wheat grew tall and golden. \"Who will help me cut the wheat?\" asked the little red hen. \"Not I,\" said the cat. \"Not I,\" said the dog. \"Not I,\" said the pig. \"Then I will cut it myself,\" said the little red hen. And she did. \"Who will help me take the wheat to the mill?\" asked the little red hen. \"Not I,\" said the cat. \"Not I,\" said the dog. \"Not I,\" said the pig. \"Then I will take it myself,\" said the little red hen. And she did. The miller ground the wheat into flour. \"Who will help me bake the bread?\" asked the little red hen. \"Not I,\" said the cat. \"Not I,\" said the dog. \"Not I,\" said the pig. \"Then I will bake it myself,\" said the little red hen. And she did. The bread smelled wonderful! \"Who will help me eat the bread?\" asked the little red hen. \"I will!\" said the cat. \"I will!\" said the dog. \"I will!\" said the pig. \"No, you will not,\" said the little red hen. \"I will eat it myself.\" And she did.",
+    "language": "en",
+    "level": "Beginner",
+    "questions": [
+      {
+        "questionText": "What did the little red hen find in the barnyard?",
+        "questionNumber": 1,
+        "questionType": "comprehension",
+        "difficulty": "easy"
+      },
+      {
+        "questionText": "What did the other animals say when the hen asked for help?",
+        "questionNumber": 2,
+        "questionType": "comprehension",
+        "difficulty": "easy"
+      },
+      {
+        "questionText": "What lesson does this story teach about helping others?",
+        "questionNumber": 3,
+        "questionType": "analysis",
+        "difficulty": "medium"
+      }
+    ]
+  },
+  "dictionary": [
+    {
+      "word": "hen",
+      "language": "en",
+      "translation_en": "hen",
+      "translation_fr": "poule",
+      "translation_es": "gallina",
+      "translation_de": "Huhn",
+      "translation_uk": "курка",
+      "part_of_speech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "farm",
+      "language": "en",
+      "translation_en": "farm",
+      "translation_fr": "ferme",
+      "translation_es": "granja",
+      "translation_de": "Bauernhof",
+      "translation_uk": "ферма",
+      "part_of_speech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "wheat",
+      "language": "en",
+      "translation_en": "wheat",
+      "translation_fr": "blé",
+      "translation_es": "trigo",
+      "translation_de": "Weizen",
+      "translation_uk": "пшениця",
+      "part_of_speech": "noun",
+      "difficulty": "intermediate"
+    },
+    {
+      "word": "seeds",
+      "language": "en",
+      "translation_en": "seeds",
+      "translation_fr": "graines",
+      "translation_es": "semillas",
+      "translation_de": "Samen",
+      "translation_uk": "насіння",
+      "part_of_speech": "noun",
+      "difficulty": "intermediate"
+    },
+    {
+      "word": "barnyard",
+      "language": "en",
+      "translation_en": "barnyard",
+      "translation_fr": "cour de ferme",
+      "translation_es": "patio de la granja",
+      "translation_de": "Hof",
+      "translation_uk": "подвір'я",
+      "part_of_speech": "noun",
+      "difficulty": "advanced"
+    },
+    {
+      "word": "plant",
+      "language": "en",
+      "translation_en": "plant",
+      "translation_fr": "planter",
+      "translation_es": "plantar",
+      "translation_de": "pflanzen",
+      "translation_uk": "садити",
+      "part_of_speech": "verb",
+      "difficulty": "intermediate"
+    },
+    {
+      "word": "cut",
+      "language": "en",
+      "translation_en": "cut",
+      "translation_fr": "couper",
+      "translation_es": "cortar",
+      "translation_de": "schneiden",
+      "translation_uk": "різати",
+      "part_of_speech": "verb",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "mill",
+      "language": "en",
+      "translation_en": "mill",
+      "translation_fr": "moulin",
+      "translation_es": "molino",
+      "translation_de": "Mühle",
+      "translation_uk": "млин",
+      "part_of_speech": "noun",
+      "difficulty": "intermediate"
+    },
+    {
+      "word": "bake",
+      "language": "en",
+      "translation_en": "bake",
+      "translation_fr": "cuire",
+      "translation_es": "hornear",
+      "translation_de": "backen",
+      "translation_uk": "пекти",
+      "part_of_speech": "verb",
+      "difficulty": "intermediate"
+    },
+    {
+      "word": "bread",
+      "language": "en",
+      "translation_en": "bread",
+      "translation_fr": "pain",
+      "translation_es": "pan",
+      "translation_de": "Brot",
+      "translation_uk": "хліб",
+      "part_of_speech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "busy",
+      "language": "en",
+      "translation_en": "busy",
+      "translation_fr": "occupé",
+      "translation_es": "ocupado",
+      "translation_de": "beschäftigt",
+      "translation_uk": "зайнятий",
+      "part_of_speech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "golden",
+      "language": "en",
+      "translation_en": "golden",
+      "translation_fr": "doré",
+      "translation_es": "dorado",
+      "translation_de": "golden",
+      "translation_uk": "золотий",
+      "part_of_speech": "adjective",
+      "difficulty": "intermediate"
+    },
+    {
+      "word": "wonderful",
+      "language": "en",
+      "translation_en": "wonderful",
+      "translation_fr": "merveilleux",
+      "translation_es": "maravilloso",
+      "translation_de": "wunderbar",
+      "translation_uk": "чудовий",
+      "part_of_speech": "adjective",
+      "difficulty": "intermediate"
+    }
+  ]
+} 

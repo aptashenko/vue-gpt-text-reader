@@ -1,139 +1,280 @@
 <template>
   <div class="reader-container" v-if="text">
-    <h2>{{ text.title }}</h2>
+    <div class="reader-header">
+      <BackButton text="Back to Texts" small />
+      <h2>{{ text.title }}</h2>
+    </div>
 
+    <!-- Text content with inline translations -->
     <div class="text-content">
-      <span
-        v-for="(word, idx) in words"
-        :key="idx"
-        class="word"
-        :class="{ selected: selectedWord === word }"
-        @click="showTranslation(word)"
-      >
-        {{ word }}
-      </span>
-    </div>
-
-    <div v-if="selectedWord" class="dictionary">
-      <div class="word-info">
-        <strong>{{ selectedWord }}</strong>
-        <span v-if="wordData" class="part-of-speech">({{ wordData.part_of_speech }})</span>
-        <span v-if="wordData" class="difficulty">[{{ wordData.difficulty }}]</span>
-      </div>
-
-      <div class="translation">{{ translation }}</div>
-
-      <div v-if="!wordData" class="no-translation">
-        <p>Translation not found. Would you like to add one?</p>
-        <button @click="addTranslation" class="add-translation-btn">Add Translation</button>
+      <div v-for="(word, idx) in processedWords" :key="idx" class="word-container">
+        <span class="word">{{ word.original }}</span>
+        <span v-if="word.translation" class="translation-tooltip">
+          {{ word.translation }}
+        </span>
       </div>
     </div>
 
-    <div class="questions">
-      <h3>Questions</h3>
-      <div v-for="(q, i) in questions" :key="i">
-        <p>{{ q }}</p>
-        <input v-model="answers[i]" type="text" :placeholder="`Answer ${i + 1}`" />
+    <!-- Dictionary section -->
+    <div v-if="textDictionary.length > 0" class="vocabulary-section">
+      <h3>{{ $t('textReader.vocabulary') }}</h3>
+      <div class="vocabulary-list">
+        <div v-for="entry in textDictionary" :key="entry.id" class="vocabulary-item">
+          <div class="word-info">
+            <strong>{{ entry.word }}</strong>
+            <span class="part-of-speech">({{ entry.part_of_speech }})</span>
+            <span class="difficulty">[{{ entry.difficulty }}]</span>
+          </div>
+          <div class="translation">{{ entry.translation }}</div>
+        </div>
       </div>
-      <button @click="submitAnswers" :disabled="loading">Submit Answers</button>
+    </div>
+
+    <!-- Questions section -->
+    <div class="questions-section">
+      <h3>{{ $t('textReader.comprehensionQuestions') }}</h3>
+      <div v-for="(question, i) in questions" :key="i" class="question-item">
+        <p class="question-text">{{ question }}</p>
+        <input 
+          v-model="answers[i]" 
+          type="text" 
+          :placeholder="`Your answer to question ${i + 1}`" 
+          class="answer-input"
+        />
+      </div>
+      <button @click="submitAnswers" :disabled="loading" class="submit-btn">
+        {{ loading ? 'Evaluating...' : 'Submit Answers' }}
+      </button>
 
       <div v-if="feedback" class="feedback">
         <h4>Score: {{ feedback.score }}</h4>
-        <p>{{ feedback.comment }}</p>
+        <div class="feedback-content">
+          <div v-if="feedback.detailedFeedback" class="detailed-feedback">
+            <h5>Detailed Feedback:</h5>
+            <div class="feedback-text" v-html="formatFeedback(feedback.detailedFeedback)"></div>
+          </div>
+          <div v-else class="simple-feedback">
+            <p>{{ feedback.comment }}</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div v-else>Loading...</div>
+  <div v-else class="loading">Loading text...</div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { supabase } from '../supabase.js'
-import { DictionaryService } from '../services/dictionary.js'
-// import { OpenAI } from 'openai'
+import { UserPreferencesService } from '../services/userPreferences.js'
+import { useAuthStore } from '../stores/auth.js'
+import { OpenAI } from 'openai'
+import BackButton from './BackButton.vue'
 
-// const openai = new OpenAI({ 
-//   apiKey: import.meta.env.VITE_OPENAI_API_KEY, 
-//   dangerouslyAllowBrowser: true 
-// })
+const openai = new OpenAI({ 
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY, 
+  dangerouslyAllowBrowser: true 
+})
 
 const route = useRoute()
+const authStore = useAuthStore()
 const text = ref(null)
-const words = ref([])
-const selectedWord = ref('')
-const translation = ref('')
-const wordData = ref(null)
+const textDictionary = ref([])
 const questions = ref([])
 const answers = ref(['', ''])
 const feedback = ref(null)
 const loading = ref(false)
+const userNativeLanguage = ref('en')
 
-const fetchText = async () => {
-  const { data, error } = await supabase.from('texts').select('*').eq('id', route.params.id).single()
-  if (!error && data) {
-    text.value = data
-    words.value = data.content.split(' ')
-    questions.value = [data.question1, data.question2]
+// Fetch text with all related data
+const fetchTextWithData = async () => {
+  loading.value = true
+  try {
+    // 1. Fetch the text
+    const { data: textData, error: textError } = await supabase
+      .from('texts')
+      .select('*')
+      .eq('id', route.params.id)
+      .single()
+    
+    if (textError) throw textError
+    text.value = textData
+    
+    // 2. Extract questions
+    questions.value = [textData.question1, textData.question2].filter(q => q)
+    
+    // 3. Fetch dictionary entries for this text
+    // Fetch ALL dictionary entries for this language, not just the ones in the text
+    const { data: dictData, error: dictError } = await supabase
+      .from('dictionary')
+      .select('*')
+      .eq('language', textData.language)
+      .order('word', { ascending: true })
+    
+    if (!dictError && dictData) {
+      // Map translations to user's native language
+      textDictionary.value = dictData.map(entry => ({
+        ...entry,
+        translation: getTranslationForLanguage(entry, userNativeLanguage.value)
+      }))
+      
+      console.log(`📚 Loaded ${dictData.length} dictionary words for ${textData.language}`)
+      console.log('📋 Dictionary words:', dictData.map(w => w.word))
+    } else if (dictError) {
+      console.error('❌ Error fetching dictionary:', dictError)
+    }
+    
+  } catch (error) {
+    console.error('Error fetching text data:', error)
+  } finally {
+    loading.value = false
   }
 }
-onMounted(fetchText)
 
-const showTranslation = async (word) => {
-  selectedWord.value = word
-  translation.value = 'Loading...'
-  wordData.value = null
+// Get translation for user's native language
+const getTranslationForLanguage = (entry, nativeLang) => {
+  const translations = {
+    en: entry.translation_en,
+    fr: entry.translation_fr,
+    es: entry.translation_es,
+    de: entry.translation_de,
+    uk: entry.translation_uk
+  }
+  return translations[nativeLang] || entry.translation_en || entry.word
+}
 
-  try {
+// Process words to show translations inline
+const processedWords = computed(() => {
+  if (!text.value) return []
+  
+  const words = text.value.content.split(' ')
+  const dictMap = new Map()
+  
+  textDictionary.value.forEach(entry => {
+    dictMap.set(entry.word.toLowerCase(), entry)
+  })
+  
+  return words.map(word => {
     const cleanWord = word.replace(/[^\w]/g, '').toLowerCase()
-    const dictionaryEntry = await DictionaryService.getTranslation(cleanWord)
+    const dictEntry = dictMap.get(cleanWord)
+    
+    return {
+      original: word,
+      translation: dictEntry ? getTranslationForLanguage(dictEntry, userNativeLanguage.value) : null,
+      partOfSpeech: dictEntry?.part_of_speech,
+      difficulty: dictEntry?.difficulty
+    }
+  })
+})
 
-    if (dictionaryEntry) {
-      wordData.value = dictionaryEntry
-      translation.value = dictionaryEntry.translation
-    } else {
-      translation.value = `Translation not found for "${word}"`
+const loadUserPreferences = async () => {
+  try {
+    const user = authStore.user
+    if (user) {
+      const preferences = await UserPreferencesService.getUserPreferences(user.id)
+      userNativeLanguage.value = preferences.native_language
     }
   } catch (error) {
-    console.error('Error fetching translation:', error)
-    translation.value = 'Error loading translation'
+    console.error('Error loading user preferences:', error)
   }
 }
 
-const addTranslation = () => {
-  alert(`To add a translation for "${selectedWord.value}", use the dictionary admin interface.`)
-}
+onMounted(async () => {
+  await loadUserPreferences()
+  await fetchTextWithData()
+})
 
 const submitAnswers = async () => {
   loading.value = true
   feedback.value = null
 
-  feedback.value = {
-    score: '3/5',
-    comment: 'This is placeholder feedback. Connect OpenAI for automatic scoring.'
+  try {
+    // Create a comprehensive prompt for ChatGPT
+    const prompt = `You are an expert language teacher evaluating a student's comprehension of a text. 
+
+TEXT: "${text.value.content}"
+
+QUESTIONS AND STUDENT ANSWERS:
+${questions.value.map((q, i) => `Question ${i + 1}: ${q}
+Student Answer: ${answers.value[i] || '(no answer provided)'}`).join('\n\n')}
+
+INSTRUCTIONS:
+1. Evaluate each answer for:
+   - Content accuracy (does it correctly answer the question?)
+   - Grammar correctness (are there any grammatical errors?)
+   - Phrase structure (is the sentence well-formed?)
+   - Vocabulary usage (are words used correctly?)
+
+2. For each answer, provide:
+   - A score from 0-100 (0 = completely wrong, 100 = perfect)
+   - Specific feedback on what was correct
+   - Corrections for any grammar, spelling, or phrase mistakes
+   - A corrected version of the answer if there were mistakes
+   - Suggestions for improvement
+
+3. Format your response as:
+   ANSWER 1:
+   Score: [0-100]
+   Feedback: [detailed feedback]
+   Corrections: [list of specific mistakes]
+   Corrected Answer: [improved version]
+   
+   ANSWER 2:
+   Score: [0-100]
+   Feedback: [detailed feedback]
+   Corrections: [list of specific mistakes]
+   Corrected Answer: [improved version]
+   
+   OVERALL ASSESSMENT:
+   [brief summary of performance]
+
+Be encouraging but honest. Focus on helping the student improve their language skills.`
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 1000
+    })
+    
+    const result = completion.choices[0].message.content
+    
+    // Parse the response to extract scores and feedback
+    const scoreMatches = result.match(/Score:\s*(\d+)/gi)
+    const scores = scoreMatches ? scoreMatches.map(match => parseInt(match.match(/\d+/)[0])) : []
+    const averageScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0
+    
+    feedback.value = {
+      score: `${averageScore}/100`,
+      comment: result,
+      detailedFeedback: result
+    }
+  } catch (e) {
+    feedback.value = { 
+      score: 'Error', 
+      comment: 'Error evaluating answers: ' + e.message,
+      detailedFeedback: 'Unable to process answers due to an error.'
+    }
   }
 
-  // const prompt = `Text: ${text.value.content}\nQuestions: ${questions.value.join(
-  //   '\n'
-  // )}\nAnswers: ${answers.value.join('\n')}`
-
-  // try {
-  //   const completion = await openai.chat.completions.create({
-  //     model: 'gpt-4',
-  //     messages: [{ role: 'user', content: prompt }]
-  //   })
-  //   const result = completion.choices[0].message.content
-  //   const match = result.match(/score\s*[:\-]?\s*(\d+)/i)
-  //   feedback.value = {
-  //     score: match ? match[1] : 'N/A',
-  //     comment: result
-  //   }
-  // } catch (e) {
-  //   feedback.value = { score: 'N/A', comment: 'Error: ' + e.message }
-  // }
-
   loading.value = false
+}
+
+const formatFeedback = (feedback) => {
+  // Format the feedback text for better display
+  return feedback
+    .replace(/\n\n/g, '</p><p>') // Convert double line breaks to paragraphs
+    .replace(/\n/g, '<br>') // Convert single line breaks to <br>
+    .replace(/^(.*?)$/m, '<p>$1</p>') // Wrap in paragraphs
+    .replace(/<p><\/p>/g, '') // Remove empty paragraphs
+    .replace(/ANSWER (\d+):/g, '<h6>Answer $1:</h6>') // Format answer headers
+    .replace(/Score:/g, '<strong>Score:</strong>') // Bold score labels
+    .replace(/Feedback:/g, '<strong>Feedback:</strong>') // Bold feedback labels
+    .replace(/Corrections:/g, '<strong>Corrections:</strong>') // Bold correction labels
+    .replace(/Corrected Answer:/g, '<strong>Corrected Answer:</strong>') // Bold corrected answer labels
+    .replace(/OVERALL ASSESSMENT:/g, '<h6>Overall Assessment:</h6>') // Format overall assessment header
 }
 </script>
 
@@ -159,102 +300,163 @@ h2 {
 .text-content {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
   margin-bottom: 2rem;
   line-height: 1.7;
+  gap: 4px;
+}
+
+.word-container {
+  position: relative;
+  display: inline-block;
+  cursor: default;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.word-container:hover {
+  background-color: #e8d8c3;
 }
 
 .word {
-  cursor: pointer;
-  padding: 6px 10px;
-  background-color: #f5ebe0;
-  border-radius: 10px;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-.word:hover {
-  background-color: #e8d8c3;
-}
-.word.selected {
-  background-color: #d8a48f;
-  color: white;
+  color: #3b3b3b;
 }
 
-.dictionary {
-  padding: 1rem;
+.translation-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #5a4a42;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  margin-bottom: 4px;
+}
+
+.translation-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #5a4a42;
+}
+
+.word-container:hover .translation-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.vocabulary-section {
+  padding: 1.5rem;
   background: #fff3e6;
   border-left: 6px solid #d8a48f;
   border-radius: 12px;
   margin-bottom: 2rem;
 }
 
-.word-info strong {
+.vocabulary-section h3 {
+  margin: 0 0 1rem 0;
+  color: #5a4a42;
   font-size: 1.3rem;
+}
+
+.vocabulary-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.vocabulary-item {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e6ddd6;
+  transition: box-shadow 0.3s ease;
+}
+
+.vocabulary-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.word-info strong {
+  font-size: 1.1rem;
   color: #a0522d;
 }
+
 .part-of-speech,
 .difficulty {
   margin-left: 0.5rem;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #6e6259;
 }
+
 .difficulty {
   background-color: #ffe9d6;
   padding: 2px 6px;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 .translation {
   margin-top: 0.5rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #4d3a33;
+  font-weight: 500;
 }
 
-.no-translation p {
-  margin: 0.5rem 0;
-  color: #7a6a5f;
-}
-
-.add-translation-btn {
-  background-color: #d8a48f;
-  color: white;
-  padding: 0.5rem 1rem;
-  font-size: 0.95rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-.add-translation-btn:hover {
-  background-color: #c08975;
-}
-
-.questions {
+.questions-section {
   border-top: 1px solid #e6ddd6;
   padding-top: 2rem;
 }
-.questions h3 {
+
+.questions-section h3 {
   color: #5f4c43;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
 }
 
-.questions p {
-  margin: 0.5rem 0;
+.question-item {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #faf8f5;
+  border-radius: 8px;
+  border: 1px solid #e6ddd6;
+}
+
+.question-text {
+  margin: 0 0 0.75rem 0;
   color: #4d3a33;
+  font-weight: 500;
+  font-size: 1rem;
 }
 
-.questions input[type="text"] {
+.answer-input {
   width: 100%;
-  padding: 0.6rem;
+  padding: 0.8rem;
   border-radius: 8px;
   border: 1px solid #d8cfc7;
   font-size: 1rem;
-  margin-bottom: 1.2rem;
   background: #fffaf6;
   color: #3b3b3b;
+  transition: border-color 0.3s ease;
 }
 
-.questions button {
-  padding: 0.6rem 1.2rem;
+.answer-input:focus {
+  outline: none;
+  border-color: #d8a48f;
+  box-shadow: 0 0 0 2px rgba(216, 164, 143, 0.2);
+}
+
+.submit-btn {
+  padding: 0.8rem 1.5rem;
   background-color: #98c9a3;
   color: white;
   border: none;
@@ -263,11 +465,14 @@ h2 {
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-top: 1rem;
 }
-.questions button:hover {
+
+.submit-btn:hover {
   background-color: #82b28d;
 }
-.questions button:disabled {
+
+.submit-btn:disabled {
   background-color: #c7c7c7;
   cursor: not-allowed;
 }
@@ -282,8 +487,46 @@ h2 {
   margin: 0;
   color: #5a4a42;
 }
-.feedback p {
+.feedback-content {
   margin-top: 0.5rem;
+}
+.detailed-feedback {
+  margin-bottom: 1rem;
+}
+.detailed-feedback h5 {
+  margin: 0;
+  color: #5a4a42;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+.detailed-feedback h6 {
+  margin: 0.5rem 0 0.25rem 0;
+  color: #5a4a42;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.feedback-text {
   color: #4e433f;
+  line-height: 1.5;
+}
+.feedback-text p {
+  margin: 0.5rem 0;
+}
+.feedback-text strong {
+  color: #5a4a42;
+  font-weight: 600;
+}
+.simple-feedback {
+  color: #4e433f;
+}
+.simple-feedback p {
+  margin: 0.5rem 0;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6e6259;
+  font-size: 1.1rem;
 }
 </style>

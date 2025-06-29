@@ -4,6 +4,8 @@ require('dotenv').config()
 const supabaseUrl = process.env.VITE_SUPABASE_URL
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY
 
+console.log(supabaseKey)
+
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 async function createTableAndData() {

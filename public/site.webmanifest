@@ -1,0 +1,16 @@
+{
+  "name": "Language Reader",
+  "short_name": "LangReader",
+  "description": "Learn languages by reading short texts and answering questions",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#667eea",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+} 

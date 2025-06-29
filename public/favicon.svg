@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="bookGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#48bb78;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#38a169;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Book background -->
+  <rect x="4" y="6" width="24" height="20" rx="2" fill="url(#bookGradient)" stroke="#4a5568" stroke-width="1"/>
+  
+  <!-- Book pages -->
+  <rect x="6" y="8" width="20" height="16" rx="1" fill="white" opacity="0.9"/>
+  
+  <!-- Text lines -->
+  <rect x="8" y="10" width="12" height="1.5" fill="url(#textGradient)" rx="0.5"/>
+  <rect x="8" y="12.5" width="10" height="1.5" fill="url(#textGradient)" rx="0.5"/>
+  <rect x="8" y="15" width="14" height="1.5" fill="url(#textGradient)" rx="0.5"/>
+  <rect x="8" y="17.5" width="8" height="1.5" fill="url(#textGradient)" rx="0.5"/>
+  
+  <!-- Language symbol (globe) -->
+  <circle cx="22" cy="12" r="3" fill="none" stroke="#667eea" stroke-width="1.5"/>
+  <path d="M22 9c0 0-1.5 1.5-1.5 3s1.5 3 1.5 3" fill="none" stroke="#667eea" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M22 9c0 0 1.5 1.5 1.5 3s-1.5 3-1.5 3" fill="none" stroke="#667eea" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Book spine -->
+  <rect x="26" y="6" width="2" height="20" fill="#4a5568"/>
+</svg> 

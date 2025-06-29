@@ -1,0 +1,335 @@
+[
+  {
+    "word": "anna",
+    "translation_en": "Anna",
+    "translation_fr": "Anna",
+    "translation_es": "Anna",
+    "translation_de": "Anna",
+    "translation_uk": "Анна",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "wake",
+    "translation_en": "wake",
+    "translation_fr": "se réveiller",
+    "translation_es": "despertarse",
+    "translation_de": "aufwachen",
+    "translation_uk": "прокидатися",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "up",
+    "translation_en": "up",
+    "translation_fr": "debout",
+    "translation_es": "arriba",
+    "translation_de": "auf",
+    "translation_uk": "вгору",
+    "part_of_speech": "adverb"
+  },
+  {
+    "word": "early",
+    "translation_en": "early",
+    "translation_fr": "tôt",
+    "translation_es": "temprano",
+    "translation_de": "früh",
+    "translation_uk": "рано",
+    "part_of_speech": "adverb"
+  },
+  {
+    "word": "every",
+    "translation_en": "every",
+    "translation_fr": "chaque",
+    "translation_es": "cada",
+    "translation_de": "jeder",
+    "translation_uk": "кожен",
+    "part_of_speech": "determiner"
+  },
+  {
+    "word": "day",
+    "translation_en": "day",
+    "translation_fr": "jour",
+    "translation_es": "día",
+    "translation_de": "Tag",
+    "translation_uk": "день",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "she",
+    "translation_en": "she",
+    "translation_fr": "elle",
+    "translation_es": "ella",
+    "translation_de": "sie",
+    "translation_uk": "вона",
+    "part_of_speech": "pronoun"
+  },
+  {
+    "word": "open",
+    "translation_en": "open",
+    "translation_fr": "ouvrir",
+    "translation_es": "abrir",
+    "translation_de": "öffnen",
+    "translation_uk": "відкривати",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "window",
+    "translation_en": "window",
+    "translation_fr": "fenêtre",
+    "translation_es": "ventana",
+    "translation_de": "Fenster",
+    "translation_uk": "вікно",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "take",
+    "translation_en": "take",
+    "translation_fr": "prendre",
+    "translation_es": "tomar",
+    "translation_de": "nehmen",
+    "translation_uk": "брати",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "deep",
+    "translation_en": "deep",
+    "translation_fr": "profond",
+    "translation_es": "profundo",
+    "translation_de": "tief",
+    "translation_uk": "глибокий",
+    "part_of_speech": "adjective"
+  },
+  {
+    "word": "breath",
+    "translation_en": "breath",
+    "translation_fr": "souffle",
+    "translation_es": "respiración",
+    "translation_de": "Atemzug",
+    "translation_uk": "дихання",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "sky",
+    "translation_en": "sky",
+    "translation_fr": "ciel",
+    "translation_es": "cielo",
+    "translation_de": "Himmel",
+    "translation_uk": "небо",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "blue",
+    "translation_en": "blue",
+    "translation_fr": "bleu",
+    "translation_es": "azul",
+    "translation_de": "blau",
+    "translation_uk": "синій",
+    "part_of_speech": "adjective"
+  },
+  {
+    "word": "bird",
+    "translation_en": "bird",
+    "translation_fr": "oiseau",
+    "translation_es": "pájaro",
+    "translation_de": "Vogel",
+    "translation_uk": "птах",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "sing",
+    "translation_en": "sing",
+    "translation_fr": "chanter",
+    "translation_es": "cantar",
+    "translation_de": "singen",
+    "translation_uk": "співати",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "go",
+    "translation_en": "go",
+    "translation_fr": "aller",
+    "translation_es": "ir",
+    "translation_de": "gehen",
+    "translation_uk": "йти",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "kitchen",
+    "translation_en": "kitchen",
+    "translation_fr": "cuisine",
+    "translation_es": "cocina",
+    "translation_de": "Küche",
+    "translation_uk": "кухня",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "make",
+    "translation_en": "make",
+    "translation_fr": "faire / préparer",
+    "translation_es": "hacer",
+    "translation_de": "machen",
+    "translation_uk": "робити / готувати",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "cup",
+    "translation_en": "cup",
+    "translation_fr": "tasse",
+    "translation_es": "taza",
+    "translation_de": "Tasse",
+    "translation_uk": "чашка",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "tea",
+    "translation_en": "tea",
+    "translation_fr": "thé",
+    "translation_es": "té",
+    "translation_de": "Tee",
+    "translation_uk": "чай",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "eat",
+    "translation_en": "eat",
+    "translation_fr": "manger",
+    "translation_es": "comer",
+    "translation_de": "essen",
+    "translation_uk": "їсти",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "toast",
+    "translation_en": "toast",
+    "translation_fr": "pain grillé",
+    "translation_es": "tostada",
+    "translation_de": "Toast",
+    "translation_uk": "тост",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "jam",
+    "translation_en": "jam",
+    "translation_fr": "confiture",
+    "translation_es": "mermelada",
+    "translation_de": "Marmelade",
+    "translation_uk": "повидло",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "after",
+    "translation_en": "after",
+    "translation_fr": "après",
+    "translation_es": "después de",
+    "translation_de": "nach",
+    "translation_uk": "після",
+    "part_of_speech": "preposition"
+  },
+  {
+    "word": "breakfast",
+    "translation_en": "breakfast",
+    "translation_fr": "petit-déjeuner",
+    "translation_es": "desayuno",
+    "translation_de": "Frühstück",
+    "translation_uk": "сніданок",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "bag",
+    "translation_en": "bag",
+    "translation_fr": "sac",
+    "translation_es": "bolso",
+    "translation_de": "Tasche",
+    "translation_uk": "сумка",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "walk",
+    "translation_en": "walk",
+    "translation_fr": "marcher",
+    "translation_es": "caminar",
+    "translation_de": "gehen",
+    "translation_uk": "йти пішки",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "work",
+    "translation_en": "work",
+    "translation_fr": "travail",
+    "translation_es": "trabajo",
+    "translation_de": "Arbeit",
+    "translation_uk": "робота",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "way",
+    "translation_en": "way",
+    "translation_fr": "chemin",
+    "translation_es": "camino",
+    "translation_de": "Weg",
+    "translation_uk": "шлях",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "see",
+    "translation_en": "see",
+    "translation_fr": "voir",
+    "translation_es": "ver",
+    "translation_de": "sehen",
+    "translation_uk": "бачити",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "neighbor",
+    "translation_en": "neighbor",
+    "translation_fr": "voisin",
+    "translation_es": "vecino",
+    "translation_de": "Nachbar",
+    "translation_uk": "сусід",
+    "part_of_speech": "noun"
+  },
+  {
+    "word": "smile",
+    "translation_en": "smile",
+    "translation_fr": "sourire",
+    "translation_es": "sonreír",
+    "translation_de": "lächeln",
+    "translation_uk": "усміхатися",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "wave",
+    "translation_en": "wave",
+    "translation_fr": "saluer de la main",
+    "translation_es": "saludar con la mano",
+    "translation_de": "winken",
+    "translation_uk": "махати",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "like",
+    "translation_en": "like",
+    "translation_fr": "aimer",
+    "translation_es": "gustar",
+    "translation_de": "mögen",
+    "translation_uk": "подобатися",
+    "part_of_speech": "verb"
+  },
+  {
+    "word": "quiet",
+    "translation_en": "quiet",
+    "translation_fr": "calme",
+    "translation_es": "tranquilo",
+    "translation_de": "ruhig",
+    "translation_uk": "тихий",
+    "part_of_speech": "adjective"
+  },
+  {
+    "word": "peaceful",
+    "translation_en": "peaceful",
+    "translation_fr": "paisible",
+    "translation_es": "tranquilo",
+    "translation_de": "friedlich",
+    "translation_uk": "спокійний",
+    "part_of_speech": "adjective"
+  }
+] 

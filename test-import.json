@@ -1,0 +1,140 @@
+{
+  "text": {
+    "title": "Le Chat de Lucie",
+    "content": "Lucie a un chat noir qui s'appelle Minou. Il aime dormir sous le canapé et regarder la pluie par la fenêtre. Chaque soir, Lucie lui donne du lait et joue avec lui. Minou ronronne toujours quand il est content.",
+    "language": "fr",
+    "level": "Beginner",
+    "questions": [
+      {
+        "questionText": "Comment s'appelle le chat de Lucie ?",
+        "questionNumber": 1,
+        "questionType": "comprehension",
+        "difficulty": "easy"
+      },
+      {
+        "questionText": "Qu'est-ce que Minou aime faire ?",
+        "questionNumber": 2,
+        "questionType": "comprehension",
+        "difficulty": "easy"
+      },
+      {
+        "questionText": "Pourquoi Minou ronronne-t-il ?",
+        "questionNumber": 3,
+        "questionType": "analysis",
+        "difficulty": "medium"
+      }
+    ]
+  },
+  "dictionary": [
+    {
+      "word": "chat",
+      "language": "fr",
+      "translation_en": "cat",
+      "translation_fr": "chat",
+      "translation_es": "gato",
+      "translation_de": "Katze",
+      "translation_uk": "кіт",
+      "part_of_speech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "noir",
+      "language": "fr",
+      "translation_en": "black",
+      "translation_fr": "noir",
+      "translation_es": "negro",
+      "translation_de": "schwarz",
+      "translation_uk": "чорний",
+      "part_of_speech": "adjective",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "canapé",
+      "language": "fr",
+      "translation_en": "sofa",
+      "translation_fr": "canapé",
+      "translation_es": "sofá",
+      "translation_de": "Sofa",
+      "translation_uk": "диван",
+      "part_of_speech": "noun",
+      "difficulty": "intermediate"
+    },
+    {
+      "word": "pluie",
+      "language": "fr",
+      "translation_en": "rain",
+      "translation_fr": "pluie",
+      "translation_es": "lluvia",
+      "translation_de": "Regen",
+      "translation_uk": "дощ",
+      "part_of_speech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "fenêtre",
+      "language": "fr",
+      "translation_en": "window",
+      "translation_fr": "fenêtre",
+      "translation_es": "ventana",
+      "translation_de": "Fenster",
+      "translation_uk": "вікно",
+      "part_of_speech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "soir",
+      "language": "fr",
+      "translation_en": "evening",
+      "translation_fr": "soir",
+      "translation_es": "tarde",
+      "translation_de": "Abend",
+      "translation_uk": "вечір",
+      "part_of_speech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "lait",
+      "language": "fr",
+      "translation_en": "milk",
+      "translation_fr": "lait",
+      "translation_es": "leche",
+      "translation_de": "Milch",
+      "translation_uk": "молоко",
+      "part_of_speech": "noun",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "jouer",
+      "language": "fr",
+      "translation_en": "play",
+      "translation_fr": "jouer",
+      "translation_es": "jugar",
+      "translation_de": "spielen",
+      "translation_uk": "грати",
+      "part_of_speech": "verb",
+      "difficulty": "beginner"
+    },
+    {
+      "word": "ronronner",
+      "language": "fr",
+      "translation_en": "purr",
+      "translation_fr": "ronronner",
+      "translation_es": "ronronear",
+      "translation_de": "schnurren",
+      "translation_uk": "муркотіти",
+      "part_of_speech": "verb",
+      "difficulty": "intermediate"
+    },
+    {
+      "word": "content",
+      "language": "fr",
+      "translation_en": "happy",
+      "translation_fr": "content",
+      "translation_es": "contento",
+      "translation_de": "glücklich",
+      "translation_uk": "щасливий",
+      "part_of_speech": "adjective",
+      "difficulty": "beginner"
+    }
+  ]
+} 

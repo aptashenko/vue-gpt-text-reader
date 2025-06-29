@@ -29,23 +29,46 @@ router.beforeEach(async (to, from, next) => {
   }
 
   const isAuthenticated = authStore.isAuthenticated
+  const isGuestMode = authStore.isGuestMode
+  const canAccessProtectedRoutes = authStore.canAccessProtectedRoutes
+  
+  // Check if route requires authentication
   const requiresAuth = to.meta.requiresAuth !== false // Default to requiring auth
   const isAuthPage = to.meta.isAuthPage === true
+  const isPublicPage = to.meta.isPublicPage === true
 
   // If user is authenticated and trying to access auth pages (login/signup)
   if (isAuthenticated && isAuthPage) {
-    next('/texts') // Redirect to texts page
+    next('/') // Redirect to landing page
     return
   }
 
-  // If user is not authenticated and trying to access protected pages
-  if (!isAuthenticated && requiresAuth) {
-    next('/') // Redirect to login page
+  // If user is in guest mode and trying to access auth pages
+  if (isGuestMode && isAuthPage) {
+    next('/') // Redirect to landing page
     return
   }
 
-  // Allow navigation
-  next()
+  // If user is not authenticated, not in guest mode, and trying to access protected pages
+  if (!canAccessProtectedRoutes && requiresAuth) {
+    next('/login') // Redirect to login page
+    return
+  }
+
+  // Allow navigation for public pages
+  if (isPublicPage) {
+    next()
+    return
+  }
+
+  // Allow navigation for authenticated users or guest mode users
+  if (canAccessProtectedRoutes) {
+    next()
+    return
+  }
+
+  // Fallback: redirect to login
+  next('/login')
 })
 
 export default router 

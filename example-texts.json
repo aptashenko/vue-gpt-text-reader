@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "title": "Jean va à l'école",
+    "level": "A1",
+    "target_language": "fr",
+    "text": "Jean se lève à 7h.\nIl prend son petit déjeuner.\nEnsuite, il va à l'école.",
+    "words": [
+      { "word": "se lève", "translations": { "uk": "прокидається", "en": "wakes up", "ru": "просыпается" } },
+      { "word": "petit déjeuner", "translations": { "uk": "сніданок", "en": "breakfast", "ru": "завтрак" } },
+      { "word": "école", "translations": { "uk": "школа", "en": "school", "ru": "школа" } },
+      { "word": "prend", "translations": { "uk": "бере", "en": "takes", "ru": "берет" } },
+      { "word": "va", "translations": { "uk": "йде", "en": "goes", "ru": "идет" } }
+    ],
+    "questions": [
+      "À quelle heure Jean se lève-t-il ?",
+      "Où va-t-il après le petit déjeuner ?"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Maria's Daily Routine",
+    "level": "A1",
+    "target_language": "en",
+    "text": "Maria wakes up at 6:30.\nShe has breakfast with her family.\nThen she goes to work by bus.",
+    "words": [
+      { "word": "wakes up", "translations": { "uk": "прокидається", "ru": "просыпается" } },
+      { "word": "breakfast", "translations": { "uk": "сніданок", "ru": "завтрак" } },
+      { "word": "work", "translations": { "uk": "робота", "ru": "работа" } },
+      { "word": "bus", "translations": { "uk": "автобус", "ru": "автобус" } }
+    ],
+    "questions": [
+      "What time does Maria wake up?",
+      "How does she go to work?"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "La casa de Pedro",
+    "level": "A1",
+    "target_language": "es",
+    "text": "Pedro vive en una casa grande.\nLa casa tiene tres habitaciones.\nEn el jardín hay muchas flores.",
+    "words": [
+      { "word": "vive", "translations": { "uk": "живе", "en": "lives", "ru": "живет" } },
+      { "word": "casa", "translations": { "uk": "будинок", "en": "house", "ru": "дом" } },
+      { "word": "grande", "translations": { "uk": "великий", "en": "big", "ru": "большой" } },
+      { "word": "habitaciones", "translations": { "uk": "кімнати", "en": "rooms", "ru": "комнаты" } },
+      { "word": "jardín", "translations": { "uk": "сад", "en": "garden", "ru": "сад" } }
+    ],
+    "questions": [
+      "¿Dónde vive Pedro?",
+      "¿Cuántas habitaciones tiene la casa?"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Mein Tag",
+    "level": "A1",
+    "target_language": "de",
+    "text": "Ich stehe um 8 Uhr auf.\nIch frühstücke mit meiner Familie.\nDann gehe ich zur Arbeit.",
+    "words": [
+      { "word": "stehe auf", "translations": { "uk": "встаю", "en": "get up", "ru": "встаю" } },
+      { "word": "frühstücke", "translations": { "uk": "снідаю", "en": "have breakfast", "ru": "завтракаю" } },
+      { "word": "Familie", "translations": { "uk": "сім'я", "en": "family", "ru": "семья" } },
+      { "word": "Arbeit", "translations": { "uk": "робота", "en": "work", "ru": "работа" } }
+    ],
+    "questions": [
+      "Um wie viel Uhr steht er auf?",
+      "Was macht er nach dem Frühstück?"
+    ]
+  }
+] 

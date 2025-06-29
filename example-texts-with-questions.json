@@ -1,0 +1,98 @@
+[
+  {
+    "title": "The Little Prince",
+    "content": "Once upon a time, there was a little prince who lived on a planet that was scarcely bigger than himself. He needed a sheep to eat the baobab trees that threatened to overrun his tiny world. The baobabs were dangerous because if they grew too large, they could split his small planet apart. Every morning, the little prince would carefully check his planet for any baobab seedlings and pull them out immediately if he found any. 'It's a question of discipline,' he would say. 'When you've finished washing and dressing each morning, you must tend your planet.'",
+    "language": "en",
+    "level": "intermediate",
+    "questions": [
+      {
+        "questionText": "What was the main problem on the little prince's planet?",
+        "questionNumber": 1,
+        "questionType": "comprehension",
+        "difficulty": "easy"
+      },
+      {
+        "questionText": "Why did the little prince need a sheep?",
+        "questionNumber": 2,
+        "questionType": "comprehension",
+        "difficulty": "medium"
+      },
+      {
+        "questionText": "What did the little prince do every morning?",
+        "questionNumber": 3,
+        "questionType": "comprehension",
+        "difficulty": "easy"
+      },
+      {
+        "questionText": "What lesson does this story teach about responsibility?",
+        "questionNumber": 4,
+        "questionType": "analysis",
+        "difficulty": "hard"
+      }
+    ]
+  },
+  {
+    "title": "Le Petit Prince",
+    "content": "Il était une fois un petit prince qui habitait une planète à peine plus grande que lui-même. Il avait besoin d'un mouton pour manger les baobabs qui menaçaient d'envahir sa petite planète. Les baobabs étaient dangereux car s'ils grandissaient trop, ils pouvaient faire éclater sa petite planète. Chaque matin, le petit prince vérifiait soigneusement sa planète pour toute pousse de baobab et les arrachait immédiatement s'il en trouvait. 'C'est une question de discipline,' disait-il. 'Quand tu as fini de te laver et de t'habiller chaque matin, tu dois soigner ta planète.'",
+    "language": "fr",
+    "level": "intermediate",
+    "questions": [
+      {
+        "questionText": "Quel était le problème principal sur la planète du petit prince?",
+        "questionNumber": 1,
+        "questionType": "comprehension",
+        "difficulty": "easy"
+      },
+      {
+        "questionText": "Pourquoi le petit prince avait-il besoin d'un mouton?",
+        "questionNumber": 2,
+        "questionType": "comprehension",
+        "difficulty": "medium"
+      },
+      {
+        "questionText": "Que faisait le petit prince chaque matin?",
+        "questionNumber": 3,
+        "questionType": "comprehension",
+        "difficulty": "easy"
+      },
+      {
+        "questionText": "Quelle leçon cette histoire enseigne-t-elle sur la responsabilité?",
+        "questionNumber": 4,
+        "questionType": "analysis",
+        "difficulty": "hard"
+      }
+    ]
+  },
+  {
+    "title": "El Principito",
+    "content": "Había una vez un pequeño príncipe que vivía en un planeta apenas más grande que él mismo. Necesitaba una oveja para comer los baobabs que amenazaban con invadir su pequeño planeta. Los baobabs eran peligrosos porque si crecían demasiado, podían hacer estallar su pequeño planeta. Cada mañana, el principito revisaba cuidadosamente su planeta en busca de cualquier brote de baobab y los arrancaba inmediatamente si los encontraba. 'Es una cuestión de disciplina,' decía. 'Cuando hayas terminado de lavarte y vestirte cada mañana, debes cuidar tu planeta.'",
+    "language": "es",
+    "level": "intermediate",
+    "questions": [
+      {
+        "questionText": "¿Cuál era el problema principal en el planeta del principito?",
+        "questionNumber": 1,
+        "questionType": "comprehension",
+        "difficulty": "easy"
+      },
+      {
+        "questionText": "¿Por qué necesitaba el principito una oveja?",
+        "questionNumber": 2,
+        "questionType": "comprehension",
+        "difficulty": "medium"
+      },
+      {
+        "questionText": "¿Qué hacía el principito cada mañana?",
+        "questionNumber": 3,
+        "questionType": "comprehension",
+        "difficulty": "easy"
+      },
+      {
+        "questionText": "¿Qué lección enseña esta historia sobre la responsabilidad?",
+        "questionNumber": 4,
+        "questionType": "analysis",
+        "difficulty": "hard"
+      }
+    ]
+  }
+] 

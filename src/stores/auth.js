@@ -1,78 +1,179 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { auth } from '../supabase.js'
+import { supabase, auth } from '../supabase'
 
 export const useAuthStore = defineStore('auth', () => {
+  // State
   const user = ref(null)
   const loading = ref(true)
   const initialized = ref(false)
+  const isGuestMode = ref(false)
 
-  // Computed properties
+  // Computed
   const isAuthenticated = computed(() => !!user.value)
-  const userEmail = computed(() => user.value?.email)
+  const canAccessProtectedRoutes = computed(() => isAuthenticated.value || isGuestMode.value)
 
   // Actions
-  const initializeAuth = async () => {
+  async function initializeAuth() {
     if (initialized.value) return
-    
+
     try {
-      loading.value = true
-      // Get current user
-      const currentUser = await auth.getCurrentUser()
-      user.value = currentUser
-      
-      // Listen for auth state changes
-      auth.onAuthStateChange((event, session) => {
-        user.value = session?.user || null
+      // Check for guest mode in localStorage
+      const guestMode = localStorage.getItem('guestMode') === 'true'
+      if (guestMode) {
+        isGuestMode.value = true
         loading.value = false
         initialized.value = true
-      })
+        return
+      }
+
+      // Get current session
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session) {
+        user.value = session.user
+      }
+
+      // Listen for auth changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (session) {
+            user.value = session.user
+          } else {
+            user.value = null
+          }
+          loading.value = false
+        }
+      )
+
+      // Store subscription for cleanup
+      authSubscription.value = subscription
+      
     } catch (error) {
-      console.error('Auth initialization error:', error)
+      console.error('Error initializing auth:', error)
+    } finally {
       loading.value = false
       initialized.value = true
     }
   }
 
-  const signUp = async (email, password) => {
-    try {
-      const { data, error } = await auth.signUp(email, password)
-      if (error) throw error
-      return { data, error: null }
-    } catch (error) {
-      return { data: null, error }
-    }
+  function enableGuestMode() {
+    isGuestMode.value = true
+    localStorage.setItem('guestMode', 'true')
+    return { success: true }
   }
 
-  const signIn = async (email, password) => {
+  function disableGuestMode() {
+    isGuestMode.value = false
+    localStorage.removeItem('guestMode')
+    return { success: true }
+  }
+
+  async function signIn(email, password) {
     try {
+      // Disable guest mode when signing in
+      disableGuestMode()
+      
       const { data, error } = await auth.signIn(email, password)
-      if (error) throw error
-      user.value = data.user
-      return { data, error: null }
+      
+      if (error) {
+        throw error
+      }
+
+      if (data.user) {
+        user.value = data.user
+        return { success: true }
+      }
     } catch (error) {
-      return { data: null, error }
+      console.error('Sign in error:', error)
+      return { error: error.message }
     }
   }
 
-  const signOut = async () => {
+  async function signUp(email, password) {
     try {
-      const { error } = await auth.signOut()
-      if (error) throw error
-      user.value = null
-      return { error: null }
+      // Disable guest mode when signing up
+      disableGuestMode()
+      
+      const { data, error } = await auth.signUp(email, password)
+      
+      if (error) {
+        throw error
+      }
+
+      return { success: true, data }
     } catch (error) {
-      return { error }
+      console.error('Sign up error:', error)
+      return { error: error.message }
     }
   }
 
-  const resetPassword = async (email) => {
+  async function signOut(redirectToLogin = true) {
+    try {
+      // Clear user data immediately for better UX
+      const wasGuestMode = isGuestMode.value
+      user.value = null
+      isGuestMode.value = false
+      
+      // Clear any stored session data
+      localStorage.removeItem('supabase.auth.token')
+      localStorage.removeItem('guestMode')
+      
+      // If in guest mode, just return success
+      if (wasGuestMode) {
+        return { success: true }
+      }
+      
+      // Sign out from Supabase if authenticated
+      const { error } = await supabase.auth.signOut()
+      
+      if (error) {
+        throw error
+      }
+      
+      return { success: true }
+    } catch (error) {
+      console.error('Sign out error:', error)
+      return { error: error.message }
+    }
+  }
+
+  async function resetPassword(email) {
     try {
       const { error } = await auth.resetPassword(email)
-      if (error) throw error
-      return { error: null }
+      
+      if (error) {
+        throw error
+      }
+
+      return { success: true }
     } catch (error) {
-      return { error }
+      console.error('Reset password error:', error)
+      return { error: error.message }
+    }
+  }
+
+  async function updatePassword(password) {
+    try {
+      const { error } = await auth.updatePassword(password)
+      
+      if (error) {
+        throw error
+      }
+
+      return { success: true }
+    } catch (error) {
+      console.error('Update password error:', error)
+      return { error: error.message }
+    }
+  }
+
+  // Cleanup subscription
+  const authSubscription = ref(null)
+
+  function cleanup() {
+    if (authSubscription.value) {
+      authSubscription.value.unsubscribe()
     }
   }
 
@@ -81,16 +182,21 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     loading,
     initialized,
+    isGuestMode,
     
     // Computed
     isAuthenticated,
-    userEmail,
+    canAccessProtectedRoutes,
     
     // Actions
     initializeAuth,
-    signUp,
+    enableGuestMode,
+    disableGuestMode,
     signIn,
+    signUp,
     signOut,
-    resetPassword
+    resetPassword,
+    updatePassword,
+    cleanup
   }
 }) 
