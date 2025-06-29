@@ -93,6 +93,15 @@
           {{ $t('resultPage.backToSession') }}
         </button>
       </div>
+      <section class="feedback-prompt-section">
+          <div class="feedback-prompt">
+            <h3>{{ $t('resultPage.feedbackPrompt.title') }}</h3>
+            <p>{{ $t('resultPage.feedbackPrompt.message') }}</p>
+            <button @click="goToFeedback" class="feedback-button">
+              {{ $t('resultPage.feedbackPrompt.button') }}
+            </button>
+          </div>
+        </section>
     </div>
   </div>
 </template>
@@ -172,6 +181,15 @@ function handleLogoutError(error) {
   min-height: 100vh;
   background: #f7fafc;
   padding: 20px;
+}
+
+.feedback-prompt {
+  color: #2d3748;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: center;
+  background: #f8fafc;
 }
 
 .container {
@@ -263,6 +281,10 @@ function handleLogoutError(error) {
   margin-bottom: 15px;
   padding-bottom: 8px;
   border-bottom: 2px solid #e2e8f0;
+}
+
+.feedback-button {
+  margin-top: 10px;
 }
 
 .text-info-section {
@@ -434,10 +456,15 @@ function handleLogoutError(error) {
 
 /* Responsive design */
 @media (max-width: 768px) {
+  .result-page {
+    padding: 0px;
+  }
+
   .container {
     padding: 20px;
-    margin: 10px;
+    margin: 10px 0px;
   }
+  
   
   .result-title {
     font-size: 1.5rem;

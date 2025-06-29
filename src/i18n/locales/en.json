@@ -66,7 +66,8 @@
     "importTexts": "Import Texts",
     "availableTexts": "Available texts: {count}",
     "loadingTexts": "Loading text count...",
-    "noTextsAvailable": "No texts available for this language and level"
+    "noTextsAvailable": "No texts available for this language and level",
+    "comingSoon": "Coming Soon"
   },
   "textSession": {
     "backToTexts": "Back to Texts",
@@ -284,7 +285,18 @@
   "levels": {
     "A1": "A1 - Beginner",
     "A2": "A2 - Elementary",
-    "B1": "B1 - Intermediate"
+    "B1": "B1 - Intermediate",
+    "B2": "B2 - Upper Intermediate",
+    "C1": "C1 - Advanced",
+    "C2": "C2 - Mastery"
+  },
+  "levelDescriptions": {
+    "A1": "Basic phrases and words",
+    "A2": "Simple dialogues and texts",
+    "B1": "Extended texts and communication",
+    "B2": "Complex texts and fluent communication",
+    "C1": "Professional texts and fluency",
+    "C2": "Academic texts and mastery"
   },
   "difficulties": {
     "beginner": "Beginner",
@@ -318,5 +330,18 @@
     "score": "Score:",
     "detailedFeedback": "Detailed Feedback:",
     "loadingText": "Loading text..."
+  },
+  "landing": {
+    "title": "Learn Languages Through Reading",
+    "subtitle": "Choose your level, read authentic texts, build vocabulary, and test comprehension with AI-powered feedback",
+    "benefits": {
+      "title": "Why Choose Our Method?",
+      "simple": "Simple and intuitive interface",
+      "dictionary": "Built-in dictionary for every word",
+      "questions": "Comprehension questions for each text",
+      "ai": "AI-powered answer checking and feedback"
+    },
+    "cta": "Start Reading Now",
+    "ctaSubtitle": "Free to try • No registration required"
   }
 } 

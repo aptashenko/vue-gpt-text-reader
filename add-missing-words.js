@@ -17,7 +17,6 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 async function addMissingWords() {
   try {
-    console.log('📚 Adding missing dictionary words for "Le Chat de Lucie"')
     
     // Only the words that were missing from the original import
     const missingWords = [
@@ -100,15 +99,11 @@ async function addMissingWords() {
       
       if (!wordError) {
         successCount++
-        console.log(`✅ Word added: ${word.word} → ${word.translation_en}`)
       } else {
         console.warn(`⚠️ Word failed: ${word.word} - ${wordError.message}`)
       }
     }
-    
-    console.log(`\n🎉 Missing words added: ${successCount}/${wordsToAdd.length}`)
-    console.log('🔗 You can now view the complete text at:')
-    console.log('http://localhost:5174/reader/22')
+
     
   } catch (error) {
     console.error('❌ Failed to add missing words:', error)

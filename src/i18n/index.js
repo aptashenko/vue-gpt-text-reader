@@ -21,12 +21,13 @@ function getDefaultLocale() {
     const stored = localStorage.getItem('languageLearningPreferences')
     if (stored) {
       const preferences = JSON.parse(stored)
-      // Handle both correct and incorrect property names due to previous typo
-      return preferences.nativeLanguage || preferences.NativeLanguage || 'en'
+      const locale = preferences.nativeLanguage || preferences.NativeLanguage || 'en'
+      return locale
     }
   } catch (error) {
     console.error('Error loading stored preferences for i18n:', error)
   }
+  console.log('i18n initialized with default locale: en')
   return 'en'
 }
 
@@ -41,16 +42,19 @@ export const i18n = createI18n({
 
 // Function to change locale and save to localStorage
 export function setLocale(locale) {
-  console.log('setLocale called with:', locale)
-  console.log('Current locale before change:', i18n.global.locale.value)
+  
+  if (!i18n.global.messages.value[locale]) {
+    console.error('Locale not found:', locale)
+    return
+  }
+  
   i18n.global.locale.value = locale
-  console.log('Current locale after change:', i18n.global.locale.value)
+  
   try {
     const stored = localStorage.getItem('languageLearningPreferences')
     const preferences = stored ? JSON.parse(stored) : {}
     preferences.nativeLanguage = locale
     localStorage.setItem('languageLearningPreferences', JSON.stringify(preferences))
-    console.log('Locale preference saved to localStorage:', locale)
   } catch (error) {
     console.error('Error saving locale preference:', error)
   }

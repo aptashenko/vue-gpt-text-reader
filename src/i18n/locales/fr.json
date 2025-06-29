@@ -22,7 +22,7 @@
     "texts": "Textes",
     "dictionary": "Dictionnaire",
     "settings": "Paramètres",
-    "admin": "Panneau d’administration",
+    "admin": "Panneau d'administration",
     "import": "Importer",
     "logout": "Déconnexion"
   },
@@ -55,7 +55,8 @@
     "importTexts": "Importer des textes",
     "availableTexts": "Textes disponibles : {count}",
     "loadingTexts": "Chargement du nombre de textes...",
-    "noTextsAvailable": "Aucun texte disponible pour cette langue et ce niveau"
+    "noTextsAvailable": "Aucun texte disponible pour cette langue et ce niveau",
+    "comingSoon": "Bientôt disponible"
   },
   "textSession": {
     "backToTexts": "← Retour aux textes",
@@ -65,7 +66,7 @@
     "checkAnswers": "Vérifier les réponses",
     "loadingText": "Chargement du texte...",
     "textNotFound": "Texte introuvable",
-    "textNotFoundError": "Texte introuvable. La base de données est peut-être vide ou l’ID du texte est incorrect.",
+    "textNotFoundError": "Texte introuvable. La base de données est peut-être vide ou l'ID du texte est incorrect.",
     "translationNotFound": "Traduction introuvable",
     "answerPlaceholder": "Votre réponse à la question {number}...",
     "checkingAnswers": "Vérification des réponses...",
@@ -85,7 +86,12 @@
     "restart": "Recommencer",
     "backToSession": "Retour à la session",
     "noResults": "Aucun résultat trouvé",
-    "noResultsError": "Une erreur s’est produite. Veuillez réessayer."
+    "noResultsError": "Une erreur s'est produite. Veuillez réessayer.",
+    "feedbackPrompt": {
+      "title": "Comment s’est passée votre expérience ?",
+      "message": "Nous aimerions avoir votre retour pour améliorer notre application d’apprentissage des langues !",
+      "button": "Laisser un avis"
+    }
   },
   "textList": {
     "title": "Textes en {language}",
@@ -95,9 +101,9 @@
     "noTextsFound": "Aucun texte trouvé en {language} à ce niveau.",
     "loadingTexts": "Chargement des textes...",
     "databaseSetupRequired": "Configuration de la base requise",
-    "databaseSetupInstructions": "La table des textes n’existe pas encore dans votre base de données. Veuillez suivre les étapes suivantes :",
+    "databaseSetupInstructions": "La table des textes n'existe pas encore dans votre base de données. Veuillez suivre les étapes suivantes :",
     "databaseSetupStep1": "Accédez à votre tableau de bord Supabase",
-    "databaseSetupStep2": "Naviguez vers l’éditeur SQL",
+    "databaseSetupStep2": "Naviguez vers l'éditeur SQL",
     "databaseSetupStep3": "Exécutez les commandes SQL depuis database-setup.sql",
     "databaseSetupStep4": "Ou exécutez : node setup-database.js",
     "retry": "Réessayer"
@@ -148,10 +154,10 @@
     "backToTexts": "← Retour aux textes"
   },
   "admin": {
-    "title": "Panneau d’administration",
+    "title": "Panneau d'administration",
     "accessDenied": "Accès refusé",
-    "accessDeniedMessage": "Vous n’avez pas la permission d’accéder au panneau d’administration.",
-    "backToHome": "← Retour à l’accueil",
+    "accessDeniedMessage": "Vous n'avez pas la permission d'accéder au panneau d'administration.",
+    "backToHome": "← Retour à l'accueil",
     "currentLanguage": "Langue actuelle :",
     "manageTexts": "Gérer les textes",
     "manageDictionary": "Gérer le dictionnaire",
@@ -202,7 +208,7 @@
     "uploadSuccess": "Fichier téléversé avec succès",
     "uploadError": "Erreur de téléversement",
     "importSuccess": "JSON importé avec succès",
-    "importError": "Erreur d’importation JSON"
+    "importError": "Erreur d'importation JSON"
   },
   "languages": {
     "en": "Anglais",
@@ -215,11 +221,56 @@
   "levels": {
     "A1": "A1 - Débutant",
     "A2": "A2 - Élémentaire",
-    "B1": "B1 - Intermédiaire"
+    "B1": "B1 - Intermédiaire",
+    "B2": "B2 - Intermédiaire supérieur",
+    "C1": "C1 - Avancé",
+    "C2": "C2 - Maîtrise"
+  },
+  "levelDescriptions": {
+    "A1": "Phrases et mots de base",
+    "A2": "Dialogues et textes simples",
+    "B1": "Textes étendus et communication",
+    "B2": "Textes complexes et communication fluide",
+    "C1": "Textes professionnels et fluidité",
+    "C2": "Textes académiques et maîtrise"
   },
   "difficulties": {
     "beginner": "Débutant",
     "intermediate": "Intermédiaire",
     "advanced": "Avancé"
+  },
+  "textReader": {
+    "vocabulary": "Vocabulaire",
+    "comprehensionQuestions": "Questions de compréhension",
+    "score": "Score :",
+    "detailedFeedback": "Commentaires détaillés :",
+    "loadingText": "Chargement du texte..."
+  },
+  "feedback": {
+    "title": "Retour",
+    "subtitle": "Nous aimerions connaître votre avis sur notre application d’apprentissage des langues !",
+    "email": "Votre email",
+    "emailPlaceholder": "Entrez votre adresse e-mail",
+    "message": "Votre message",
+    "messagePlaceholder": "Dites-nous ce que vous en pensez, signalez des bugs ou proposez des améliorations...",
+    "submit": "Envoyer le retour",
+    "submitting": "Envoi en cours...",
+    "successMessage": "Merci pour votre retour ! Nous allons l'examiner et vous répondre bientôt.",
+    "errorMessage": "Erreur lors de l'envoi du retour. Veuillez réessayer."
+  },
+ 
+
+  "landing": {
+    "title": "Apprenez les langues en lisant",
+    "subtitle": "Choisissez votre niveau, lisez des textes authentiques, enrichissez votre vocabulaire et testez votre compréhension avec des commentaires alimentés par l'IA",
+    "benefits": {
+      "title": "Pourquoi choisir notre méthode ?",
+      "simple": "Interface simple et intuitive",
+      "dictionary": "Dictionnaire intégré pour chaque mot",
+      "questions": "Questions de compréhension pour chaque texte",
+      "ai": "Vérification des réponses et commentaires alimentés par l'IA"
+    },
+    "cta": "Commencer à lire maintenant",
+    "ctaSubtitle": "Essai gratuit • Aucune inscription requise"
   }
 }

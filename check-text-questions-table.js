@@ -8,7 +8,6 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 async function checkTextQuestionsTable() {
   try {
-    console.log('Checking text_questions table structure...')
     
     // Check if table exists
     const { data: tableInfo, error: tableError } = await supabase

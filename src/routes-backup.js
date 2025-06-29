@@ -17,6 +17,15 @@ export default [
     }
   },
   {
+    path: '/start',
+    name: 'Start',
+    component: () => import('./components/LandingPage.vue'),
+    meta: {
+      requiresAuth: false,
+      isPublicPage: true
+    }
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('./components/LoginPage.vue'),

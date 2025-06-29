@@ -45,7 +45,7 @@ const userEmail = computed(() => {
 
 // Methods
 function goHome() {
-  router.push('/')
+  router.push('/app')
 }
 
 function goToFeedback() {

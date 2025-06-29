@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { textImportService } from '../services/textImport'
 import { getTextCount } from '../services/texts'
 import { supabase } from '../supabase'
@@ -26,28 +26,37 @@ export const useLanguageLearningStore = defineStore('languageLearning', () => {
   const availableLanguages = [
     { code: 'en', name: 'English', nativeName: 'English' },
     { code: 'fr', name: 'Français', nativeName: 'Français' },
+    { code: 'uk', name: 'Українська', nativeName: 'Українська' },
+    { code: 'ru', name: 'Русский', nativeName: 'Русский' },
     { code: 'es', name: 'Español', nativeName: 'Español' },
     { code: 'de', name: 'Deutsch', nativeName: 'Deutsch' },
-    { code: 'uk', name: 'Українська', nativeName: 'Українська' },
-    { code: 'ru', name: 'Русский', nativeName: 'Русский' }
   ]
   
   // Available levels
   const availableLevels = [
-    { code: 'A1', name: 'A1 - Начинающий', description: 'Базовые фразы и слова' },
-    { code: 'A2', name: 'A2 - Элементарный', description: 'Простые диалоги и тексты' },
-    { code: 'B1', name: 'B1 - Средний', description: 'Развернутые тексты и общение' }
+    { code: 'A1', nameKey: 'levels.A1', descriptionKey: 'levelDescriptions.A1' },
+    { code: 'A2', nameKey: 'levels.A2', descriptionKey: 'levelDescriptions.A2' },
+    { code: 'B1', nameKey: 'levels.B1', descriptionKey: 'levelDescriptions.B1' },
+    { code: 'B2', nameKey: 'levels.B2', descriptionKey: 'levelDescriptions.B2' },
+    { code: 'C1', nameKey: 'levels.C1', descriptionKey: 'levelDescriptions.C1' },
+    { code: 'C2', nameKey: 'levels.C2', descriptionKey: 'levelDescriptions.C2' }
   ]
   
   // Load preferences from localStorage on store initialization
   function loadStoredPreferences() {
     try {
       const stored = localStorage.getItem('languageLearningPreferences')
+      
       if (stored) {
         const preferences = JSON.parse(stored)
+        
         targetLanguage.value = preferences.targetLanguage || ''
         nativeLanguage.value = preferences.nativeLanguage || ''
         level.value = preferences.level || ''
+        console.log(nativeLanguage.value, '1')
+
+      } else {
+        console.log('loadStoredPreferences - No stored preferences found')
       }
     } catch (error) {
       console.error('Error loading stored preferences:', error)
@@ -89,18 +98,37 @@ export const useLanguageLearningStore = defineStore('languageLearning', () => {
     targetLanguage.value = target
     nativeLanguage.value = native
     level.value = userLevel
+    console.log(nativeLanguage.value, '2')
+
     savePreferencesToStorage()
     // Update i18n locale when native language changes
     setLocale(native)
+    
+    // Also save to database if user is authenticated
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        UserPreferencesService.setNativeLanguage(user.id, native).catch(error => {
+          console.error('Error saving native language to database:', error)
+        })
+      }
+    }).catch(error => {
+      console.error('Error getting current user:', error)
+    })
   }
   
   // Load user preferences from database (for authenticated users)
   async function loadUserPreferencesFromDB(userId) {
     try {
-      const preferences = await UserPreferencesService.getUserPreferences(userId)
-      if (preferences.native_language) {
-        nativeLanguage.value = preferences.native_language
-        savePreferencesToStorage()
+      // Only load from database if we don't already have a native language set
+      if (!nativeLanguage.value) {
+        const preferences = await UserPreferencesService.getUserPreferences(userId)
+        if (preferences.native_language) {
+          nativeLanguage.value = preferences.native_language
+          console.log(nativeLanguage.value, '3')
+          savePreferencesToStorage()
+        }
+      } else {
+        console.log('Skipping database load - nativeLanguage already set to:', nativeLanguage.value)
       }
     } catch (error) {
       console.error('Error loading user preferences from DB:', error)
@@ -261,6 +289,19 @@ export const useLanguageLearningStore = defineStore('languageLearning', () => {
   async function clearImportedTexts() {
     return await textImportService.clearFromDatabase()
   }
+
+  // Function to get translated level data
+  function getTranslatedLevels(i18n) {
+    return availableLevels.map(level => ({
+      code: level.code,
+      name: i18n.t(level.nameKey),
+      description: i18n.t(level.descriptionKey)
+    }))
+  }
+
+  watch(nativeLanguage, (newVal) => {
+    console.log('nativeLanguage changed to:', newVal)
+  })
   
   return {
     // State
@@ -300,6 +341,7 @@ export const useLanguageLearningStore = defineStore('languageLearning', () => {
     getTextStatistics,
     getAvailableLanguagesFromTexts,
     getAvailableLevelsFromTexts,
-    clearImportedTexts
+    clearImportedTexts,
+    getTranslatedLevels
   }
 }) 

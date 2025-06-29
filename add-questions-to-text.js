@@ -17,7 +17,6 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 async function addQuestionsToText() {
   try {
-    console.log('❓ Adding questions to "Le Chat de Lucie" (ID: 22)')
     
     const questions = [
       {
@@ -55,15 +54,11 @@ async function addQuestionsToText() {
       
       if (!questionError) {
         successCount++
-        console.log(`✅ Question ${question.questionNumber} added: ${question.questionText.substring(0, 50)}...`)
       } else {
         console.warn(`⚠️ Question ${question.questionNumber} failed:`, questionError.message)
       }
     }
-    
-    console.log(`\n🎉 Questions added successfully: ${successCount}/${questions.length}`)
-    console.log('🔗 You can now view the text with questions at:')
-    console.log('http://localhost:5174/reader/22')
+
     
   } catch (error) {
     console.error('❌ Failed to add questions:', error)

@@ -83,9 +83,10 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-
+import { useI18n } from 'vue-i18n'
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 // Form data
 const email = ref('')
@@ -111,13 +112,13 @@ function validateEmail() {
   const emailValue = email.value.trim()
   
   if (!emailValue) {
-    emailError.value = $t('auth.emailRequired')
+    emailError.value = t('auth.emailRequired')
     return false
   }
   
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(emailValue)) {
-    emailError.value = $t('auth.invalidEmail')
+    emailError.value = t('auth.invalidEmail')
     return false
   }
   
@@ -129,12 +130,12 @@ function validatePassword() {
   const passwordValue = password.value.trim()
   
   if (!passwordValue) {
-    passwordError.value = $t('auth.passwordRequired')
+    passwordError.value = t('auth.passwordRequired')
     return false
   }
   
   if (passwordValue.length < 6) {
-    passwordError.value = $t('auth.passwordTooShort')
+    passwordError.value = t('auth.passwordTooShort')
     return false
   }
   
@@ -153,7 +154,7 @@ async function handleLogin() {
     
     if (result.error) {
       if (result.error.includes('Invalid login credentials')) {
-        loginError.value = $t('auth.invalidCredentials')
+        loginError.value = t('auth.invalidCredentials')
       } else {
         loginError.value = result.error
       }
@@ -166,7 +167,7 @@ async function handleLogin() {
     }
   } catch (error) {
     console.error('Login error:', error)
-    loginError.value = $t('auth.unexpectedError')
+    loginError.value = t('auth.unexpectedError')
   } finally {
     loading.value = false
   }
@@ -184,7 +185,7 @@ async function continueAsGuest() {
     }
   } catch (error) {
     console.error('Guest mode error:', error)
-    loginError.value = $t('auth.guestModeError')
+    loginError.value = t('auth.guestModeError')
   } finally {
     loading.value = false
   }

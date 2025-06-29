@@ -1,65 +1,90 @@
 <template>
-  <div class="start-page" :key="currentLocale">
+  <div class="start-page">
     <div class="container">
       <header class="header">
         <div class="header-top">
-          <h1 class="title">{{ t('startPage.title') }}</h1>
+          <h1 class="title">{{ pageTitle }}</h1>
         </div>
-        <p class="subtitle">{{ t('startPage.subtitle') }}</p>
+        <p class="subtitle">{{ pageSubtitle }}</p>
       </header>
 
       <form @submit.prevent="startLearning" class="setup-form">
+        
         <!-- Target Language Selection -->
         <div class="form-section">
-          <label class="form-label">{{ t('startPage.targetLanguage') }}</label>
+          <label class="form-label">{{ targetLanguageLabel }}</label>
           <div class="language-grid">
             <button
               v-for="lang in availableLanguages"
               :key="lang.code"
               type="button"
               class="language-card"
-              :class="{ active: targetLanguage === lang.code }"
-              @click="targetLanguage = lang.code"
+              :class="{ 
+                active: targetLanguage === lang.code,
+                disabled: ['es', 'de'].includes(lang.code)
+              }"
+              @click="['es', 'de'].includes(lang.code) ? null : targetLanguage = lang.code"
+              :disabled="['es', 'de'].includes(lang.code)"
+              :title="['es', 'de'].includes(lang.code) ? $t('startPage.comingSoon') : ''"
             >
               <div class="language-flag">{{ getFlag(lang.code) }}</div>
-              <div class="language-name">{{ t('languages.' + lang.code) }}</div>
+              <div class="language-name">{{ getLanguageName(lang.code) }}</div>
+              <div v-if="['es', 'de'].includes(lang.code)" class="coming-soon-badge">
+                {{ $t('startPage.comingSoon') }}
+              </div>
             </button>
           </div>
         </div>
 
         <!-- Native Language Selection -->
         <div class="form-section">
-          <label class="form-label">{{ t('startPage.nativeLanguage') }}</label>
+          <label class="form-label">{{ nativeLanguageLabel }}</label>
           <div class="language-grid">
             <button
               v-for="lang in availableLanguages"
               :key="lang.code"
               type="button"
               class="language-card"
-              :class="{ active: nativeLanguage === lang.code }"
-              @click="nativeLanguage = lang.code"
+              :class="{ 
+                active: nativeLanguage === lang.code,
+                disabled: ['es', 'de'].includes(lang.code)
+              }"
+              @click="['es', 'de'].includes(lang.code) ? null : selectNativeLanguage(lang.code)"
+              :disabled="['es', 'de'].includes(lang.code)"
+              :title="['es', 'de'].includes(lang.code) ? $t('startPage.comingSoon') : ''"
             >
               <div class="language-flag">{{ getFlag(lang.code) }}</div>
-              <div class="language-name">{{ t('languages.' + lang.code) }}</div>
+              <div class="language-name">{{ getLanguageName(lang.code) }}</div>
+              <div v-if="['es', 'de'].includes(lang.code)" class="coming-soon-badge">
+                {{ $t('startPage.comingSoon') }}
+              </div>
             </button>
           </div>
         </div>
 
         <!-- Level Selection -->
         <div class="form-section">
-          <label class="form-label">{{ t('startPage.level') }}</label>
+          <label class="form-label">{{ levelLabel }}</label>
           <div class="level-grid">
             <button
               v-for="level in availableLevels"
               :key="level.code"
               type="button"
               class="level-card"
-              :class="{ active: selectedLevel === level.code }"
-              @click="selectedLevel = level.code"
+              :class="{ 
+                active: selectedLevel === level.code,
+                disabled: ['B2', 'C1', 'C2'].includes(level.code)
+              }"
+              @click="['B2', 'C1', 'C2'].includes(level.code) ? null : selectedLevel = level.code"
+              :disabled="['B2', 'C1', 'C2'].includes(level.code)"
+              :title="['B2', 'C1', 'C2'].includes(level.code) ? $t('startPage.comingSoon') : ''"
             >
               <div class="level-code">{{ level.code }}</div>
-              <div class="level-name">{{ t('levels.' + level.code) }}</div>
-              <div class="level-description">{{ level.description }}</div>
+              <div class="level-name">{{ $t(level.nameKey) }}</div>
+              <div class="level-description">{{ $t(level.descriptionKey) }}</div>
+              <div v-if="['B2', 'C1', 'C2'].includes(level.code)" class="coming-soon-badge">
+                {{ $t('startPage.comingSoon') }}
+              </div>
             </button>
           </div>
         </div>
@@ -78,7 +103,7 @@
             :disabled="!isFormValid"
             :class="{ disabled: !isFormValid }"
           >
-            {{ t('startPage.startLearning') }}
+            {{ startLearningText }}
           </button>
           
           <button
@@ -87,7 +112,7 @@
             @click="goToImport"
             class="import-button"
           >
-            {{ t('startPage.importTexts') }}
+            {{ importTextsText }}
           </button>
         </div>
       </form>
@@ -96,27 +121,30 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useLanguageLearningStore } from '../stores/languageLearning'
 import { useAuthStore } from '../stores/auth.js'
-import LogoutButton from './LogoutButton.vue'
-import BackButton from './BackButton.vue'
-import { setLocale, getCurrentLocale } from '../i18n'
+import { setLocale } from '../i18n'
 
 const router = useRouter()
 const store = useLanguageLearningStore()
 const authStore = useAuthStore()
 const { t, locale } = useI18n()
 
+// Check authentication
+if (!authStore.isAuthenticated && !authStore.isGuestMode) {
+  router.push('/')
+}
+
 // Admin state
 const isAdmin = ref(false)
 
 // Form data
-const targetLanguage = ref('')
-const nativeLanguage = ref('')
-const selectedLevel = ref('')
+const targetLanguage = ref(store.targetLanguage)
+const nativeLanguage = ref(store.nativeLanguage)
+const selectedLevel = ref(store.level)
 
 // Get available options from store
 const availableLanguages = store.availableLanguages
@@ -124,20 +152,24 @@ const availableLevels = store.availableLevels
 
 // Computed properties
 const currentLocale = computed(() => {
-  const current = locale.value
-  console.log('currentLocale computed called, value:', current)
-  return current
+  return locale.value
 })
 
-// Watch for locale changes
-watch(currentLocale, (newLocale) => {
-  console.log('currentLocale changed to:', newLocale)
-})
+// Computed translations to ensure reactivity
+const pageTitle = computed(() => t('startPage.title'))
+const pageSubtitle = computed(() => t('startPage.subtitle'))
+const targetLanguageLabel = computed(() => t('startPage.targetLanguage'))
+const nativeLanguageLabel = computed(() => t('startPage.nativeLanguage'))
+const levelLabel = computed(() => t('startPage.level'))
+const startLearningText = computed(() => t('startPage.startLearning'))
+const importTextsText = computed(() => t('startPage.importTexts'))
+
+// Computed function for language names
+const getLanguageName = computed(() => (code) => t('languages.' + code))
 
 onMounted(() => {
   checkAdminAccess()
-  console.log('StartPage mounted, current locale:', getCurrentLocale())
-  console.log('Current nativeLanguage value:', nativeLanguage.value)
+  checkAuthentication()
 })
 
 const checkAdminAccess = () => {
@@ -163,17 +195,21 @@ const checkAdminAccess = () => {
   isAdmin.value = false
 }
 
+const checkAuthentication = () => {
+  if (!authStore.isAuthenticated && !authStore.isGuestMode) {
+    router.push('/')
+  }
+}
+
 // Watch for native language changes and update i18n locale
 watch(nativeLanguage, async (newLanguage) => {
   if (newLanguage) {
-    console.log('Native language changed to:', newLanguage)
+    // Set the locale using the i18n setLocale function
+    setLocale(newLanguage)
+    // Also update the reactive locale
     locale.value = newLanguage
-    console.log('Locale set to:', newLanguage)
-    // Wait for the next tick to ensure the locale change is applied
-    await nextTick()
-    console.log('After nextTick, current locale:', getCurrentLocale())
   }
-})
+}, { immediate: true })
 
 // Computed properties
 const isFormValid = computed(() => {
@@ -190,7 +226,6 @@ watch([targetLanguage, selectedLevel], ([lang, level]) => {
     store.targetLanguage = lang
     store.level = level
     store.fetchTextCount()
-    console.log(store.textCount)
   } else {
     store.textCount = 0
   }
@@ -209,9 +244,9 @@ function getFlag(langCode) {
   return flags[langCode] || '🏳️'
 }
 
-function startLearning() {
+async function startLearning() {
   if (!isFormValid.value) return
-  
+
   // Save user preferences to store
   store.setUserPreferences(
     targetLanguage.value,
@@ -220,17 +255,8 @@ function startLearning() {
   )
   
   // Load random text and navigate to session
-  store.loadRandomText()
-  if (store.currentText && store.currentText.id) {
-    router.push(`/session/${store.currentText.id}`)
-  } else {
-    // fallback: wait for nextTick or use a watcher if needed
-    setTimeout(() => {
-      if (store.currentText && store.currentText.id) {
-        router.push(`/session/${store.currentText.id}`)
-      }
-    }, 100)
-  }
+  await store.loadRandomText()
+  router.push(`/session/${store.currentText.id}`)
 }
 
 function goToImport() {
@@ -243,6 +269,27 @@ function handleLogoutSuccess() {
 
 function handleLogoutError() {
   // Handle logout error
+}
+
+function selectNativeLanguage(langCode) {
+
+  nativeLanguage.value = langCode
+  // Update the store's nativeLanguage using the proper method
+  store.setUserPreferences(
+    store.targetLanguage,
+    langCode,
+    store.level
+  )
+  
+  // Immediately set the locale
+  setLocale(langCode)
+  locale.value = langCode
+}
+
+function clearLocalStorage() {
+  localStorage.removeItem('languageLearningPreferences')
+  console.log('localStorage cleared')
+  window.location.reload()
 }
 </script>
 
@@ -317,6 +364,7 @@ function handleLogoutError() {
 }
 
 .language-card {
+  position: relative;
   background: #f7fafc;
   border: 2px solid #e2e8f0;
   color: #2d3748;
@@ -339,6 +387,20 @@ function handleLogoutError() {
   border-color: #667eea;
   background: #667eea;
   color: white;
+}
+
+.language-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #64748b;
+}
+
+.language-card.disabled:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  transform: none;
 }
 
 .language-flag {
@@ -372,6 +434,7 @@ function handleLogoutError() {
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
+  position: relative;
 }
 
 .level-card:hover {
@@ -383,6 +446,20 @@ function handleLogoutError() {
   border-color: #667eea;
   background: #667eea;
   color: white;
+}
+
+.level-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #64748b;
+}
+
+.level-card.disabled:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  transform: none;
 }
 
 .level-code {
@@ -446,11 +523,36 @@ function handleLogoutError() {
   box-shadow: 0 10px 20px rgba(237, 137, 54, 0.3);
 }
 
+.coming-soon-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .container {
     padding: 20px;
-    margin: 10px;
+    margin: 10px 0;
   }
   
   .title {

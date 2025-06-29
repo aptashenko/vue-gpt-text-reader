@@ -150,8 +150,9 @@ const loadingText = ref(true)
 const fetchError = ref('')
 const hoveredWord = ref(null)
 
+
 // Load user preferences on mount
-onMounted(async () => {
+onMounted(async () => {  
   // Load preferences from localStorage (already done in store)
   // Also load from database if user is authenticated
   if (authStore.user) {
@@ -184,7 +185,6 @@ async function fetchTextById(id) {
   loadingText.value = true
   fetchError.value = ''
   try {
-    console.log('Fetching text with ID:', id)
     
     // Fetch text data
     const { data: textData, error: textError } = await supabase
@@ -192,9 +192,7 @@ async function fetchTextById(id) {
       .select('*')
       .eq('id', id)
       .single()
-    
-    console.log('Supabase text response:', { textData, textError })
-    
+        
     if (textError) {
       console.error('Supabase text error:', textError)
       if (textError.code === 'PGRST116') {
@@ -211,18 +209,14 @@ async function fetchTextById(id) {
       store.currentText = null
       return
     }
-    
-    console.log('Found text:', textData)
-    
+        
     // Fetch questions for this text
     const { data: questionsData, error: questionsError } = await supabase
       .from('text_questions')
       .select('*')
       .eq('text_id', id)
       .order('question_number')
-    
-    console.log('Supabase questions response:', { questionsData, questionsError })
-    
+        
     if (questionsError) {
       console.error('Supabase questions error:', questionsError)
       // Don't fail the entire fetch if questions fail, just log the error
@@ -249,9 +243,7 @@ async function fetchTextById(id) {
       `)
       .eq('text_id', id)
       .order('word_order')
-    
-    console.log('Supabase text_words response:', { textWordsData, textWordsError })
-    
+        
     if (textWordsError) {
       console.error('Supabase text_words error:', textWordsError)
       // Don't fail the entire fetch if words fail, just log the error
@@ -303,6 +295,7 @@ watch(() => route.params.id, (id) => {
 // Methods
 function highlightWords(text) {
   if (!currentTextWords.value.length) return text
+    
   let highlightedText = text
   // Sort by length descending for phrase support
   const wordsSorted = [...currentTextWords.value].sort((a, b) => b.word.length - a.word.length)
@@ -804,9 +797,18 @@ function playTextPronunciation() {
 
 /* Responsive design */
 @media (max-width: 768px) {
+  .text-session-page {
+    padding: 0;
+  }
+
+  .language-info {
+    margin-bottom: 0;
+    gap: 4px;
+  }
+
   .container {
     padding: 20px;
-    margin: 10px;
+    margin: 10px 0;
   }
   
   .text-title {

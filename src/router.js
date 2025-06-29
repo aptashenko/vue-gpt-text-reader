@@ -39,13 +39,13 @@ router.beforeEach(async (to, from, next) => {
 
   // If user is authenticated and trying to access auth pages (login/signup)
   if (isAuthenticated && isAuthPage) {
-    next('/') // Redirect to landing page
+    next('/app') // Redirect to app page
     return
   }
 
   // If user is in guest mode and trying to access auth pages
   if (isGuestMode && isAuthPage) {
-    next('/') // Redirect to landing page
+    next('/app') // Redirect to app page
     return
   }
 
@@ -69,6 +69,16 @@ router.beforeEach(async (to, from, next) => {
 
   // Fallback: redirect to login
   next('/login')
+})
+
+// Global afterEach hook to scroll to top after route changes
+router.afterEach((to, from) => {
+  // Scroll to top of the page
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'smooth'
+  })
 })
 
 export default router 

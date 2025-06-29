@@ -211,7 +211,7 @@
                 disabled
                 :title="$t('dictionary.pronunciationComingSoon')"
               >
-                🔊 {{ $t('dictionary.pronunciation') }}
+                🔊
               </button>
               <button @click.stop="deleteWord(word.id)" class="delete-btn">{{ $t('app.delete') }}</button>
             </div>

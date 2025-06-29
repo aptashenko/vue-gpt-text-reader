@@ -72,16 +72,8 @@ async function createTableAndData() {
       return
     }
     
-    console.log('✅ Sample texts inserted successfully!')
-    console.log('🎉 Your database is now ready to use!')
-    console.log('📖 You can now access your app at http://localhost:5173/')
-    
   } catch (error) {
     console.error('❌ Setup failed:', error)
-    console.log('📋 Please use the SQL Editor method instead:')
-    console.log('1. Go to your Supabase dashboard')
-    console.log('2. Open SQL Editor')
-    console.log('3. Run the commands from database-setup.sql')
   }
 }
 

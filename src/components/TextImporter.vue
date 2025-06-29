@@ -55,56 +55,6 @@
         </div>
       </div>
       
-      <!-- Statistics -->
-      <div v-if="statistics.total > 0" class="statistics-section">
-        <h3>Статистика текстов</h3>
-        <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-number">{{ statistics.total }}</div>
-            <div class="stat-label">Всего текстов</div>
-          </div>
-          
-          <div class="stat-item">
-            <div class="stat-number">{{ Object.keys(statistics.byLanguage).length }}</div>
-            <div class="stat-label">Языков</div>
-          </div>
-          
-          <div class="stat-item">
-            <div class="stat-number">{{ Object.keys(statistics.byLevel).length }}</div>
-            <div class="stat-label">Уровней</div>
-          </div>
-        </div>
-        
-        <!-- Language breakdown -->
-        <div class="language-breakdown">
-          <h4>По языкам:</h4>
-          <div class="language-stats">
-            <div 
-              v-for="(count, lang) in statistics.byLanguage" 
-              :key="lang"
-              class="language-stat"
-            >
-              <span class="lang-code">{{ lang.toUpperCase() }}</span>
-              <span class="lang-count">{{ count }}</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Level breakdown -->
-        <div class="level-breakdown">
-          <h4>По уровням:</h4>
-          <div class="level-stats">
-            <div 
-              v-for="(count, level) in statistics.byLevel" 
-              :key="level"
-              class="level-stat"
-            >
-              <span class="level-code">{{ level }}</span>
-              <span class="level-count">{{ count }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
       
       <!-- Actions -->
       <div class="actions-section">
