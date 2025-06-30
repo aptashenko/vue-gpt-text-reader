@@ -137,6 +137,8 @@ import { gptService } from '../services/gpt'
 import { supabase } from '../supabase.js'
 import LogoutButton from './LogoutButton.vue'
 import BackButton from './BackButton.vue'
+import analyticsService from '../services/logsnag.js'
+import { getAnalyticsUserId } from '../utils/analytics.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -278,10 +280,43 @@ async function fetchTextById(id) {
     // Initialize user answers array with the correct length
     userAnswers.value = new Array(store.currentText.questions.length).fill('')
     store.sessionResults = null
+    
+    // Отслеживаем начало чтения текста
+    try {
+      await analyticsService.trackTextRead(
+        textData.title, 
+        textData.language, 
+        getAnalyticsUserId()
+      )
+      await analyticsService.trackTextSessionStarted(
+        textData.id,
+        textData.title,
+        textData.language,
+        getAnalyticsUserId()
+      )
+      await analyticsService.trackMetric('text_read', 1, {
+        text_id: textData.id,
+        title: textData.title,
+        language: textData.language,
+        user_id: getAnalyticsUserId()
+      })
+      
+      // Track active user when they start reading
+      await analyticsService.trackActiveUser('daily', getAnalyticsUserId())
+    } catch (analyticsError) {
+      console.error('Analytics tracking error:', analyticsError)
+    }
   } catch (err) {
     console.error('Exception during text fetch:', err)
     fetchError.value = 'Ошибка при загрузке текста.'
     store.currentText = null
+    
+    // Отслеживаем ошибку загрузки текста
+    try {
+      await analyticsService.trackAppError(err, 'text_session_fetch', getAnalyticsUserId())
+    } catch (analyticsError) {
+      console.error('Analytics error tracking failed:', analyticsError)
+    }
   } finally {
     loadingText.value = false
   }
@@ -324,9 +359,67 @@ async function checkAnswers() {
       store.nativeLanguage
     )
     store.setSessionResults(results)
+    
+    // Отслеживаем завершение текста и ответы на вопросы
+    try {
+      const sessionDuration = Date.now() - (store.sessionStartTime || Date.now())
+      
+      // Отслеживаем завершение текста
+      await analyticsService.trackTextCompleted(
+        store.currentText.title,
+        store.currentText.language,
+        getAnalyticsUserId(),
+        sessionDuration
+      )
+      
+      // Отслеживаем ответы на вопросы
+      for (let i = 0; i < currentTextQuestions.value.length; i++) {
+        const isCorrect = results.answers[i]?.isCorrect || false
+        await analyticsService.trackQuestionAnswered(i + 1, isCorrect, getAnalyticsUserId())
+        
+        if (isCorrect) {
+          await analyticsService.trackMetric('correct_answer', 1, {
+            question_id: i + 1,
+            user_id: getAnalyticsUserId()
+          })
+        } else {
+          await analyticsService.trackMetric('incorrect_answer', 1, {
+            question_id: i + 1,
+            user_id: getAnalyticsUserId()
+          })
+        }
+      }
+      
+      // Отслеживаем общую статистику
+      await analyticsService.trackMetric('question_answered', currentTextQuestions.value.length, {
+        text_id: store.currentText.id,
+        user_id: getAnalyticsUserId()
+      })
+      
+      // Отслеживаем завершение сессии
+      await analyticsService.trackTextSessionEnded(
+        store.currentText.id,
+        store.currentText.title,
+        store.currentText.language,
+        sessionDuration,
+        getAnalyticsUserId()
+      )
+      
+    } catch (analyticsError) {
+      console.error('Analytics tracking error:', analyticsError)
+    }
+    
     router.push('/result')
   } catch (error) {
     console.error('Error checking answers:', error)
+    
+    // Отслеживаем ошибку
+    try {
+      await analyticsService.trackAppError(error, 'text_session_check_answers', getAnalyticsUserId())
+    } catch (analyticsError) {
+      console.error('Analytics error tracking failed:', analyticsError)
+    }
+    
     alert('Ошибка при проверке ответов. Попробуйте еще раз.')
   } finally {
     checking.value = false
@@ -527,6 +620,7 @@ function playTextPronunciation() {
   line-height: 1.8;
   font-size: 1.1rem;
   color: #2d3748;
+  text-align: justify;
 }
 
 .paragraph {

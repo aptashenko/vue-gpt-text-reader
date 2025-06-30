@@ -163,7 +163,7 @@ async function handleLogin() {
     
     if (result.success) {
       // Successful login
-      router.push('/')
+      router.push('/app')
     }
   } catch (error) {
     console.error('Login error:', error)
@@ -178,10 +178,10 @@ async function continueAsGuest() {
   loading.value = true
   
   try {
-    const result = authStore.enableGuestMode()
+    const result = await authStore.enableGuestMode()
     
     if (result.success) {
-      router.push('/')
+      router.push('/app')
     }
   } catch (error) {
     console.error('Guest mode error:', error)

@@ -88,8 +88,10 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { FeedbackService } from '../services/feedback'
 import BackButton from './BackButton.vue'
-
+import { useI18n } from 'vue-i18n'
 const authStore = useAuthStore()
+const { t } = useI18n()
+
 
 // State
 const feedbackList = ref([])
@@ -152,7 +154,7 @@ async function loadFeedback() {
 }
 
 async function deleteFeedback(feedbackId) {
-  if (!confirm($t('adminFeedback.confirmDelete'))) return
+  if (!confirm(t('adminFeedback.confirmDelete'))) return
   
   deleting.value = feedbackId
   try {
@@ -161,7 +163,7 @@ async function deleteFeedback(feedbackId) {
     stats.value.total--
   } catch (error) {
     console.error('Error deleting feedback:', error)
-    alert($t('adminFeedback.deleteError'))
+    alert(t('adminFeedback.deleteError'))
   } finally {
     deleting.value = null
   }

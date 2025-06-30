@@ -24,8 +24,8 @@ const props = defineProps({
   },
   variant: {
     type: String,
-    default: 'default', // 'default', 'text', 'icon'
-    validator: (value) => ['default', 'text', 'icon'].includes(value)
+    default: 'default', // 'default', 'text', 'icon', 'mobile', 'mobile'
+    validator: (value) => ['default', 'text', 'icon', 'mobile', 'mobile'].includes(value)
   },
   redirectToLogin: {
     type: Boolean,
@@ -142,6 +142,32 @@ async function handleLogout() {
 }
 
 .logout-button.icon .logout-icon {
+
+.logout-button.mobile {
+  width: 100%;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #e53e3e;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.logout-button.mobile:hover:not(:disabled) {
+  background: #fed7d7;
+  color: #c53030;
+  transform: none;
+  box-shadow: none;
+}
+
+.logout-button.mobile:active:not(:disabled) {
+  background: #feb2b2;
+}
   font-size: 1.2rem;
 }
 

@@ -60,16 +60,9 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function enableGuestMode() {
+  function enableGuestMode() {
     isGuestMode.value = true
     localStorage.setItem('guestMode', 'true')
-    // Track user login for analytics
-    try {
-      await analyticsService.trackUserLogin('guest@guest.com', null)
-      await analyticsService.trackActiveUser('daily', null)
-    } catch (analyticsError) {
-      console.error('Analytics tracking error:', analyticsError)
-    }
     return { success: true }
   }
 
@@ -91,14 +84,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       if (data.user) {
-        
-        // Track user login for analytics
-        try {
-          await analyticsService.trackUserLogin(email, String(data.user.id))
-          await analyticsService.trackActiveUser('daily', String(data.user.id))
-        } catch (analyticsError) {
-          console.error('Analytics tracking error:', analyticsError)
-        }
+        user.value = data.user
         return { success: true }
       }
     } catch (error) {
@@ -116,16 +102,6 @@ export const useAuthStore = defineStore('auth', () => {
       
       if (error) {
         throw error
-      }
-
-      if (data.user) {
-        // Track new user signup for analytics
-        try {
-          await analyticsService.trackUserSignUp(email, String(data.user.id))
-          await analyticsService.trackActiveUser('daily', String(data.user.id))
-        } catch (analyticsError) {
-          console.error('Analytics tracking error:', analyticsError)
-        }
       }
 
       return { success: true, data }

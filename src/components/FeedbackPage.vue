@@ -59,6 +59,8 @@ import { useAuthStore } from '../stores/auth'
 import BackButton from './BackButton.vue'
 import { FeedbackService } from '../services/feedback'
 import { useI18n } from 'vue-i18n'
+import analyticsService from '../services/logsnag.js'
+import { getAnalyticsUserId } from '../utils/analytics.js'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -91,6 +93,16 @@ async function submitFeedback() {
       userId: authStore.user?.id || null
     })
     
+    // Отслеживаем успешную отправку обратной связи
+    await analyticsService.trackFeedbackSubmitted(
+      'positive', // Рейтинг по умолчанию
+      message.value.trim(),
+      getAnalyticsUserId()
+    )
+    
+    // Track active user when they submit feedback
+    await analyticsService.trackActiveUser('daily', getAnalyticsUserId())
+    
     submitStatus.value = {
       type: 'success',
       message: t('feedback.successMessage')
@@ -107,6 +119,10 @@ async function submitFeedback() {
     
   } catch (error) {
     console.error('Error submitting feedback:', error)
+    
+    // Отслеживаем ошибку отправки обратной связи
+    analyticsService.trackError(error, 'feedback_submission', authStore.user?.id)
+    
     submitStatus.value = {
       type: 'error',
       message: t('feedback.errorMessage')

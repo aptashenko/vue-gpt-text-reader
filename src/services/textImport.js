@@ -1,6 +1,7 @@
 // Text Import Service
 import { supabase } from '../supabase.js'
 import { useAuthStore } from '../stores/auth.js'
+import analyticsService from './logsnag.js'
 
 export class TextImportService {
   constructor() {

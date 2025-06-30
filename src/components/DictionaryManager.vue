@@ -227,12 +227,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { supabase } from '../supabase.js'
 import { DictionaryService } from '../services/dictionary.js'
 import { UserPreferencesService } from '../services/userPreferences.js'
 import { useAuthStore } from '../stores/auth.js'
 import BackButton from './BackButton.vue'
+import analyticsService from '../services/logsnag.js'
+import { getAnalyticsUserId } from '../utils/analytics.js'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const words = ref([])
 const selectedLanguage = ref('en')
@@ -240,7 +245,7 @@ const selectedDifficulty = ref('')
 const searchTerm = ref('')
 const showAddForm = ref(false)
 const editingWord = ref(null)
-const loading = ref(false)
+const loading = ref(true)
 const userNativeLanguage = ref('en')
 
 const newWord = ref({
@@ -271,9 +276,36 @@ const loadUserPreferences = async () => {
 const fetchWords = async () => {
   loading.value = true
   try {
-    words.value = await DictionaryService.getAllWords(selectedLanguage.value)
+    const { data, error } = await supabase
+      .from('dictionary')
+      .select('*')
+      .order('word', { ascending: true })
+
+    if (error) throw error
+
+    words.value = data || []
+    
+    // Отслеживаем просмотр словаря
+    try {
+      await analyticsService.trackDictionaryViewed(getAnalyticsUserId())
+      await analyticsService.trackMetric('dictionary_viewed', 1, { 
+        language: selectedLanguage.value,
+        user_id: getAnalyticsUserId() 
+      })
+      // Track active user when they view dictionary
+      await analyticsService.trackActiveUser('daily', getAnalyticsUserId())
+    } catch (analyticsError) {
+      console.error('Analytics tracking error:', analyticsError)
+    }
+    
   } catch (error) {
     console.error('Error fetching words:', error)
+    // Отслеживаем ошибку
+    try {
+      await analyticsService.trackAppError(error, 'dictionary_fetch', authStore.user?.id)
+    } catch (analyticsError) {
+      console.error('Analytics error tracking failed:', analyticsError)
+    }
   } finally {
     loading.value = false
   }
@@ -294,20 +326,24 @@ const getLanguageName = (code) => {
 const filteredWords = computed(() => {
   let filtered = words.value
 
+  if (selectedLanguage.value) {
+    filtered = filtered.filter(word => word.language === selectedLanguage.value)
+  }
+
   if (selectedDifficulty.value) {
     filtered = filtered.filter(word => word.difficulty === selectedDifficulty.value)
   }
 
   if (searchTerm.value) {
-    const term = searchTerm.value.toLowerCase()
+    const search = searchTerm.value.toLowerCase()
     filtered = filtered.filter(word => 
-      word.word.toLowerCase().includes(term) ||
-      word.translation_en?.toLowerCase().includes(term) ||
-      word.translation_fr?.toLowerCase().includes(term) ||
-      word.translation_es?.toLowerCase().includes(term) ||
-      word.translation_de?.toLowerCase().includes(term) ||
-      word.translation_uk?.toLowerCase().includes(term) ||
-      word.translation_ru?.toLowerCase().includes(term)
+      word.word.toLowerCase().includes(search) ||
+      word.translation_en?.toLowerCase().includes(search) ||
+      word.translation_fr?.toLowerCase().includes(search) ||
+      word.translation_es?.toLowerCase().includes(search) ||
+      word.translation_de?.toLowerCase().includes(search) ||
+      word.translation_uk?.toLowerCase().includes(search) ||
+      word.translation_ru?.toLowerCase().includes(search)
     )
   }
 
@@ -345,14 +381,52 @@ const saveWord = async () => {
   try {
     if (editingWord.value) {
       await DictionaryService.updateWord(editingWord.value.id, newWord.value)
+      
+      // Отслеживаем обновление слова
+      try {
+        await analyticsService.trackMetric('word_updated', 1, {
+          word: newWord.value.word,
+          language: newWord.value.language,
+          user_id: getAnalyticsUserId()
+        })
+        // Track active user when they update a word
+        await analyticsService.trackActiveUser('daily', getAnalyticsUserId())
+      } catch (analyticsError) {
+        console.error('Analytics tracking error:', analyticsError)
+      }
     } else {
       await DictionaryService.addWord(newWord.value)
+      
+      // Отслеживаем добавление слова
+      try {
+        await analyticsService.trackWordAdded(
+          newWord.value.word,
+          newWord.value.translation_en,
+          newWord.value.language,
+          authStore.user?.id
+        )
+        await analyticsService.trackMetric('word_added', 1, {
+          word: newWord.value.word,
+          language: newWord.value.language,
+          user_id: authStore.user?.id
+        })
+      } catch (analyticsError) {
+        console.error('Analytics tracking error:', analyticsError)
+      }
     }
     
     await fetchWords()
     closeForm()
   } catch (error) {
     console.error('Error saving word:', error)
+    
+    // Отслеживаем ошибку
+    try {
+      await analyticsService.trackAppError(error, 'dictionary_save_word', authStore.user?.id)
+    } catch (analyticsError) {
+      console.error('Analytics error tracking failed:', analyticsError)
+    }
+    
     alert('Error saving word. Please try again.')
   }
 }
@@ -360,10 +434,36 @@ const saveWord = async () => {
 const deleteWord = async (id) => {
   if (confirm('Are you sure you want to delete this word?')) {
     try {
+      const wordToDelete = words.value.find(w => w.id === id)
       await DictionaryService.deleteWord(id)
+      
+      // Отслеживаем удаление слова
+      try {
+        await analyticsService.trackWordRemoved(
+          wordToDelete?.word || 'unknown',
+          wordToDelete?.language || 'unknown',
+          authStore.user?.id
+        )
+        await analyticsService.trackMetric('word_removed', 1, {
+          word: wordToDelete?.word || 'unknown',
+          language: wordToDelete?.language || 'unknown',
+          user_id: authStore.user?.id
+        })
+      } catch (analyticsError) {
+        console.error('Analytics tracking error:', analyticsError)
+      }
+      
       await fetchWords()
     } catch (error) {
       console.error('Error deleting word:', error)
+      
+      // Отслеживаем ошибку
+      try {
+        await analyticsService.trackAppError(error, 'dictionary_delete_word', authStore.user?.id)
+      } catch (analyticsError) {
+        console.error('Analytics error tracking failed:', analyticsError)
+      }
+      
       alert('Error deleting word. Please try again.')
     }
   }

@@ -1,4 +1,15 @@
-{
+// Auto-generated script to add missing keys
+// Run this to add missing translations
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Read current files
+const enData = {
   "app": {
     "title": "Language Reader",
     "loading": "Loading...",
@@ -170,7 +181,7 @@
     "backToTexts": "← Back to Texts"
   },
   "admin": {
-    "title": "Admin Panel",
+    "title": "Title",
     "panel": "Admin Panel",
     "accessDenied": "Access Denied",
     "accessDeniedMessage": "You don't have permission to access the admin panel.",
@@ -187,7 +198,6 @@
     "noTextsFound": "No texts found for {language}.",
     "loadingDictionary": "Loading dictionary...",
     "noWordsFound": "No words found matching your criteria.",
-    "title": "Title",
     "content": "Content",
     "level": "Level",
     "question1": "Question 1",
@@ -374,4 +384,41 @@
     "errorTitle": "Failed to Load Analytics",
     "retry": "Retry"
   }
-} 
+};
+const ruData = JSON.parse(fs.readFileSync('src/i18n/locales/ru.json', 'utf8'));
+const ukData = JSON.parse(fs.readFileSync('src/i18n/locales/uk.json', 'utf8'));
+const frData = JSON.parse(fs.readFileSync('src/i18n/locales/fr.json', 'utf8'));
+
+// Function to add missing keys recursively
+function addMissingKeys(source, target, path = '') {
+  for (const key in source) {
+    const currentPath = path ? `${path}.${key}` : key;
+    
+    if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
+      if (!target[key]) {
+        target[key] = {};
+      }
+      addMissingKeys(source[key], target[key], currentPath);
+    } else {
+      if (!(key in target)) {
+        target[key] = source[key]; // Use English as fallback
+        console.log(`Added missing key: ${currentPath}`);
+      }
+    }
+  }
+}
+
+// Add missing keys to each language
+console.log('Adding missing keys to Russian...');
+addMissingKeys(enData, ruData);
+fs.writeFileSync('src/i18n/locales/ru.json', JSON.stringify(ruData, null, 2));
+
+console.log('Adding missing keys to Ukrainian...');
+addMissingKeys(enData, ukData);
+fs.writeFileSync('src/i18n/locales/uk.json', JSON.stringify(ukData, null, 2));
+
+console.log('Adding missing keys to French...');
+addMissingKeys(enData, frData);
+fs.writeFileSync('src/i18n/locales/fr.json', JSON.stringify(frData, null, 2));
+
+console.log('Done! Please review and translate the added keys.');

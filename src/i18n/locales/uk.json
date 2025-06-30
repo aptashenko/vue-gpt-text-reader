@@ -24,7 +24,8 @@
     "settings": "Налаштування",
     "admin": "Панель адміністратора",
     "import": "Імпорт",
-    "logout": "Вийти"
+    "logout": "Вийти",
+    "feedback": "Feedback"
   },
   "auth": {
     "login": "Увійти",
@@ -35,12 +36,22 @@
     "forgotPassword": "Забули пароль?",
     "resetPassword": "Скинути пароль",
     "loginSuccess": "Успішний вхід",
-    "signupSuccess": "Акаунт створено успішно",
-    "logoutSuccess": "Вихід успішний",
+    "signupSuccess": "Акаунт успішно створено",
+    "logoutSuccess": "Вихід виконано успішно",
     "invalidCredentials": "Невірна електронна пошта або пароль",
-    "emailAlreadyExists": "Така електронна пошта вже існує",
+    "emailAlreadyExists": "Така електронна пошта вже зареєстрована",
     "passwordsDoNotMatch": "Паролі не збігаються",
-    "weakPassword": "Пароль занадто слабкий"
+    "weakPassword": "Пароль занадто слабкий",
+    "emailRequired": "Електронна пошта є обовʼязковою",
+    "invalidEmail": "Будь ласка, введіть дійсну електронну адресу",
+    "passwordRequired": "Пароль є обовʼязковим",
+    "passwordTooShort": "Пароль має містити щонайменше 6 символів",
+    "unexpectedError": "Сталася неочікувана помилка. Спробуйте ще раз.",
+    "guestModeError": "Не вдалося увімкнути гостьовий режим. Спробуйте ще раз.",
+    "continueAsGuest": "Продовжити як гість",
+    "alreadyHaveAccount": "Вже маєте акаунт?",
+    "dontHaveAccount": "Ще не маєте акаунту?",
+    "loginDescription": "Вивчайте мови, читаючи короткі тексти та відповідаючи на запитання."
   },
   "startPage": {
     "title": "Вивчення мов",
@@ -70,7 +81,8 @@
     "translationNotFound": "Переклад не знайдено",
     "answerPlaceholder": "Ваша відповідь на питання {number}...",
     "checkingAnswers": "Перевірка відповідей...",
-    "errorCheckingAnswers": "Помилка перевірки відповідей. Спробуйте ще раз."
+    "errorCheckingAnswers": "Помилка перевірки відповідей. Спробуйте ще раз.",
+    "textPronunciationComingSoon": "Функція прослуховування тексту зʼявиться у наступному релізі"
   },
   "resultPage": {
     "results": "Результати",
@@ -130,7 +142,11 @@
     "preposition": "Прийменник",
     "conjunction": "Сполучник",
     "interjection": "Вигук",
-    "unknown": "Невідомо"
+    "unknown": "Невідомо",
+    "addToQuizlet": "Додати до Quizlet",
+    "pronunciation": "Вимова",
+    "quizletComingSoon": "Інтеграція з Quizlet зʼявиться у наступному релізі",
+    "pronunciationComingSoon": "Функція вимови зʼявиться у наступному релізі"
   },
   "userSettings": {
     "title": "Налаштування користувача",
@@ -154,7 +170,7 @@
     "backToTexts": "← Назад до текстів"
   },
   "admin": {
-    "title": "Панель адміністратора",
+    "title": "Заголовок",
     "accessDenied": "Доступ заборонено",
     "accessDeniedMessage": "У вас немає прав доступу до панелі адміністратора.",
     "backToHome": "← Назад на головну",
@@ -170,7 +186,6 @@
     "noTextsFound": "Не знайдено текстів мовою {language}.",
     "loadingDictionary": "Завантаження словника...",
     "noWordsFound": "Слів не знайдено.",
-    "title": "Заголовок",
     "content": "Зміст",
     "level": "Рівень",
     "question1": "Питання 1",
@@ -185,7 +200,30 @@
     "deleteWord": "Видалити слово",
     "clearAllWordsConfirm": "Ви дійсно хочете видалити всі слова?",
     "clearAllWordsSuccess": "Усі слова успішно видалені.",
-    "clearAllWordsError": "Помилка під час видалення слів."
+    "clearAllWordsError": "Помилка під час видалення слів.",
+   "panel": "Панель адміністратора",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "cancel": "Скасувати",
+    "word": "Слово",
+    "partOfSpeech": "Частина мови",
+    "difficulty": "Складність",
+    "translationEn": "Переклад (англійською)",
+    "translationFr": "Переклад (французькою)",
+    "translationEs": "Переклад (іспанською)",
+    "translationDe": "Переклад (німецькою)",
+    "translationUk": "Переклад (українською)",
+    "addWord": "Додати слово",
+    "importTextAndDictionary": "Імпортувати текст і словник з JSON",
+    "pasteJSONData": "Вставте ваші дані JSON:",
+    "preview": "Попередній перегляд:",
+    "text": "Текст:",
+    "questions": "Питання:",
+    "dictionaryWords": "Слова у словнику:",
+    "clear": "Очистити",
+    "importResult": "Результат імпорту:",
+    "added": "✓ Додано",
+    "failed": "✗ Помилка"
   },
   "import": {
     "title": "Імпорт текстів",
@@ -234,7 +272,6 @@
     "C1": "Професійні тексти та впевнене володіння",
     "C2": "Академічні тексти та майстерність"
   },
-
   "feedback": {
     "title": "Відгук",
     "subtitle": "Нам важлива ваша думка про наш застосунок для вивчення мов!",
@@ -247,7 +284,6 @@
     "successMessage": "Дякуємо за ваш відгук! Ми розглянемо його і скоро зв’яжемося з вами.",
     "errorMessage": "Помилка під час надсилання відгуку. Спробуйте ще раз."
   },
-
   "difficulties": {
     "beginner": "Початковий",
     "intermediate": "Середній",
@@ -272,5 +308,69 @@
     },
     "cta": "Почати читати зараз",
     "ctaSubtitle": "Безкоштовний пробний період • Реєстрація не потрібна"
+  },
+  "adminFeedback": {
+    "title": "Feedback Management",
+    "subtitle": "View and manage user feedback",
+    "totalFeedback": "Total Feedback",
+    "thisMonth": "This Month",
+    "allFeedback": "All Feedback",
+    "loading": "Loading feedback...",
+    "noFeedback": "No feedback submitted yet.",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this feedback?",
+    "deleteError": "Error deleting feedback",
+    "userId": "User ID"
+  },
+  "notFound": {
+    "title": "Сторінку не знайдено",
+    "message": "Схоже, ця сторінка загубилася в мовному лабіринті.",
+    "subtitle": "Але не хвилюйтеся — ми допоможемо вам знайти правильний шлях!",
+    "goBack": "Повернутися назад",
+    "goHome": "На головну",
+    "quickLinks": "Швидкі посилання",
+    "startLearning": "Почати навчання",
+    "importTexts": "Імпортувати тексти",
+    "settings": "Налаштування"
+  },
+  "partsOfSpeech": {
+    "noun": "Іменник",
+    "verb": "Дієслово",
+    "adjective": "Прикметник",
+    "adverb": "Прислівник",
+    "pronoun": "Займенник",
+    "preposition": "Прийменник",
+    "conjunction": "Сполучник",
+    "interjection": "Вигук"
+  },
+  "analytics": {
+    "title": "Analytics Dashboard",
+    "dateRange": "Date Range",
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days",
+    "last90Days": "Last 90 Days",
+    "userEngagement": "User Engagement",
+    "activeUsers": "Active Users",
+    "newUsers": "New Users",
+    "returningUsers": "Returning Users",
+    "contentMetrics": "Content Metrics",
+    "textsRead": "Texts Read",
+    "textsCompleted": "Texts Completed",
+    "wordsAdded": "Words Added",
+    "learningMetrics": "Learning Metrics",
+    "questionsAnswered": "Questions Answered",
+    "correctAnswers": "Correct Answers",
+    "accuracyRate": "Accuracy Rate",
+    "feedbackMetrics": "Feedback Metrics",
+    "feedbackSubmitted": "Feedback Submitted",
+    "avgRating": "Average Rating",
+    "languageDistribution": "Language Distribution",
+    "recentActivity": "Recent Activity",
+    "minutesAgo": "minutes ago",
+    "hoursAgo": "hours ago",
+    "daysAgo": "days ago",
+    "loading": "Loading analytics data...",
+    "errorTitle": "Failed to Load Analytics",
+    "retry": "Retry"
   }
 }

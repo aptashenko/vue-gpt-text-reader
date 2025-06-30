@@ -61,6 +61,14 @@ export default [
     }
   },
   {
+    path: '/admin',
+    name: 'Admin',
+    component: () => import('./components/AdminPage.vue'),
+    meta: {
+      requiresAuth: true // Requires authentication or guest mode
+    }
+  },
+  {
     path: '/admin/feedback',
     name: 'AdminFeedback',
     component: () => import('./components/AdminFeedbackPage.vue'),

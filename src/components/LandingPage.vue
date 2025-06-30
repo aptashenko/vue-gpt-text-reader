@@ -54,6 +54,10 @@ const { t } = useI18n()
 function startLearning() {
   router.push('/app')
 }
+
+function buyMeACoffee() {
+  window.open('https://coff.ee/aptashenko', '_blank')
+}
 </script>
 
 <style scoped>
@@ -121,14 +125,8 @@ function startLearning() {
   padding: 30px 20px;
   background: #f7fafc;
   border-radius: 12px;
-  border: 2px solid #e2e8f0;
+  border: 1px solid #e2e8f0aa;
   transition: all 0.3s ease;
-}
-
-.benefit-item:hover {
-  border-color: #667eea;
-  background: #edf2f7;
-  transform: translateY(-2px);
 }
 
 .benefit-icon {
@@ -189,6 +187,34 @@ function startLearning() {
 }
 
 .cta-button:active {
+  transform: translateY(0);
+}
+
+/* Coffee Button */
+.coffee-section {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.coffee-button {
+  background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2);
+}
+
+.coffee-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 69, 19, 0.3);
+}
+
+.coffee-button:active {
   transform: translateY(0);
 }
 
