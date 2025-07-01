@@ -80,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useI18n } from 'vue-i18n'
@@ -160,7 +160,7 @@ async function handleLogin() {
       }
       return
     }
-    
+    await nextTick();
     if (result.success) {
       // Successful login
       router.push('/app')

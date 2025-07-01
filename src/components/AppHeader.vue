@@ -36,7 +36,8 @@
         >
           ☕ Buy me a coffee
         </button>
-        <LogoutButton 
+        <LogoutButton
+        v-if="authStore.isAuthenticated || authStore.isGuestMode"
           variant="text"
           :text="$t('navigation.logout')"
           @logout-success="() => { handleLogoutSuccess(); closeMobileMenu(); }"
@@ -115,8 +116,8 @@
         </button>
         
         <div class="mobile-nav-divider"></div>
-        
         <LogoutButton 
+        v-if="authStore.isAuthenticated || authStore.isGuestMode"
           variant="mobile"
           :text="$t('navigation.logout')"
           @logout-success="() => { handleLogoutSuccess(); closeMobileMenu(); }"
