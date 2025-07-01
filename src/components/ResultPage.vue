@@ -73,14 +73,21 @@
           </div>
         </section>
 
-        <!-- Feedback Prompt -->
-        <section class="feedback-prompt-section">
-          <div class="feedback-prompt">
-            <h3>{{ $t('resultPage.feedbackPrompt.title') }}</h3>
-            <p>{{ $t('resultPage.feedbackPrompt.message') }}</p>
-            <button @click="goToFeedback" class="feedback-button">
-              {{ $t('resultPage.feedbackPrompt.button') }}
-            </button>
+        <!-- Typeform Feedback Embed -->
+        <section class="typeform-feedback-section">
+          <div class="typeform-container">
+            <h3>Share Your Feedback</h3>
+            <p>Help us improve by sharing your experience with this learning session.</p>
+            <div class="typeform-embed">
+              <iframe 
+                src="https://form.typeform.com/to/twZuYUpG"
+                width="100%" 
+                height="500" 
+                frameborder="0" 
+                allowfullscreen
+                title="Feedback Form">
+              </iframe>
+            </div>
           </div>
         </section>
       </div>
@@ -446,6 +453,44 @@ function handleLogoutError(error) {
   transform: translateY(-1px);
 }
 
+/* Typeform Feedback Section */
+.typeform-feedback-section {
+  background: #f8fafc;
+  padding: 25px;
+  border-radius: 12px;
+  border-left: 4px solid #ed8936;
+  margin-top: 20px;
+}
+
+.typeform-container {
+  text-align: center;
+}
+
+.typeform-container h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 10px;
+}
+
+.typeform-container p {
+  color: #718096;
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+
+.typeform-embed {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.typeform-embed iframe {
+  border-radius: 12px;
+  display: block;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .result-page {
@@ -474,6 +519,10 @@ function handleLogoutError(error) {
   
   .next-button, .restart-button {
     width: 100%;
+  }
+
+  .typeform-embed iframe {
+    height: 400px;
   }
 }
 </style> 
