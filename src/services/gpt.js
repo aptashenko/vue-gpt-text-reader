@@ -5,14 +5,25 @@ export class GPTService {
     this.apiUrl = 'https://api.openai.com/v1/chat/completions'
   }
   
-  async checkAnswers(questions, userAnswers, targetLanguage, nativeLanguage) {
+  // Helper to minimize text for token usage
+  minimizeText(text, maxChars = 900) {
+    if (!text) return ''
+    if (text.length <= maxChars) return text
+    // Take first 400 and last 400 chars
+    const start = text.slice(0, Math.floor(maxChars / 2))
+    const end = text.slice(-Math.floor(maxChars / 2))
+    return start + '\n...\n' + end
+  }
+
+  async checkAnswers(questions, userAnswers, targetLanguage, nativeLanguage, textContent) {
     if (!this.apiKey) {
       console.warn('OpenAI API key not found. Using mock responses.')
       return this.getMockResults(questions, userAnswers)
     }
     
     try {
-      const prompt = this.buildPrompt(questions, userAnswers, targetLanguage, nativeLanguage)
+      const minimizedText = this.minimizeText(textContent)
+      const prompt = this.buildPrompt(questions, userAnswers, targetLanguage, nativeLanguage, minimizedText)
       
       const response = await fetch(this.apiUrl, {
         method: 'POST',
@@ -21,7 +32,7 @@ export class GPTService {
           'Authorization': `Bearer ${this.apiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4.1-mini',
           messages: [
             {
               role: 'system',
@@ -52,37 +63,11 @@ export class GPTService {
     }
   }
   
-  buildPrompt(questions, userAnswers, targetLanguage, nativeLanguage) {
+  buildPrompt(questions, userAnswers, targetLanguage, nativeLanguage, minimizedText) {
     const targetLangName = this.getLanguageName(targetLanguage)
     const nativeLangName = this.getLanguageName(nativeLanguage)
     
-    return `
-Проверь ответы студента на вопросы по тексту на ${targetLangName} языке.
-
-Вопросы и ответы студента:
-${questions.map((q, i) => `${i + 1}. Вопрос: ${q}\n   Ответ студента: ${userAnswers[i] || 'Нет ответа'}`).join('\n')}
-
-Пожалуйста, проанализируй каждый ответ и верни результат в следующем JSON формате:
-{
-  "results": [
-    {
-      "question": "вопрос",
-      "userAnswer": "ответ студента", 
-      "correctedAnswer": "исправленный ответ",
-      "comment": "комментарий на ${nativeLangName} языке",
-      "score": 0.8
-    }
-  ]
-}
-
-Критерии оценки (0-1):
-- 0.0-0.3: Неправильный ответ или отсутствует
-- 0.4-0.6: Частично правильный ответ
-- 0.7-0.9: Правильный ответ с небольшими ошибками
-- 1.0: Полностью правильный ответ
-
-Комментарии должны быть на ${nativeLangName} языке и содержать полезные советы для улучшения.
-`
+    return `Текст (${targetLangName}):\n${minimizedText}\n\nВопросы и ответы студента:\n${questions.map((q, i) => `${i + 1}. Вопрос: ${q}\n   Ответ студента: ${userAnswers[i] || 'Нет ответа'}`).join('\n')}\n\nПожалуйста, проанализируй каждый ответ и верни результат в следующем JSON формате:\n{\n  "results": [\n    {\n      "question": "вопрос",\n      "userAnswer": "ответ студента", \n      "correctedAnswer": "исправленный ответ",\n      "comment": "комментарий на ${nativeLangName} языке",\n      "score": 0.8\n    }\n  ]\n}\n\nКритерии оценки (0-1):\n- 0.0-0.3: Неправильный ответ или отсутствует\n- 0.4-0.6: Частично правильный ответ\n- 0.7-0.9: Правильный ответ с небольшими ошибками\n- 1.0: Полностью правильный ответ\n\nКомментарии должны быть на ${nativeLangName} языке и содержать полезные советы для улучшения.`
   }
   
   parseGPTResponse(content) {

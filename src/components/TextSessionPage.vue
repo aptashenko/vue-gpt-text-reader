@@ -160,6 +160,8 @@ onMounted(async () => {
   if (authStore.user) {
     await store.loadUserPreferencesFromDB(authStore.user.id)
   }
+
+  store.sessionStartTime = Date.now()
   
   // If we have a text ID in the route, fetch the text
   if (route.params.id) {
@@ -286,7 +288,8 @@ async function fetchTextById(id) {
       await analyticsService.trackTextRead(
         textData.title, 
         textData.language, 
-        getAnalyticsUserId()
+        getAnalyticsUserId(),
+        store.nativeLanguage
       )
       await analyticsService.trackTextSessionStarted(
         textData.id,
@@ -347,6 +350,14 @@ function highlightWords(text) {
   return highlightedText
 }
 
+// Helper to format ms to mm:ss
+function formatDuration(ms) {
+  const totalSeconds = Math.floor(ms / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+}
+
 async function checkAnswers() {
   if (!canSubmit.value || checking.value) return
   checking.value = true
@@ -356,13 +367,15 @@ async function checkAnswers() {
       currentTextQuestions.value,
       userAnswers.value,
       store.targetLanguage,
-      store.nativeLanguage
+      store.nativeLanguage,
+      currentText.value?.text || ''
     )
     store.setSessionResults(results)
     
     // Отслеживаем завершение текста и ответы на вопросы
     try {
-      const sessionDuration = Date.now() - (store.sessionStartTime || Date.now())
+      const sessionDurationMs = Date.now() - (store.sessionStartTime || Date.now())
+      const sessionDuration = formatDuration(sessionDurationMs)
       
       // Отслеживаем завершение текста
       await analyticsService.trackTextCompleted(
@@ -407,6 +420,8 @@ async function checkAnswers() {
       
     } catch (analyticsError) {
       console.error('Analytics tracking error:', analyticsError)
+    } finally {
+      store.sessionStartTime = null
     }
     
     router.push('/result')

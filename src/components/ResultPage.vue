@@ -93,25 +93,17 @@
           {{ $t('resultPage.backToSession') }}
         </button>
       </div>
-      <section class="feedback-prompt-section">
-          <div class="feedback-prompt">
-            <h3>{{ $t('resultPage.feedbackPrompt.title') }}</h3>
-            <p>{{ $t('resultPage.feedbackPrompt.message') }}</p>
-            <button @click="goToFeedback" class="feedback-button">
-              {{ $t('resultPage.feedbackPrompt.button') }}
-            </button>
-          </div>
-        </section>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLanguageLearningStore } from '../stores/languageLearning'
 import LogoutButton from './LogoutButton.vue'
 import BackButton from './BackButton.vue'
+import analyticsService from '../services/logsnag.js'
 
 const router = useRouter()
 const store = useLanguageLearningStore()
@@ -154,7 +146,7 @@ function nextText() {
 function restart() {
   // Reset everything and go back to start
   store.resetSession()
-  router.push('/')
+  router.push('/app')
 }
 
 function goBack() {

@@ -260,12 +260,22 @@ class AnalyticsService {
   }
 
   // Отслеживание чтения текста
-  async trackTextRead(title, language, userId) {
+  async trackTextRead(title, language, userId, nativeLanguage) {
     await this.track(AnalyticsEvents.TEXT_READ, {
       description: `Text read: ${title}`,
-      tags: { title, language, user_id: userId },
+      tags: { title, language, user_id: userId, native_language: nativeLanguage },
       icon: '📖',
       user_id: userId || getAnalyticsUserId()
+    })
+  }
+
+  // Отслеживание завершения текста
+  async trackTextResults(results) {
+    await this.track(AnalyticsEvents.TEXT_COMPLETED, {
+      description: `Text completed, results:`,
+      tags: { results },
+      icon: '📖',
+      user_id: getAnalyticsUserId()
     })
   }
 
