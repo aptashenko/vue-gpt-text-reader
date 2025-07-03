@@ -25,7 +25,8 @@
     "admin": "Панель администратора",
     "import": "Импорт",
     "logout": "Выйти",
-    "feedback": "Feedback"
+    "feedback": "Feedback",
+    "savedWords": "Учить слова"
   },
   "auth": {
     "login": "Войти",
@@ -372,5 +373,14 @@
     "loading": "Loading analytics data...",
     "errorTitle": "Failed to Load Analytics",
     "retry": "Retry"
+  },
+  "savedWords": {
+    "title": "Учить слова",
+    "loading": "Загрузка...",
+    "noWords": "У вас еще нет сохранённых слов.",
+    "backToApp": "\u2190 Назад к приложению",
+    "previous": "Предыдущее",
+    "next": "Следующее",
+    "counter": "{current} / {total}"
   }
 }

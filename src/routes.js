@@ -85,6 +85,14 @@ export default [
     }
   },
   {
+    path: '/saved-words',
+    name: 'SavedWords',
+    component: () => import('./components/SavedWordsPage.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('./components/NotFoundPage.vue'),

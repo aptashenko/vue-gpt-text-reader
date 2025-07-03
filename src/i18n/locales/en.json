@@ -25,7 +25,8 @@
     "admin": "Admin Panel",
     "import": "Import",
     "feedback": "Feedback",
-    "logout": "Logout"
+    "logout": "Logout",
+    "savedWords": "Learn Words"
   },
   "auth": {
     "login": "Login",
@@ -373,5 +374,14 @@
     "loading": "Loading analytics data...",
     "errorTitle": "Failed to Load Analytics",
     "retry": "Retry"
+  },
+  "savedWords": {
+    "title": "Learn Words",
+    "loading": "Loading...",
+    "noWords": "You have no saved words yet.",
+    "backToApp": "← Back to App",
+    "previous": "Previous",
+    "next": "Next",
+    "counter": "{current} / {total}"
   }
 } 

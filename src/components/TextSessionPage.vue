@@ -71,21 +71,22 @@
                 {{ word.translations[store.nativeLanguage] || $t('textSession.translationNotFound') }}
               </div>
               <div class="dictionary-actions">
-                <button 
-                  @click.stop="addToQuizlet(word)" 
-                  class="action-btn quizlet-btn" 
-                  disabled
-                  :title="$t('dictionary.quizletComingSoon')"
+                <button
+                  v-if="authStore.isAuthenticated && word.id"
+                  @click.stop="saveWord(word)"
+                  class="action-btn save-btn"
+                  :class="{ saved: savedWordIds.has(word.id) }"
+                  :disabled="savedWordIds.has(word.id)"
+                  :title="savedWordIds.has(word.id) ? 'Saved' : 'Save this word'"
                 >
-                ➕
-                </button>
-                <button 
-                  @click.stop="playPronunciation(word)" 
-                  class="action-btn pronunciation-btn" 
-                  disabled
-                  :title="$t('dictionary.pronunciationComingSoon')"
-                >
-                  🔊
+                  <transition name="fade-scale" mode="out-in">
+                    <span v-if="savedWordIds.has(word.id)" key="saved" class="save-icon">
+                      ✅
+                    </span>
+                    <span v-else key="unsaved" class="save-icon">
+                      💾
+                    </span>
+                  </transition>
                 </button>
               </div>
             </div>
@@ -139,6 +140,7 @@ import LogoutButton from './LogoutButton.vue'
 import BackButton from './BackButton.vue'
 import analyticsService from '../services/logsnag.js'
 import { getAnalyticsUserId } from '../utils/analytics.js'
+import { SavedWordsService } from '../services/savedWords.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -152,6 +154,27 @@ const loadingText = ref(true)
 const fetchError = ref('')
 const hoveredWord = ref(null)
 
+const savedWordIds = ref(new Set())
+
+async function fetchSavedWordIds() {
+  if (!authStore.user) return
+  try {
+    const saved = await SavedWordsService.getUserSavedWords(authStore.user.id)
+    savedWordIds.value = new Set(saved.map(item => item.dictionary.id))
+  } catch (e) {
+    console.error('Failed to fetch saved words:', e)
+  }
+}
+
+async function saveWord(word) {
+  if (!authStore.user) return
+  try {
+    await SavedWordsService.saveWordForUser(authStore.user.id, word.id)
+    savedWordIds.value.add(word.id)
+  } catch (e) {
+    console.error('Failed to save word:', e)
+  }
+}
 
 // Load user preferences on mount
 onMounted(async () => {  
@@ -167,6 +190,7 @@ onMounted(async () => {
   if (route.params.id) {
     await fetchTextById(route.params.id)
   }
+  fetchSavedWordIds()
 })
 
 // Computed properties
@@ -268,7 +292,8 @@ async function fetchTextById(id) {
           ru: item.dictionary.translation_ru
         },
         part_of_speech: item.dictionary.part_of_speech,
-        difficulty: item.dictionary.difficulty
+        difficulty: item.dictionary.difficulty,
+        id: item.dictionary.id // Add the dictionary ID
       }))
     
     // Normalize to match expected structure
@@ -786,6 +811,50 @@ function playTextPronunciation() {
 
 .pronunciation-btn:disabled {
   color: #b3e5e1;
+}
+
+.save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: linear-gradient(90deg, #38b2ac 0%, #48bb78 100%);
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 0.7em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+}
+.save-btn:active {
+  transform: scale(0.97);
+}
+.save-btn.saved {
+  background: #e2e8f0;
+}
+
+.fade-scale-enter-active, .fade-scale-leave-active {
+  transition: all 0.25s cubic-bezier(.4,2,.3,1);
+}
+.fade-scale-enter-from, .fade-scale-leave-to {
+  opacity: 0;
+  transform: scale(0.7);
+}
+.fade-scale-enter-to, .fade-scale-leave-from {
+  opacity: 1;
+  transform: scale(1);
+}
+@media (max-width: 600px) {
+  .save-btn {
+    font-size: 0.95rem;
+    padding: 7px 12px;
+    min-width: 32px;
+    min-height: 32px;
+  }
 }
 
 .questions-section {

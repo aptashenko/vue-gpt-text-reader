@@ -1,1 +1,14 @@
-{}
+{
+  "navigation": {
+    "savedWords": "Aprender palabras"
+  },
+  "savedWords": {
+    "title": "Aprender palabras",
+    "loading": "Cargando...",
+    "noWords": "Aún no tienes palabras guardadas.",
+    "backToApp": "\u2190 Volver a la aplicación",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "counter": "{current} / {total}"
+  }
+}

@@ -28,6 +28,14 @@
         >
           {{ $t('navigation.feedback') }}
         </button>
+        <button
+          v-if="authStore.isAuthenticated || authStore.isGuestMode"
+          @click="() => { goToSavedWords(); closeMobileMenu(); }"
+          class="saved-words-button"
+          :title="$t('navigation.savedWords')"
+        >
+          📚 {{ $t('navigation.savedWords') }}
+        </button>
         <button 
           v-if="!isAdmin"
           @click="() => { buyMeACoffee(); closeMobileMenu(); }" 
@@ -95,7 +103,14 @@
           <span class="mobile-nav-icon">💬</span>
           {{ $t('navigation.feedback') }}
         </button>
-        
+        <button
+          v-if="authStore.isAuthenticated || authStore.isGuestMode"
+          @click="() => { goToSavedWords(); closeMobileMenu(); }"
+          class="mobile-nav-item"
+        >
+          <span class="mobile-nav-icon">📚</span>
+          {{ $t('navigation.savedWords') }}
+        </button>
         <button 
           v-if="isAdmin"
           @click="() => { goToAdmin(); closeMobileMenu(); }" 
@@ -105,7 +120,6 @@
           <span class="mobile-nav-icon">⚙️</span>
           {{ $t('navigation.admin') }}
         </button>
-        
         <button 
         v-if="!isAdmin"
           @click="() => { buyMeACoffee(); closeMobileMenu(); }" 
@@ -205,6 +219,10 @@ function buyMeACoffee() {
   }
 
   window.open('https://coff.ee/aptashenko', '_blank')
+}
+
+function goToSavedWords() {
+  router.push('/saved-words')
 }
 
 function toggleMobileMenu() {
@@ -342,6 +360,23 @@ onUnmounted(() => {
 .feedback-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(237, 137, 54, 0.3);
+}
+
+.saved-words-button {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saved-words-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(66, 153, 225, 0.3);
 }
 
 .coffee-button {
@@ -573,191 +608,3 @@ onUnmounted(() => {
   gap: 16px;
 }
 </style>
-
-/* Mobile Navigation */
-.mobile-nav {
-  display: none;
-}
-
-.burger-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.burger-button:hover {
-  background: #f7fafc;
-}
-
-.burger-button.active {
-  background: #e2e8f0;
-}
-
-.burger-line {
-  width: 20px;
-  height: 2px;
-  background: #4a5568;
-  margin: 2px 0;
-  transition: all 0.3s ease;
-  border-radius: 1px;
-}
-
-.burger-button.active .burger-line:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-
-.burger-button.active .burger-line:nth-child(2) {
-  opacity: 0;
-}
-
-.burger-button.active .burger-line:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -6px);
-}
-
-/* Mobile Menu Overlay */
-.mobile-menu-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 150;
-  backdrop-filter: blur(2px);
-}
-
-/* Mobile Menu */
-.mobile-menu {
-  position: fixed;
-  top: 0;
-  right: -300px;
-  width: 300px;
-  height: 100vh;
-  background: white;
-  z-index: 200;
-  transition: right 0.3s ease;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-}
-
-.mobile-menu.open {
-  right: 0;
-}
-
-.mobile-menu-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f7fafc;
-}
-
-.mobile-user-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.mobile-user-email {
-  font-size: 0.9rem;
-  color: #4a5568;
-  font-weight: 500;
-}
-
-.close-button {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #4a5568;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.close-button:hover {
-  background: #e2e8f0;
-  color: #2d3748;
-}
-
-.mobile-nav-links {
-  flex: 1;
-  padding: 20px 0;
-  overflow-y: auto;
-}
-
-.mobile-nav-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 16px 20px;
-  background: none;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.mobile-nav-item:hover {
-  background: #f7fafc;
-}
-
-.mobile-nav-item:active {
-  background: #e2e8f0;
-}
-
-.mobile-nav-icon {
-  font-size: 1.2rem;
-  margin-right: 12px;
-  width: 24px;
-  text-align: center;
-}
-
-.mobile-nav-item span:not(.mobile-nav-icon) {
-  font-size: 1rem;
-  color: #2d3748;
-  font-weight: 500;
-}
-
-.mobile-nav-divider {
-  height: 1px;
-  background: #e2e8f0;
-  margin: 16px 20px;
-}
-
-/* Desktop Navigation */
-.desktop-nav {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .header-content {
-    padding: 0 16px;
-  }
-  
-  .app-title {
-    font-size: 1.2rem;
-  }
-  
-  .desktop-nav {
-    display: none;
-  }
-  
-  .mobile-nav {
-    display: block;
-  }
-}

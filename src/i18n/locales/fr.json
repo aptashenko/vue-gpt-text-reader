@@ -25,7 +25,8 @@
     "admin": "Panneau d'administration",
     "import": "Importer",
     "logout": "Déconnexion",
-    "feedback": "Feedback"
+    "feedback": "Feedback",
+    "savedWords": "Apprendre les mots"
   },
   "auth": {
     "login": "Connexion",
@@ -372,5 +373,14 @@
     "loading": "Loading analytics data...",
     "errorTitle": "Failed to Load Analytics",
     "retry": "Retry"
+  },
+  "savedWords": {
+    "title": "Apprendre les mots",
+    "loading": "Chargement...",
+    "noWords": "Vous n'avez encore aucun mot enregistré.",
+    "backToApp": "← Retour à l'application",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "counter": "{current} / {total}"
   }
 }
