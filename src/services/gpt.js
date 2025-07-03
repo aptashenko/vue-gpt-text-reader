@@ -63,6 +63,31 @@ export class GPTService {
     }
   }
   
+  async generateText(prompt) {
+    if (!this.apiKey) {
+      throw new Error('OpenAI API key not found')
+    }
+    const response = await fetch(this.apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-mini',
+        messages: [
+          { role: 'system', content: 'You are a helpful language learning assistant.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 500
+      })
+    })
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data = await response.json()
+    return data.choices[0].message.content
+  }
+
   buildPrompt(questions, userAnswers, targetLanguage, nativeLanguage, minimizedText) {
     const targetLangName = this.getLanguageName(targetLanguage)
     const nativeLangName = this.getLanguageName(nativeLanguage)

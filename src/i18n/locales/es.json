@@ -6,9 +6,30 @@
     "title": "Aprender palabras",
     "loading": "Cargando...",
     "noWords": "Aún no tienes palabras guardadas.",
-    "backToApp": "\u2190 Volver a la aplicación",
+    "backToApp": "← Volver a la aplicación",
     "previous": "Anterior",
     "next": "Siguiente",
-    "counter": "{current} / {total}"
+    "counter": "{current} / {total}",
+    "folders": {
+      "all": { "name": "Todas las palabras", "description": "Todas tus palabras guardadas de la lectura" },
+      "food": { "name": "Comida & Gastronomía", "description": "Palabras relacionadas con la comida, la cocina y la gastronomía" },
+      "travel": { "name": "Viaje & Transporte", "description": "Palabras para viajar y moverse" },
+      "emotions": { "name": "Emociones & Sentimientos", "description": "Palabras para expresar emociones y sentimientos" },
+      "nature": { "name": "Naturaleza & Medio ambiente", "description": "Palabras sobre la naturaleza, el clima y el medio ambiente" },
+      "work": { "name": "Trabajo & Negocios", "description": "Vocabulario profesional y del lugar de trabajo" },
+      "family": { "name": "Familia & Relaciones", "description": "Miembros de la familia y términos de relación" },
+      "technology": { "name": "Tecnología & Digital", "description": "Tecnología moderna y mundo digital" },
+      "clothes": { "name": "Ropa & Moda", "description": "Vocabulario de ropa y moda" },
+      "health": { "name": "Salud & Bienestar", "description": "Salud, cuerpo y bienestar" },
+      "daily": { "name": "Vida diaria", "description": "Actividades y rutinas diarias" }
+    },
+    "languageFilter": "Filtro de idioma",
+    "allLanguages": "Todos los idiomas",
+    "generateWords": "Generar 10 palabras",
+    "generating": "Generando...",
+    "wordsGenerated": "¡{count} palabras generadas!",
+    "backToFolders": "← Volver a las carpetas",
+    "folderEmpty": "Esta carpeta está vacía.",
+    "generatePrompt": "Haz clic en el botón de abajo para generar 10 palabras nuevas para este tema."
   }
 }

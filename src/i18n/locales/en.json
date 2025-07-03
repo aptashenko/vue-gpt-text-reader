@@ -382,6 +382,60 @@
     "backToApp": "← Back to App",
     "previous": "Previous",
     "next": "Next",
-    "counter": "{current} / {total}"
+    "counter": "{current} / {total}",
+    "folders": {
+      "all": {
+        "name": "All Words",
+        "description": "All your saved words from reading"
+      },
+      "food": {
+        "name": "Food & Dining",
+        "description": "Words related to food, cooking, and dining"
+      },
+      "travel": {
+        "name": "Travel & Transportation",
+        "description": "Words for traveling and getting around"
+      },
+      "emotions": {
+        "name": "Emotions & Feelings",
+        "description": "Words to express emotions and feelings"
+      },
+      "nature": {
+        "name": "Nature & Environment",
+        "description": "Words about nature, weather, and environment"
+      },
+      "work": {
+        "name": "Work & Business",
+        "description": "Professional and workplace vocabulary"
+      },
+      "family": {
+        "name": "Family & Relationships",
+        "description": "Family members and relationship terms"
+      },
+      "technology": {
+        "name": "Technology & Digital",
+        "description": "Modern technology and digital world"
+      },
+      "clothes": {
+        "name": "Clothes & Fashion",
+        "description": "Clothing and fashion vocabulary"
+      },
+      "health": {
+        "name": "Health & Wellness",
+        "description": "Health, body, and wellness terms"
+      },
+      "daily": {
+        "name": "Daily Life",
+        "description": "Everyday activities and routines"
+      }
+    },
+    "languageFilter": "Language Filter",
+    "allLanguages": "All Languages",
+    "generateWords": "Generate 10 Words",
+    "generating": "Generating...",
+    "wordsGenerated": "{count} words generated!",
+    "backToFolders": "← Back to Folders",
+    "folderEmpty": "This folder is empty.",
+    "generatePrompt": "Click the button below to generate 10 new words for this topic."
   }
 } 

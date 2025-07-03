@@ -6,9 +6,30 @@
     "title": "Wörter lernen",
     "loading": "Laden...",
     "noWords": "Du hast noch keine gespeicherten Wörter.",
-    "backToApp": "\u2190 Zurück zur App",
+    "backToApp": "← Zurück zur App",
     "previous": "Zurück",
     "next": "Weiter",
-    "counter": "{current} / {total}"
+    "counter": "{current} / {total}",
+    "folders": {
+      "all": { "name": "Alle Wörter", "description": "Alle deine gespeicherten Wörter aus dem Lesen" },
+      "food": { "name": "Essen & Gastronomie", "description": "Wörter rund ums Essen, Kochen und Gastronomie" },
+      "travel": { "name": "Reise & Transport", "description": "Wörter für Reisen und Fortbewegung" },
+      "emotions": { "name": "Emotionen & Gefühle", "description": "Wörter zum Ausdrücken von Emotionen und Gefühlen" },
+      "nature": { "name": "Natur & Umwelt", "description": "Wörter über Natur, Wetter und Umwelt" },
+      "work": { "name": "Arbeit & Geschäft", "description": "Berufs- und Arbeitsplatzvokabular" },
+      "family": { "name": "Familie & Beziehungen", "description": "Familienmitglieder und Beziehungstermine" },
+      "technology": { "name": "Technologie & Digital", "description": "Moderne Technologie und digitale Welt" },
+      "clothes": { "name": "Kleidung & Mode", "description": "Vokabular für Kleidung und Mode" },
+      "health": { "name": "Gesundheit & Wohlbefinden", "description": "Gesundheit, Körper und Wohlbefinden" },
+      "daily": { "name": "Alltag", "description": "Alltägliche Aktivitäten und Routinen" }
+    },
+    "languageFilter": "Sprachfilter",
+    "allLanguages": "Alle Sprachen",
+    "generateWords": "10 Wörter generieren",
+    "generating": "Generiere...",
+    "wordsGenerated": "{count} Wörter generiert!",
+    "backToFolders": "← Zurück zu den Ordnern",
+    "folderEmpty": "Dieser Ordner ist leer.",
+    "generatePrompt": "Klicke auf den Button unten, um 10 neue Wörter für dieses Thema zu generieren."
   }
 }

@@ -381,6 +381,27 @@
     "backToApp": "← Retour à l'application",
     "previous": "Précédent",
     "next": "Suivant",
-    "counter": "{current} / {total}"
+    "counter": "{current} / {total}",
+    "folders": {
+      "all": { "name": "Tous les mots", "description": "Tous vos mots enregistrés depuis la lecture" },
+      "food": { "name": "Nourriture & Repas", "description": "Mots liés à la nourriture, la cuisine et les repas" },
+      "travel": { "name": "Voyage & Transport", "description": "Mots pour voyager et se déplacer" },
+      "emotions": { "name": "Émotions & Sentiments", "description": "Mots pour exprimer les émotions et les sentiments" },
+      "nature": { "name": "Nature & Environnement", "description": "Mots sur la nature, la météo et l'environnement" },
+      "work": { "name": "Travail & Affaires", "description": "Vocabulaire professionnel et du lieu de travail" },
+      "family": { "name": "Famille & Relations", "description": "Membres de la famille et termes de relation" },
+      "technology": { "name": "Technologie & Numérique", "description": "Technologie moderne et monde numérique" },
+      "clothes": { "name": "Vêtements & Mode", "description": "Vocabulaire des vêtements et de la mode" },
+      "health": { "name": "Santé & Bien-être", "description": "Santé, corps et bien-être" },
+      "daily": { "name": "Vie quotidienne", "description": "Activités et routines quotidiennes" }
+    },
+    "languageFilter": "Filtre de langue",
+    "allLanguages": "Toutes les langues",
+    "generateWords": "Générer 10 mots",
+    "generating": "Génération...",
+    "wordsGenerated": "{count} mots générés !",
+    "backToFolders": "← Retour aux dossiers",
+    "folderEmpty": "Ce dossier est vide.",
+    "generatePrompt": "Cliquez sur le bouton ci-dessous pour générer 10 nouveaux mots pour ce sujet."
   }
 }
