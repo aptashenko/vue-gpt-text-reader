@@ -383,6 +383,12 @@
     "previous": "Previous",
     "next": "Next",
     "counter": "{current} / {total}",
+    "unknownWords": "Unknown Words",
+    "knownWords": "Known Words",
+    "know": "I Know",
+    "dontKnow": "I Don't Know",
+    "noUnknownWords": "No unknown words in this folder.",
+    "noKnownWords": "No known words in this folder.",
     "folders": {
       "all": {
         "name": "All Words",

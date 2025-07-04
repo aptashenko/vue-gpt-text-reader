@@ -10,6 +10,12 @@
     "previous": "Zurück",
     "next": "Weiter",
     "counter": "{current} / {total}",
+    "unknownWords": "Unbekannte Wörter",
+    "knownWords": "Bekannte Wörter",
+    "know": "Ich weiß",
+    "dontKnow": "Ich weiß nicht",
+    "noUnknownWords": "Keine unbekannten Wörter in diesem Ordner.",
+    "noKnownWords": "Keine bekannten Wörter in diesem Ordner.",
     "folders": {
       "all": { "name": "Alle Wörter", "description": "Alle deine gespeicherten Wörter aus dem Lesen" },
       "food": { "name": "Essen & Gastronomie", "description": "Wörter rund ums Essen, Kochen und Gastronomie" },

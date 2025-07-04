@@ -10,6 +10,12 @@
     "previous": "Anterior",
     "next": "Siguiente",
     "counter": "{current} / {total}",
+    "unknownWords": "Palabras desconocidas",
+    "knownWords": "Palabras conocidas",
+    "know": "Lo sé",
+    "dontKnow": "No lo sé",
+    "noUnknownWords": "No hay palabras desconocidas en esta carpeta.",
+    "noKnownWords": "No hay palabras conocidas en esta carpeta.",
     "folders": {
       "all": { "name": "Todas las palabras", "description": "Todas tus palabras guardadas de la lectura" },
       "food": { "name": "Comida & Gastronomía", "description": "Palabras relacionadas con la comida, la cocina y la gastronomía" },

@@ -58,8 +58,26 @@
           <p class="folder-description">{{ $t('savedWords.folders.' + currentFolder.theme + '.description') }}</p>
         </div>
 
+        <!-- Word Status Tabs -->
+        <div class="word-status-tabs">
+          <button 
+            @click="setActiveTab('unknown')" 
+            class="tab-button"
+            :class="{ active: activeTab === 'unknown' }"
+          >
+            {{ $t('savedWords.unknownWords') }} ({{ unknownWords.length }})
+          </button>
+          <button 
+            @click="setActiveTab('known')" 
+            class="tab-button"
+            :class="{ active: activeTab === 'known' }"
+          >
+            {{ $t('savedWords.knownWords') }} ({{ knownWords.length }})
+          </button>
+        </div>
+
         <!-- Generate Words Button for Thematic Folders -->
-        <div v-if="!currentFolder.is_default && !generating" class="generate-section">
+        <div v-if="!currentFolder.is_default && !generating && activeTab === 'unknown'" class="generate-section">
           <p class="generate-prompt">{{ $t('savedWords.generatePrompt') }}</p>
           <button @click="generateWords" class="generate-button">
             {{ $t('savedWords.generateWords') }}
@@ -77,8 +95,8 @@
 
         <!-- Flashcards -->
         <div v-if="loading" class="loading">{{ $t('savedWords.loading') }}</div>
-        <div v-else-if="flashcards && flashcards.length === 0" class="no-words">
-          <p>{{ $t('savedWords.folderEmpty') }}</p>
+        <div v-else-if="currentWords.length === 0" class="no-words">
+          <p>{{ activeTab === 'unknown' ? $t('savedWords.noUnknownWords') : $t('savedWords.noKnownWords') }}</p>
         </div>
         <div v-else class="flashcard-section">
           <div class="flashcard-wrapper">
@@ -97,14 +115,29 @@
               </div>
             </div>
           </div>
-          <div class="flashcard-controls">
-            <button @click="prevCard" :disabled="currentIndex === 0">
+          
+          <!-- Unknown Words Controls -->
+          <div v-if="activeTab === 'unknown'" class="flashcard-controls unknown-controls">
+            <button @click="markAsUnknown" class="control-button unknown-button">
+              {{ $t('savedWords.dontKnow') }}
+            </button>
+            <span class="counter">
+              {{ $t('savedWords.counter', { current: currentIndex + 1, total: currentWords.length }) }}
+            </span>
+            <button @click="markAsKnown" class="control-button known-button">
+              {{ $t('savedWords.know') }}
+            </button>
+          </div>
+          
+          <!-- Known Words Controls -->
+          <div v-else class="flashcard-controls known-controls">
+            <button @click="prevCard" :disabled="currentIndex === 0" class="control-button">
               {{ $t('savedWords.previous') }}
             </button>
             <span class="counter">
-              {{ $t('savedWords.counter', { current: currentIndex + 1, total: flashcards.length }) }}
+              {{ $t('savedWords.counter', { current: currentIndex + 1, total: currentWords.length }) }}
             </span>
-            <button @click="nextCard" :disabled="currentIndex === flashcards.length - 1">
+            <button @click="nextCard" :disabled="currentIndex === currentWords.length - 1" class="control-button">
               {{ $t('savedWords.next') }}
             </button>
           </div>
@@ -131,7 +164,9 @@ const generating = ref(false)
 const generatedCount = ref(0)
 const folders = ref([])
 const currentFolder = ref(null)
-const flashcards = ref([])
+const activeTab = ref('unknown')
+const knownWords = ref([])
+const unknownWords = ref([])
 const currentIndex = ref(0)
 const isFlipped = ref(false)
 const userNativeLanguage = ref('en')
@@ -144,7 +179,8 @@ const folderWordCountsByLanguage = ref({})
 const DEFAULT_LANGUAGES = ['fr', 'en', 'es', 'de', 'ru', 'uk']
 
 // Computed
-const currentCard = computed(() => flashcards.value[currentIndex.value] || {})
+const currentWords = computed(() => activeTab.value === 'known' ? knownWords.value : unknownWords.value)
+const currentCard = computed(() => currentWords.value[currentIndex.value] || {})
 
 const allLanguages = computed(() => {
   // Always show all default languages, plus any found in availableLanguages
@@ -242,6 +278,7 @@ async function loadFolders() {
 
 async function openFolder(folder) {
   currentFolder.value = folder
+  activeTab.value = 'unknown'
   await loadFolderWords(folder.id)
 }
 
@@ -249,15 +286,31 @@ async function loadFolderWords(folderId) {
   loading.value = true
   try {
     const user = authStore.user
-    const folderWords = await FoldersService.getFolderWords(user.id, folderId)
-    // Only use words in the selected language
-    const filteredWords = folderWords.filter(item => item.dictionary.language === targetLanguage.value)
-    flashcards.value = filteredWords.map(item => ({
+    
+    // Load all words from the folder (temporarily without status filtering)
+    const folderWordsData = await FoldersService.getFolderWords(user.id, folderId)
+    
+    // Filter by selected language
+    const filteredWords = folderWordsData.filter(item => 
+      item.dictionary.language === targetLanguage.value
+    )
+    
+    // For now, treat all words as unknown until the database migration is applied
+    // This will be updated once the word_status column is added
+    const allWords = filteredWords.map(item => ({
+      id: item.id,
+      wordId: item.dictionary.id,
       word: item.dictionary.word,
       translation: item.dictionary[`translation_${userNativeLanguage.value}`] || 
                   item.dictionary.translation_en || 
-                  item.dictionary.word
+                  item.dictionary.word,
+      status: item.word_status || 'unknown' // Fallback to 'unknown' if column doesn't exist
     }))
+    
+    // Split into known and unknown lists
+    knownWords.value = allWords.filter(word => word.status === 'known')
+    unknownWords.value = allWords.filter(word => word.status === 'unknown')
+    
     currentIndex.value = 0
     isFlipped.value = false
   } catch (e) {
@@ -297,6 +350,52 @@ async function generateWords() {
   }
 }
 
+async function markAsKnown() {
+  if (!currentCard.value || activeTab.value !== 'unknown') return
+  
+  try {
+    const user = authStore.user
+    const currentWord = currentCard.value
+    
+    // Try to update the word status in the database (will fail gracefully if column doesn't exist)
+    try {
+      await FoldersService.markWordAsKnown(user.id, currentFolder.value.id, currentWord.wordId)
+    } catch (dbError) {
+      console.log('Database update failed (word_status column may not exist yet):', dbError.message)
+    }
+    
+    // Move word from unknown to known list
+    const wordIndex = unknownWords.value.findIndex(w => w.id === currentWord.id)
+    if (wordIndex !== -1) {
+      const movedWord = unknownWords.value.splice(wordIndex, 1)[0]
+      movedWord.status = 'known'
+      knownWords.value.push(movedWord)
+      
+      // If we're at the end of the unknown words, go back to the beginning
+      if (currentIndex.value >= unknownWords.value.length) {
+        currentIndex.value = Math.max(0, unknownWords.value.length - 1)
+      }
+      
+      isFlipped.value = false
+    }
+  } catch (e) {
+    console.error('Failed to mark word as known:', e)
+  }
+}
+
+async function markAsUnknown() {
+  if (!currentCard.value || activeTab.value !== 'unknown') return
+  
+  // Just move to the next card, word stays in unknown list
+  nextCard()
+}
+
+function setActiveTab(tab) {
+  activeTab.value = tab
+  currentIndex.value = 0
+  isFlipped.value = false
+}
+
 function filterByLanguage() {
   // Language filter is handled by computed property
   // The filteredFolders computed property will automatically update
@@ -305,7 +404,9 @@ function filterByLanguage() {
 
 function backToFolders() {
   currentFolder.value = null
-  flashcards.value = []
+  activeTab.value = 'unknown'
+  knownWords.value = []
+  unknownWords.value = []
   currentIndex.value = 0
   isFlipped.value = false
   generatedCount.value = 0
@@ -316,17 +417,27 @@ function flipCard() {
 }
 
 function nextCard() {
-  if (currentIndex.value < flashcards.value.length - 1) {
+  if (currentWords.value.length === 0) return
+  
+  if (currentIndex.value < currentWords.value.length - 1) {
     currentIndex.value++
-    isFlipped.value = false
+  } else {
+    // Loop back to the beginning
+    currentIndex.value = 0
   }
+  isFlipped.value = false
 }
 
 function prevCard() {
+  if (currentWords.value.length === 0) return
+  
   if (currentIndex.value > 0) {
     currentIndex.value--
-    isFlipped.value = false
+  } else {
+    // Loop to the end
+    currentIndex.value = currentWords.value.length - 1
   }
+  isFlipped.value = false
 }
 
 function getFolderWordCount(folderId) {
@@ -337,7 +448,8 @@ function getFolderWordCount(folderId) {
 watch(selectedLanguage, () => {
   loadFolders()
   currentFolder.value = null
-  flashcards.value = []
+  knownWords.value = []
+  unknownWords.value = []
   currentIndex.value = 0
   isFlipped.value = false
 })
@@ -486,6 +598,36 @@ onMounted(() => {
   margin: 0 0 10px 0;
 }
 
+.word-status-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.tab-button {
+  background: #f7fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #4a5568;
+}
+
+.tab-button:hover {
+  border-color: #667eea;
+  background: #edf2f7;
+}
+
+.tab-button.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
 .generate-section {
   background: #f7fafc;
   border-radius: 12px;
@@ -630,7 +772,7 @@ onMounted(() => {
   margin-top: 10px;
 }
 
-.flashcard-controls button {
+.control-button {
   background: #667eea;
   color: #fff;
   border: none;
@@ -639,19 +781,44 @@ onMounted(() => {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
-.flashcard-controls button:disabled {
+.control-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.control-button:disabled {
   background: #e2e8f0;
   color: #a0aec0;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.unknown-controls .unknown-button {
+  background: #e53e3e;
+}
+
+.unknown-controls .unknown-button:hover {
+  background: #c53030;
+  box-shadow: 0 4px 12px rgba(229, 62, 62, 0.2);
+}
+
+.unknown-controls .known-button {
+  background: #48bb78;
+}
+
+.unknown-controls .known-button:hover {
+  background: #38a169;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.2);
 }
 
 .counter {
-  color: #667eea;
-  font-size: 1.1rem;
   font-weight: 600;
+  color: #4a5568;
+  min-width: 80px;
 }
 
 @media (max-width: 768px) {
@@ -659,52 +826,28 @@ onMounted(() => {
     padding: 20px 15px 30px 15px;
   }
   
-  .title {
-    font-size: 1.5rem;
-  }
-  
-  .folders-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-  
-  .folder-card {
-    padding: 15px;
-  }
-  
-  .folder-icon {
-    font-size: 2rem;
-  }
-  
-  .folder-name {
-    font-size: 1.1rem;
-  }
-  
-  .language-filter {
+  .word-status-tabs {
     flex-direction: column;
     gap: 8px;
   }
   
-  .flashcard {
-    height: 200px;
-    font-size: 1.5rem;
-  }
-  
-  .word {
-    font-size: 1.8rem;
-  }
-  
-  .translation {
-    font-size: 1.4rem;
+  .tab-button {
+    width: 100%;
   }
   
   .flashcard-controls {
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
   }
   
-  .flashcard-controls button {
+  .control-button {
     width: 100%;
+    max-width: 200px;
+  }
+  
+  .counter {
+    order: -1;
+    margin-bottom: 10px;
   }
 }
 </style> 

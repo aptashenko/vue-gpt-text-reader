@@ -14,13 +14,14 @@ export class FoldersService {
     return data
   }
 
-  // Get words in a specific folder for a user
-  static async getFolderWords(userId, folderId) {
-    const { data, error } = await supabase
+  // Get words in a specific folder for a user by status
+  static async getFolderWords(userId, folderId, status = null) {
+    let query = supabase
       .from('user_folder_words')
       .select(`
         id,
         added_at,
+        word_status,
         dictionary:word_id (
           id,
           word,
@@ -39,18 +40,109 @@ export class FoldersService {
       .eq('folder_id', folderId)
       .order('added_at', { ascending: false })
     
+    if (status) {
+      query = query.eq('word_status', status)
+    }
+    
+    const { data, error } = await query
     if (error) throw error
     return data
   }
 
+  // Get known words in a folder
+  static async getKnownWords(userId, folderId) {
+    try {
+      return await this.getFolderWords(userId, folderId, 'known')
+    } catch (error) {
+      // If word_status column doesn't exist, return empty array
+      console.log('getKnownWords failed, word_status column may not exist:', error.message)
+      return []
+    }
+  }
+
+  // Get unknown words in a folder
+  static async getUnknownWords(userId, folderId) {
+    try {
+      return await this.getFolderWords(userId, folderId, 'unknown')
+    } catch (error) {
+      // If word_status column doesn't exist, return all words as unknown
+      console.log('getUnknownWords failed, falling back to all words:', error.message)
+      return await this.getFolderWords(userId, folderId)
+    }
+  }
+
+  // Update word status (known/unknown)
+  static async updateWordStatus(userId, folderId, wordId, status) {
+    try {
+      const { data, error } = await supabase
+        .from('user_folder_words')
+        .update({ word_status: status })
+        .eq('user_id', userId)
+        .eq('folder_id', folderId)
+        .eq('word_id', wordId)
+        .select()
+      
+      if (error) throw error
+      return data[0]
+    } catch (error) {
+      console.log('updateWordStatus failed, word_status column may not exist:', error.message)
+      throw error
+    }
+  }
+
+  // Mark word as known
+  static async markWordAsKnown(userId, folderId, wordId) {
+    try {
+      return await this.updateWordStatus(userId, folderId, wordId, 'known')
+    } catch (error) {
+      console.log('markWordAsKnown failed:', error.message)
+      throw error
+    }
+  }
+
+  // Mark word as unknown
+  static async markWordAsUnknown(userId, folderId, wordId) {
+    try {
+      return await this.updateWordStatus(userId, folderId, wordId, 'unknown')
+    } catch (error) {
+      console.log('markWordAsUnknown failed:', error.message)
+      throw error
+    }
+  }
+
+  // Get word counts by status for a folder
+  static async getFolderWordCountsByStatus(userId, folderId) {
+    try {
+      const { data, error } = await supabase
+        .from('user_folder_words')
+        .select('word_status')
+        .eq('user_id', userId)
+        .eq('folder_id', folderId)
+      
+      if (error) throw error
+      
+      const counts = { known: 0, unknown: 0 }
+      data.forEach(item => {
+        counts[item.word_status]++
+      })
+      
+      return counts
+    } catch (error) {
+      console.log('getFolderWordCountsByStatus failed, word_status column may not exist:', error.message)
+      // Return default counts if column doesn't exist
+      return { known: 0, unknown: 0 }
+    }
+  }
+
   // Add a word to a folder
-  static async addWordToFolder(userId, folderId, wordId) {
+  static async addWordToFolder(userId, folderId, wordId, status = 'unknown') {
     const { data, error } = await supabase
       .from('user_folder_words')
       .insert({
         user_id: userId,
         folder_id: folderId,
-        word_id: wordId
+        word_id: wordId,
+        word_status: status
       })
       .select()
     
@@ -156,7 +248,7 @@ export class FoldersService {
 
             if (existingWord) {
               // Add existing word to folder
-              await this.addWordToFolder(userId, folderId, existingWord.id)
+              await this.addWordToFolder(userId, folderId, existingWord.id, 'unknown')
               addedWords.push({
                 word: wordData.word,
                 translation: wordData.translation,
@@ -165,7 +257,7 @@ export class FoldersService {
             }
           } else {
             // Add new word to folder
-            await this.addWordToFolder(userId, folderId, dictData.id)
+            await this.addWordToFolder(userId, folderId, dictData.id, 'unknown')
             addedWords.push({
               word: wordData.word,
               translation: wordData.translation,
@@ -220,9 +312,13 @@ export class FoldersService {
       .from('user_folder_words')
       .select(`
         folder_id,
-        dictionary:word_id (language)
+        word_status,
+        dictionary:word_id (
+          language
+        )
       `)
       .eq('user_id', userId)
+    
     if (error) throw error
     return data
   }

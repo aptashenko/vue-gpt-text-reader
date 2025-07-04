@@ -382,6 +382,12 @@
     "previous": "Précédent",
     "next": "Suivant",
     "counter": "{current} / {total}",
+    "unknownWords": "Mots inconnus",
+    "knownWords": "Mots connus",
+    "know": "Je sais",
+    "dontKnow": "Je ne sais pas",
+    "noUnknownWords": "Aucun mot inconnu dans ce dossier.",
+    "noKnownWords": "Aucun mot connu dans ce dossier.",
     "folders": {
       "all": { "name": "Tous les mots", "description": "Tous vos mots enregistrés depuis la lecture" },
       "food": { "name": "Nourriture & Repas", "description": "Mots liés à la nourriture, la cuisine et les repas" },
