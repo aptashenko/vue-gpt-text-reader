@@ -79,7 +79,28 @@
         <!-- Generate Words Button for Thematic Folders -->
         <div v-if="!currentFolder.is_default && !generating && activeTab === 'unknown'" class="generate-section">
           <p class="generate-prompt">{{ $t('savedWords.generatePrompt') }}</p>
-          <button @click="generateWords" class="generate-button">
+          
+          <!-- Level Selection -->
+          <div class="level-selection">
+            <label for="level-select">{{ $t('savedWords.selectLevel') }}:</label>
+            <select 
+              id="level-select" 
+              v-model="selectedLevel" 
+              class="level-select"
+              :disabled="generating"
+            >
+              <option value="">{{ $t('savedWords.chooseLevel') }}</option>
+              <option value="A1">{{ $t('levels.A1') }}</option>
+              <option value="A2">{{ $t('levels.A2') }}</option>
+              <option value="B1">{{ $t('levels.B1') }}</option>
+            </select>
+          </div>
+          
+          <button 
+            @click="generateWords" 
+            class="generate-button"
+            :disabled="!selectedLevel || generating"
+          >
             {{ $t('savedWords.generateWords') }}
           </button>
         </div>
@@ -174,9 +195,10 @@ const selectedLanguage = ref('')
 const availableLanguages = ref([])
 const folderWordCounts = ref({})
 const folderWordCountsByLanguage = ref({})
+const selectedLevel = ref('')
 
 // Default supported languages
-const DEFAULT_LANGUAGES = ['fr', 'en', 'es', 'de', 'ru', 'uk']
+const DEFAULT_LANGUAGES = ['fr', 'en', 'ru', 'uk']
 
 // Computed
 const currentWords = computed(() => activeTab.value === 'known' ? knownWords.value : unknownWords.value)
@@ -321,7 +343,7 @@ async function loadFolderWords(folderId) {
 }
 
 async function generateWords() {
-  if (!currentFolder.value || currentFolder.value.is_default) return
+  if (!currentFolder.value || currentFolder.value.is_default || !selectedLevel.value) return
   
   generating.value = true
   try {
@@ -330,7 +352,8 @@ async function generateWords() {
       user.id, 
       currentFolder.value.id, 
       userNativeLanguage.value,
-      targetLanguage.value
+      targetLanguage.value,
+      selectedLevel.value
     )
     
     generatedCount.value = addedWords.length
@@ -410,6 +433,7 @@ function backToFolders() {
   currentIndex.value = 0
   isFlipped.value = false
   generatedCount.value = 0
+  selectedLevel.value = ''
 }
 
 function flipCard() {
@@ -819,6 +843,34 @@ onMounted(() => {
   font-weight: 600;
   color: #4a5568;
   min-width: 80px;
+}
+
+.level-selection {
+  margin-bottom: 15px;
+}
+
+.level-selection label {
+  font-weight: 600;
+  color: #4a5568;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.level-select {
+  padding: 8px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  color: #2d3748;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.level-select:disabled {
+  background: #f7fafc;
+  color: #a0aec0;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

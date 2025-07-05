@@ -442,6 +442,8 @@
     "wordsGenerated": "{count} words generated!",
     "backToFolders": "← Back to Folders",
     "folderEmpty": "This folder is empty.",
-    "generatePrompt": "Click the button below to generate 10 new words for this topic."
+    "generatePrompt": "Click the button below to generate 10 new words for this topic.",
+    "selectLevel": "Select Difficulty Level",
+    "chooseLevel": "Choose a level"
   }
 } 

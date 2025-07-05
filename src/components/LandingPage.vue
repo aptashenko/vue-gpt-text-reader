@@ -6,7 +6,16 @@
         <h1 class="title">{{ $t('landing.title') }}</h1>
         <p class="subtitle">{{ $t('landing.subtitle') }}</p>
       </header>
-
+      <!-- CTA Section -->
+      <section class="cta-section">
+        <div class="cta-content">
+          <h2 class="cta-title">{{ $t('landing.cta') }}</h2>
+          <p class="cta-subtitle">{{ $t('landing.ctaSubtitle') }}</p>
+          <button class="cta-button" @click="startLearning">
+            {{ $t('landing.cta') }}
+          </button>
+        </div>
+      </section>
       <!-- Benefits Section -->
       <section class="benefits">
         <h2 class="benefits-title">{{ $t('landing.benefits.title') }}</h2>
@@ -30,7 +39,6 @@
         </div>
       </section>
 
-      <!-- CTA Section -->
       <section class="cta-section">
         <div class="cta-content">
           <h2 class="cta-title">{{ $t('landing.cta') }}</h2>
@@ -82,7 +90,7 @@ function buyMeACoffee() {
 
 /* Header */
 .header {
-  margin-bottom: 60px;
+  margin-bottom: 30px;
 }
 
 .title {
@@ -125,7 +133,7 @@ function buyMeACoffee() {
   padding: 30px 20px;
   background: #f7fafc;
   border-radius: 12px;
-  border: 1px solid #e2e8f0aa;
+  border: 2px solid #e2e8f078;
   transition: all 0.3s ease;
 }
 
@@ -144,11 +152,13 @@ function buyMeACoffee() {
 
 /* CTA Section */
 .cta-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  margin: 0 -40px -60px -40px;
-  padding: 60px 40px;
-  border-radius: 0 0 20px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba278 100%);
+  margin: 0 auto 40px;
+  padding: 40px;
+  border-radius: 20px;
   color: white;
+
+  width: fit-content;
 }
 
 .cta-content {
@@ -160,6 +170,7 @@ function buyMeACoffee() {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 15px;
+  line-height: 1;
 }
 
 .cta-subtitle {
@@ -250,8 +261,8 @@ function buyMeACoffee() {
   }
 
   .cta-section {
-    margin: 0 -20px -40px -20px;
-    padding: 40px 20px;
+    margin: 0 auto 20px;
+    padding: 20px;
   }
 
   .cta-title {

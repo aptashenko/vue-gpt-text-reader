@@ -36,6 +36,8 @@
     "wordsGenerated": "¡{count} palabras generadas!",
     "backToFolders": "← Volver a las carpetas",
     "folderEmpty": "Esta carpeta está vacía.",
-    "generatePrompt": "Haz clic en el botón de abajo para generar 10 palabras nuevas para este tema."
+    "generatePrompt": "Haz clic en el botón de abajo para generar 10 palabras nuevas para este tema.",
+    "selectLevel": "Seleccionar nivel de dificultad",
+    "chooseLevel": "Elegir un nivel"
   }
 }

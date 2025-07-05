@@ -18,8 +18,6 @@
           <select id="language-filter" v-model="selectedLanguage" @change="fetchWords">
             <option value="en">🇺🇸 {{ $t('languages.en') }}</option>
             <option value="fr">🇫🇷 {{ $t('languages.fr') }}</option>
-            <option value="es">🇪🇸 {{ $t('languages.es') }}</option>
-            <option value="de">🇩🇪 {{ $t('languages.de') }}</option>
             <option value="uk">🇺🇦 {{ $t('languages.uk') }}</option>
             <option value="ru">🇷🇺 {{ $t('languages.ru') }}</option>
           </select>
@@ -69,8 +67,6 @@
             <select id="language" v-model="newWord.language" required>
               <option value="en">{{ $t('languages.en') }}</option>
               <option value="fr">{{ $t('languages.fr') }}</option>
-              <option value="es">{{ $t('languages.es') }}</option>
-              <option value="de">{{ $t('languages.de') }}</option>
               <option value="uk">{{ $t('languages.uk') }}</option>
               <option value="ru">{{ $t('languages.ru') }}</option>
             </select>

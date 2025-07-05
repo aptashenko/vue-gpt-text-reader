@@ -408,6 +408,8 @@
     "wordsGenerated": "{count} mots générés !",
     "backToFolders": "← Retour aux dossiers",
     "folderEmpty": "Ce dossier est vide.",
-    "generatePrompt": "Cliquez sur le bouton ci-dessous pour générer 10 nouveaux mots pour ce sujet."
+    "generatePrompt": "Cliquez sur le bouton ci-dessous pour générer 10 nouveaux mots pour ce sujet.",
+    "selectLevel": "Sélectionner le niveau de difficulté",
+    "chooseLevel": "Choisir un niveau"
   }
 }

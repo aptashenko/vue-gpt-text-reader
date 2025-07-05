@@ -175,7 +175,7 @@ export class FoldersService {
   }
 
   // Generate new words for a thematic folder using GPT
-  static async generateWordsForFolder(userId, folderId, userNativeLanguage = 'en', targetLanguage = 'fr') {
+  static async generateWordsForFolder(userId, folderId, userNativeLanguage = 'en', targetLanguage = 'fr', level = 'A1') {
     try {
       // Get folder info
       const folder = await this.getFolder(folderId)
@@ -200,8 +200,33 @@ export class FoldersService {
       const targetLanguageName = languageNames[targetLanguage] || targetLanguage
 
       // Generate prompt for GPT
-      const prompt = `Generate 10 unique ${folder.theme}-related words in ${targetLanguageName} that are useful for language learning.\nEach word should be:\n- Relevant to the theme: ${folder.name}\n- Common and practical for everyday use\n- Not too advanced (beginner to intermediate level)\n- Include the part of speech (noun, verb, adjective, etc.)\n\nTranslate each word into ${userNativeLanguageName}.\n\nFormat the response as a JSON array with this structure:\n[\n  {\n    "word": "the word in ${targetLanguageName}",\n    "translation": "the translation in ${userNativeLanguageName}",\n    "part_of_speech": "noun/verb/adjective/etc"\n  }\n]\n\nDo NOT include any words from this list (already in the folder): ${existingWordList.join(', ')}`
+      const prompt = `Generate 10 unique ${folder.theme}-related words in ${targetLanguageName} that are useful for language learning at ${level} level.
 
+      Each word should be:
+      - Relevant to the theme: ${folder.name}
+      - Common and practical for everyday use
+      - Appropriate for ${level} level learners
+      - Include the part of speech (noun, verb, adjective, etc.)
+      - Include the article if the language uses articles (e.g. "le", "la", "der", "die", "el", "la"). For languages that do not require articles (e.g. English, Russian, Ukrainian), omit them.
+      
+      For ${level} level:
+      - A1: Basic vocabulary, simple words, essential phrases
+      - A2: Elementary vocabulary, common everyday words
+      - B1: Intermediate vocabulary, more complex words and expressions
+      
+      Translate each word into ${userNativeLanguageName}.
+      
+      Format the response as a JSON array with this structure:
+      [
+        {
+          "word": "the word in ${targetLanguageName}, with article if applicable",
+          "translation": "the translation in ${userNativeLanguageName}",
+          "part_of_speech": "noun/verb/adjective/etc"
+        }
+      ]
+      
+      Do NOT include any words from this list (already in the folder): ${existingWordList.join(', ')}` 
+      
       // Call GPT service
       const response = await gptService.generateText(prompt)
       
