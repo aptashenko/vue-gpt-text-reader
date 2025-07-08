@@ -181,6 +181,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { SavedWordsService } from '../services/savedWords.js'
 import { FoldersService } from '../services/folders.js'
 import { UserPreferencesService } from '../services/userPreferences.js'
+import analyticsService from '../services/logsnag.js'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -324,6 +325,16 @@ async function openFolder(folder) {
   currentFolder.value = folder
   activeTab.value = 'unknown'
   await loadFolderWords(folder.id)
+  // LogSnag: Track entering a folder
+  const user = authStore.user;
+  if (user && folder) {
+    analyticsService.track('folder_opened', {
+      description: `User opened folder: ${folder.theme || folder.id}`,
+      tags: { user_id: user.id, folder_id: folder.id, folder_theme: folder.theme, language: selectedLanguage.value || 'en' },
+      icon: '📁',
+      user_id: user.id
+    });
+  }
 }
 
 async function loadFolderWords(folderId) {
@@ -380,6 +391,22 @@ async function generateWords() {
     
     generatedCount.value = addedWords.length
     
+    // LogSnag: Track word generation event
+    if (user && currentFolder.value) {
+      analyticsService.track('words_generated', {
+        description: `User generated words for folder: ${currentFolder.value.theme || currentFolder.value.id}`,
+        tags: {
+          user_id: user.id,
+          language: targetLanguage.value,
+          folder_id: currentFolder.value.id,
+          folder_theme: currentFolder.value.theme,
+          level: selectedLevel.value,
+          count: addedWords.length
+        },
+        icon: '✨',
+        user_id: user.id
+      });
+    }
     // Invalidate cache for the current language
     foldersCache.value[selectedLanguage.value || 'en'] = undefined
     // Reload folder words and all folder counts in one go
@@ -447,6 +474,11 @@ function filterByLanguage() {
   // Language filter is handled by computed property
   // The filteredFolders computed property will automatically update
   // when selectedLanguage changes
+  // LogSnag: Track language change
+  const user = authStore.user;
+  if (user) {
+    analyticsService.trackLanguageChanged('', selectedLanguage.value, user.id);
+  }
 }
 
 function backToFolders() {
@@ -571,6 +603,16 @@ onMounted(async () => {
     selectedLanguage.value = 'en';
   }
   filterByLanguage();
+  // LogSnag: Track opening the Saved Words page
+  const user = authStore.user;
+  if (user) {
+    analyticsService.track('saved_words_opened', {
+      description: 'User opened Saved Words page',
+      tags: { user_id: user.id, language: selectedLanguage.value || 'en' },
+      icon: '📚',
+      user_id: user.id
+    });
+  }
 });
 </script>
 

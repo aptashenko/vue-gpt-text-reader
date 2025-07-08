@@ -172,7 +172,6 @@ async function main() {
         
       default:
         console.error('❌ Unknown command:', command)
-        console.log('Available commands: texts, dictionary, all')
         process.exit(1)
     }
   } catch (error) {
