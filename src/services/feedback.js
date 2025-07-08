@@ -24,7 +24,6 @@ export class FeedbackService {
   // Get all feedback (admin only)
   static async getAllFeedback() {
     try {
-      console.log('FeedbackService: Fetching all feedback...')
       const { data, error } = await supabase
         .from('feedback')
         .select('*')
@@ -34,11 +33,6 @@ export class FeedbackService {
         console.error('FeedbackService: Error fetching feedback:', error)
         throw error
       }
-      
-      console.log('FeedbackService: Feedback data received:', {
-        count: data?.length || 0,
-        data: data
-      })
       
       return data || []
     } catch (error) {

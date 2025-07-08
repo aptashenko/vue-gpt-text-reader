@@ -27,7 +27,6 @@ function getDefaultLocale() {
   } catch (error) {
     console.error('Error loading stored preferences for i18n:', error)
   }
-  console.log('i18n initialized with default locale: en')
   return 'en'
 }
 

@@ -91,6 +91,15 @@ export class SavedWordsService {
     return !!data
   }
 
+  // Remove all saved words for a user
+  static async clearAllSavedWords(userId) {
+    const { error } = await supabase
+      .from('user_saved_words')
+      .delete()
+      .eq('user_id', userId);
+    if (error) throw error;
+  }
+
   // Get available languages from saved words and folders
   static async getSavedWordsLanguages(userId) {
     try {
@@ -177,5 +186,58 @@ export class SavedWordsService {
     } catch (error) {
       console.error('Failed to populate All Words folder:', error)
     }
+  }
+
+  // Save a word from the reading text (with translation and language info)
+  static async saveWordFromText(userId, word, translation, targetLanguage, nativeLanguage) {
+    // 1. Check if word exists in dictionary for this language
+    let { data: dictRows, error: dictError } = await supabase
+      .from('dictionary')
+      .select('*')
+      .eq('word', word)
+      .eq('language', targetLanguage)
+      .limit(1)
+    if (dictError) throw dictError
+    let dictId
+    if (dictRows && dictRows.length > 0) {
+      dictId = dictRows[0].id
+      // Optionally update translation if missing
+      const translationCol = `translation_${nativeLanguage}`
+      if (!dictRows[0][translationCol] && translation) {
+        await supabase
+          .from('dictionary')
+          .update({ [translationCol]: translation })
+          .eq('id', dictId)
+      }
+    } else {
+      // Insert new dictionary entry
+      const insertObj = {
+        word,
+        language: targetLanguage,
+        [`translation_${nativeLanguage}`]: translation
+      }
+      const { data: newDict, error: insertError } = await supabase
+        .from('dictionary')
+        .insert(insertObj)
+        .select()
+        .single()
+      if (insertError) throw insertError
+      dictId = newDict.id
+    }
+    // 2. Insert into user_saved_words if not already present
+    const { data: existing, error: existError } = await supabase
+      .from('user_saved_words')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('word_id', dictId)
+      .maybeSingle()
+    if (existError && existError.code !== 'PGRST116') throw existError
+    if (!existing) {
+      const { error: saveError } = await supabase
+        .from('user_saved_words')
+        .insert({ user_id: userId, word_id: dictId })
+      if (saveError) throw saveError
+    }
+    return { word, translation, dictId }
   }
 } 

@@ -202,8 +202,6 @@ export class DictionaryService {
       // Find new words that aren't in the dictionary
       const newWords = Array.from(allWords).filter(word => !existingWordSet.has(word))
 
-      console.log(`Found ${newWords.length} new words to add to dictionary`)
-
       // Add new words to dictionary (with basic translations)
       const wordsToAdd = newWords.map(word => ({
         word,

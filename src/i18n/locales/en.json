@@ -83,7 +83,12 @@
     "answerPlaceholder": "Your answer to question {number}...",
     "checkingAnswers": "Checking answers...",
     "errorCheckingAnswers": "Error checking answers. Please try again.",
-    "textPronunciationComingSoon": "Text listening feature coming in next release"
+    "textPronunciationComingSoon": "Text listening feature coming in next release",
+    "translateWithAI": "Get translation",
+    "translating": "Translating...",
+    "addToFlashcards": "Add to flashcards",
+    "addedToFlashcards": "Added to flashcards!",
+    "translationError": "Translation failed. Try again."
   },
   "resultPage": {
     "results": "Results",
@@ -444,6 +449,8 @@
     "folderEmpty": "This folder is empty.",
     "generatePrompt": "Click the button below to generate 10 new words for this topic.",
     "selectLevel": "Select Difficulty Level",
-    "chooseLevel": "Choose a level"
+    "chooseLevel": "Choose a level",
+    "clearFolder": "Clear Folder",
+    "removeWord": "Remove Word"
   }
 } 

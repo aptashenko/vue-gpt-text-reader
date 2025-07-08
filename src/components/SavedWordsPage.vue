@@ -14,7 +14,6 @@
             @change="filterByLanguage"
             class="language-select"
           >
-            <option value="">{{ $t('savedWords.allLanguages') }}</option>
             <option v-for="lang in allLanguages" :key="lang" :value="lang">
               {{ getLanguageName(lang) }}
             </option>
@@ -39,6 +38,7 @@
               <p class="folder-description">{{ $t('savedWords.folders.' + folder.theme + '.description') }}</p>
               <span class="word-count">{{ getFolderWordCount(folder.id) }} words</span>
             </div>
+            <button class="clear-folder-btn" @click.stop="clearFolder(folder)">{{ $t('savedWords.clearFolder') }}</button>
           </div>
         </div>
 
@@ -148,6 +148,9 @@
             <button @click="markAsKnown" class="control-button known-button">
               {{ $t('savedWords.know') }}
             </button>
+            <button @click="removeWord(currentCard)" class="control-button remove-button">
+              {{ $t('savedWords.removeWord') }}
+            </button>
           </div>
           
           <!-- Known Words Controls -->
@@ -160,6 +163,9 @@
             </span>
             <button @click="nextCard" :disabled="currentIndex === currentWords.length - 1" class="control-button">
               {{ $t('savedWords.next') }}
+            </button>
+            <button @click="removeWord(currentCard)" class="control-button remove-button">
+              {{ $t('savedWords.removeWord') }}
             </button>
           </div>
         </div>
@@ -196,6 +202,8 @@ const availableLanguages = ref([])
 const folderWordCounts = ref({})
 const folderWordCountsByLanguage = ref({})
 const selectedLevel = ref('')
+const foldersCache = ref({})
+let justClearedAllWords = false;
 
 // Default supported languages
 const DEFAULT_LANGUAGES = ['fr', 'en', 'ru', 'uk']
@@ -250,6 +258,16 @@ function getLanguageName(code) {
 }
 
 async function loadFolders() {
+  const lang = selectedLanguage.value || 'en';
+  if (foldersCache.value[lang]) {
+    const cache = foldersCache.value[lang];
+    folders.value = cache.folders
+    availableLanguages.value = cache.availableLanguages
+    folderWordCounts.value = cache.folderWordCounts
+    folderWordCountsByLanguage.value = cache.folderWordCountsByLanguage
+    loading.value = false
+    return
+  }
   loading.value = true
   try {
     const user = authStore.user
@@ -257,40 +275,44 @@ async function loadFolders() {
       router.push('/login')
       return
     }
-
     // Get user's native language
     const prefs = await UserPreferencesService.getUserPreferences(user.id)
     userNativeLanguage.value = prefs.native_language || 'en'
-
     // Load folders
-    folders.value = await FoldersService.getFolders()
-
+    const loadedFolders = await FoldersService.getFolders()
     // Load available languages
-    availableLanguages.value = await SavedWordsService.getSavedWordsLanguages(user.id)
-
-    // Populate "All Words" folder with saved words
-    await SavedWordsService.populateAllWordsFolder(user.id)
-
+    const langs = await SavedWordsService.getSavedWordsLanguages(user.id)
+    // Populate "All Words" folder with saved words, unless just cleared
+    if (!justClearedAllWords) {
+      await SavedWordsService.populateAllWordsFolder(user.id)
+    } else {
+      justClearedAllWords = false;
+    }
     // Batch fetch all folder word meta (folderId + language)
     const allMeta = await FoldersService.getAllFolderWordMeta(user.id)
     // Build counts for the selected language only
-    folderWordCounts.value = {}
-    folderWordCountsByLanguage.value = {}
+    const wordCounts = {}
+    const wordCountsByLang = {}
     for (const meta of allMeta) {
       const folderId = meta.folder_id
-      const lang = meta.dictionary?.language
-      if (lang === targetLanguage.value) {
-        // Count per folder for the selected language
-        folderWordCounts.value[folderId] = (folderWordCounts.value[folderId] || 0) + 1
-        // Count per folder-language
-        const key = `${folderId}-${lang}`
-        folderWordCountsByLanguage.value[key] = (folderWordCountsByLanguage.value[key] || 0) + 1
+      const metaLang = meta.dictionary?.language
+      if (metaLang === lang) {
+        wordCounts[folderId] = (wordCounts[folderId] || 0) + 1
+        const key = `${folderId}-${metaLang}`
+        wordCountsByLang[key] = (wordCountsByLang[key] || 0) + 1
       }
     }
-    
-    console.log('Available languages:', availableLanguages.value)
-    console.log('Folder word counts by language:', folderWordCountsByLanguage.value)
-
+    folders.value = loadedFolders
+    availableLanguages.value = langs
+    folderWordCounts.value = wordCounts
+    folderWordCountsByLanguage.value = wordCountsByLang
+    // Cache the loaded data for this language
+    foldersCache.value[lang] = {
+      folders: loadedFolders,
+      availableLanguages: langs,
+      folderWordCounts: wordCounts,
+      folderWordCountsByLanguage: wordCountsByLang
+    }
   } catch (e) {
     console.error('Failed to load folders:', e)
   } finally {
@@ -358,6 +380,8 @@ async function generateWords() {
     
     generatedCount.value = addedWords.length
     
+    // Invalidate cache for the current language
+    foldersCache.value[selectedLanguage.value || 'en'] = undefined
     // Reload folder words and all folder counts in one go
     await loadFolderWords(currentFolder.value.id)
     await loadFolders() // This will refresh all counts and batch data
@@ -469,6 +493,40 @@ function getFolderWordCount(folderId) {
   return folderWordCounts.value[folderId] || 0
 }
 
+async function clearFolder(folder) {
+  if (!confirm('Are you sure you want to clear all words from this folder?')) return;
+  try {
+    const user = authStore.user;
+    await FoldersService.clearFolder(user.id, folder.id);
+    foldersCache.value[selectedLanguage.value || 'en'] = undefined;
+    if (folder.is_default) {
+      justClearedAllWords = true;
+      await SavedWordsService.clearAllSavedWords(user.id);
+    }
+    await loadFolders();
+    if (currentFolder.value && currentFolder.value.id === folder.id) {
+      await loadFolderWords(folder.id);
+    }
+  } catch (e) {
+    alert('Failed to clear folder.');
+  }
+}
+
+async function removeWord(wordObj) {
+  if (!wordObj || !wordObj.wordId) return;
+  if (!confirm('Remove this word from the folder?')) return;
+  try {
+    const user = authStore.user;
+    await FoldersService.removeWordFromFolder(user.id, currentFolder.value.id, wordObj.wordId);
+    // Invalidate cache for the current language
+    foldersCache.value[selectedLanguage.value || 'en'] = undefined;
+    await loadFolderWords(currentFolder.value.id);
+    await loadFolders();
+  } catch (e) {
+    alert('Failed to remove word.');
+  }
+}
+
 watch(selectedLanguage, () => {
   loadFolders()
   currentFolder.value = null
@@ -478,13 +536,42 @@ watch(selectedLanguage, () => {
   isFlipped.value = false
 })
 
-onMounted(() => {
-  if (!authStore.isAuthenticated && !authStore.isGuestMode) {
-    router.push('/login')
-    return
+watch(currentFolder, (val) => {
+  if (!val) {
+    const lang = selectedLanguage.value || 'en';
+    if (!foldersCache.value[lang]) {
+      loadFolders();
+    } else {
+      const cache = foldersCache.value[lang];
+      folders.value = cache.folders
+      availableLanguages.value = cache.availableLanguages
+      folderWordCounts.value = cache.folderWordCounts
+      folderWordCountsByLanguage.value = cache.folderWordCountsByLanguage
+      loading.value = false
+    }
   }
-  loadFolders()
-})
+});
+
+onMounted(async () => {
+  const lang = selectedLanguage.value || 'en';
+  if (!foldersCache.value[lang]) {
+    await loadFolders();
+  } else {
+    const cache = foldersCache.value[lang];
+    folders.value = cache.folders
+    availableLanguages.value = cache.availableLanguages
+    folderWordCounts.value = cache.folderWordCounts
+    folderWordCountsByLanguage.value = cache.folderWordCountsByLanguage
+    loading.value = false
+  }
+  // Set selectedLanguage to the first available language (or default to 'en')
+  if (allLanguages.value.length > 0) {
+    selectedLanguage.value = allLanguages.value[0];
+  } else {
+    selectedLanguage.value = 'en';
+  }
+  filterByLanguage();
+});
 </script>
 
 <style scoped>
@@ -550,6 +637,7 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 16px;
 }
@@ -679,6 +767,11 @@ onMounted(() => {
 .generate-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.generate-button:disabled {
+  background: #e2e8f0;
+  color: #a0aec0;
 }
 
 .generating {
@@ -873,9 +966,44 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+.clear-folder-btn {
+  margin-top: 10px;
+  background: #f56565;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.clear-folder-btn:hover {
+  background: #c53030;
+}
+.remove-button {
+  background: #e53e3e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: background 0.2s;
+}
+.remove-button:hover {
+  background: #9b2c2c;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 20px 15px 30px 15px;
+  }
+
+  .remove-button {
+    margin-left: 0;
   }
   
   .word-status-tabs {

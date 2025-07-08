@@ -43,56 +43,35 @@
             >
               🔊
             </button>
-          <div class="text-content">
-            <p 
-              v-for="(paragraph, index) in textParagraphs" 
-              :key="index"
-              class="paragraph"
-              v-html="highlightWords(paragraph)"
-            ></p>
-          </div>
-        </section>
-
-        <!-- Dictionary Section -->
-        <section class="dictionary-section">
-          <h2 class="section-title">{{ $t('textSession.dictionary') }}</h2>
-          <div class="dictionary-grid">
-            <div 
-              v-for="word in currentTextWords" 
-              :key="word.word"
-              class="dictionary-item"
-              :class="{ active: hoveredWord === word.word }"
-              :data-word="word.word"
-              @mouseenter="hoveredWord = word.word"
-              @mouseleave="hoveredWord = null"
+          <div class="text-content" ref="textContentRef">
+            <span v-for="(word, pIdx) in splitTextWithArticles" :key="pIdx" :class="{'word': !punctuation.includes(word)}"
+              @click="!punctuation.includes(word) && openWordPanel(word)"
+              style="user-select: none;"
             >
-              <div class="word">{{ word.word }}</div>
-              <div class="translation">
-                {{ word.translations[store.nativeLanguage] || $t('textSession.translationNotFound') }}
-              </div>
-              <div class="dictionary-actions">
-                <button
-                  v-if="authStore.isAuthenticated && word.id"
-                  @click.stop="saveWord(word)"
-                  class="action-btn save-btn"
-                  :class="{ saved: savedWordIds.has(word.id) }"
-                  :disabled="savedWordIds.has(word.id)"
-                  :title="savedWordIds.has(word.id) ? 'Saved' : 'Save this word'"
-                >
-                  <transition name="fade-scale" mode="out-in">
-                    <span v-if="savedWordIds.has(word.id)" key="saved" class="save-icon">
-                      ✅
-                    </span>
-                    <span v-else key="unsaved" class="save-icon">
-                      💾
-                    </span>
-                  </transition>
-                </button>
-              </div>
-            </div>
+              {{ word }}
+            </span>
           </div>
         </section>
-
+        <!-- Fixed bottom panel for word actions -->
+        <div v-if="panel.visible" class="word-panel">
+          <button class="panel-close" @click="closeWordPanel">&times;</button>
+          <div class="panel-word">{{ panel.word }}</div>
+          <div v-if="!panel.translation && !panel.loading">
+            <button class="panel-btn" @click="translateWord(panel.word)">
+              {{ $t('textSession.translateWithAI') }}
+            </button>
+          </div>
+          <div v-else-if="panel.loading">
+            <span class="panel-loading">{{ $t('textSession.translating') }}</span>
+          </div>
+          <div v-else>
+            <div class="panel-translation">{{ panel.translation }}</div>
+            <button class="panel-btn" :disabled="panel.added" @click="addToFlashcards(panel.word, panel.translation)">
+              <span v-if="panel.added">✅ {{ $t('textSession.addedToFlashcards') }}</span>
+              <span v-else>{{ $t('textSession.addToFlashcards') }}</span>
+            </button>
+          </div>
+        </div>
         <!-- Questions Section -->
         <section class="questions-section">
           <h2 class="section-title">{{ $t('textSession.questions') }}</h2>
@@ -130,13 +109,12 @@
 </template>
 
 <script setup>
-import { computed, ref, watch, onMounted, nextTick } from 'vue'
+import { computed, ref, watch, onMounted, nextTick, reactive, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLanguageLearningStore } from '../stores/languageLearning'
 import { useAuthStore } from '../stores/auth'
 import { gptService } from '../services/gpt'
 import { supabase } from '../supabase.js'
-import LogoutButton from './LogoutButton.vue'
 import BackButton from './BackButton.vue'
 import analyticsService from '../services/logsnag.js'
 import { getAnalyticsUserId } from '../utils/analytics.js'
@@ -152,29 +130,7 @@ const userAnswers = ref([])
 const checking = ref(false)
 const loadingText = ref(true)
 const fetchError = ref('')
-const hoveredWord = ref(null)
-
-const savedWordIds = ref(new Set())
-
-async function fetchSavedWordIds() {
-  if (!authStore.user) return
-  try {
-    const saved = await SavedWordsService.getUserSavedWords(authStore.user.id)
-    savedWordIds.value = new Set(saved.map(item => item.dictionary.id))
-  } catch (e) {
-    console.error('Failed to fetch saved words:', e)
-  }
-}
-
-async function saveWord(word) {
-  if (!authStore.user) return
-  try {
-    await SavedWordsService.saveWordForUser(authStore.user.id, word.id)
-    savedWordIds.value.add(word.id)
-  } catch (e) {
-    console.error('Failed to save word:', e)
-  }
-}
+const addedWords = ref(new Set());
 
 // Load user preferences on mount
 onMounted(async () => {  
@@ -190,17 +146,75 @@ onMounted(async () => {
   if (route.params.id) {
     await fetchTextById(route.params.id)
   }
-  fetchSavedWordIds()
 })
 
 // Computed properties
 const currentText = computed(() => store.currentText)
-const currentTextWords = computed(() => store.currentTextWords)
-const currentTextQuestions = computed(() => store.currentTextQuestions)
+const currentTextQuestions = computed(() => store.currentTextQuestions);
+const punctuation = [
+  // Стандартные знаки
+  '.', ',', '!', '?', ';', ':',
 
-const textParagraphs = computed(() => {
-  if (!currentText.value?.text) return []
-  return currentText.value.text.split('\n').filter(p => p.trim())
+  // Скобки
+  '(', ')', '[', ']', '{', '}', '<', '>',
+
+  // Кавычки (одинарные, двойные, французские, типографские)
+  '"', "'", '«', '»', '“', '”', '‘', '’', '‹', '›',
+
+  // Тире, дефисы, многоточие
+  '-', '–', '—', '―', '…',
+
+  // Разделители и символы
+  '/', '\\', '|', '_', '*', '#', '@', '&', '%', '$', '€', '£', '¥', '+', '=', '~', '^', '`',
+
+  // Точки и запятые разных форм
+  '·', '•', '‚', '٫', '٬', '⁄', '·',
+
+  // Юникод-символы, которые могут встречаться
+  '©', '®', '™', '°'
+];
+const articles = [
+  // 🇫🇷 French
+  'le', 'la', 'les', 'l’', 'un', 'une', 'des', 'du', 'de la', 'de l’',
+
+  // 🇪🇸 Spanish
+  'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'al', 'del',
+
+  // 🇩🇪 German
+  'der', 'die', 'das', 'den', 'dem', 'des',
+  'ein', 'eine', 'einen', 'einem', 'eines', 'einer',
+
+  // 🇬🇧 English
+  'the', 'a', 'an'
+];
+
+const splitTextWithArticles = computed(() => {
+  const text = currentText.value?.text || '';
+
+  // Разбиваем текст на слова и знаки препинания
+  const tokens = text.match(/[^\s\w\d]|[\p{L}\p{M}’'-]+/gu);
+
+  const result = [];
+  let i = 0;
+
+  while (i < tokens.length) {
+    const word = tokens[i];
+    const next = tokens[i + 1];
+
+    if (
+      articles.includes(word.toLowerCase()) &&
+      next &&
+      !punctuation.includes(next)
+    ) {
+      result.push(`${word} ${next}`);
+      i += 2;
+    } else {
+      result.push(word);
+      i += 1;
+    }
+  }
+
+  return result
 })
 
 const canSubmit = computed(() => {
@@ -355,25 +369,6 @@ watch(() => route.params.id, (id) => {
   if (id) fetchTextById(id)
 }, { immediate: false })
 
-// Methods
-function highlightWords(text) {
-  if (!currentTextWords.value.length) return text
-    
-  let highlightedText = text
-  // Sort by length descending for phrase support
-  const wordsSorted = [...currentTextWords.value].sort((a, b) => b.word.length - a.word.length)
-  wordsSorted.forEach(word => {
-    // Escape regex special chars
-    const escaped = word.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const regex = new RegExp(`\\b${escaped}\\b`, 'gi')
-    const translation = word.translations[store.nativeLanguage] || word.word
-    highlightedText = highlightedText.replace(
-      regex,
-      `<span class=\"highlighted-word\" data-word=\"${word.word}\" title=\"${translation}\">${word.word}</span>`
-    )
-  })
-  return highlightedText
-}
 
 // Helper to format ms to mm:ss
 function formatDuration(ms) {
@@ -470,69 +465,67 @@ function goBack() {
   router.push('/')
 }
 
-function handleLogoutSuccess() {
-  // Handle logout success
-}
-
-function handleLogoutError(error) {
-  // Handle logout error
-}
-
-// Add event listeners after DOM update
-watch(() => currentText.value, () => {
-  nextTick(() => {
-    document.querySelectorAll('.highlighted-word').forEach(el => {
-      el.addEventListener('mouseenter', e => {
-        hoveredWord.value = el.getAttribute('data-word')
-      })
-      el.addEventListener('mouseleave', e => {
-        hoveredWord.value = null
-      })
-      el.addEventListener('click', e => {
-        const word = el.getAttribute('data-word')
-        scrollToDictionary(word)
-      })
-    })
-  })
+// Remove popup logic, add panel state
+const panel = reactive({
+  visible: false,
+  word: '',
+  translation: '',
+  loading: false,
+  added: false
 })
 
-// Function to scroll to dictionary entry
-function scrollToDictionary(word) {
-  const dictionarySection = document.querySelector('.dictionary-section')
-  const targetWord = document.querySelector(`[data-word="${word}"]`)
-  
-  if (dictionarySection && targetWord) {
-    // Scroll to dictionary section
-    dictionarySection.scrollIntoView({ 
-      behavior: 'smooth', 
-      block: 'start' 
-    })
-    
-    // Add a brief highlight effect to the target word
-    setTimeout(() => {
-      targetWord.classList.add('active')
-      setTimeout(() => {
-        targetWord.classList.remove('active')
-      }, 2000) // Remove highlight after 2 seconds
-    }, 500) // Wait for scroll to complete
+function openWordPanel(word) {
+  if (punctuation.includes(word)) return
+  panel.word = word
+  panel.translation = ''
+  panel.loading = false
+  panel.added = addedWords.value.has(word)
+  panel.visible = true
+}
+function closeWordPanel() {
+  panel.visible = false
+}
+
+// Translate with AI
+async function translateWord(word) {
+  panel.loading = true
+  panel.translation = ''
+  try {
+    // Pass the current text as context
+    const result = await gptService.translateWord(
+      word,
+      store.targetLanguage,
+      store.nativeLanguage,
+      currentText.value?.text || ''
+    )
+    panel.translation = result.translation || result || ''
+  } catch (e) {
+    panel.translation = $t('textSession.translationError')
+  } finally {
+    panel.loading = false
   }
 }
 
-// Placeholder methods for future implementation
-function addToQuizlet(word) {
-  // TODO: Implement Quizlet integration in next release
-  console.log('Add to Quizlet functionality will be implemented in next release:', word)
+// Add to flashcards (All Words folder)
+async function addToFlashcards(word, translation) {
+  if (!authStore.user) return
+  try {
+    await SavedWordsService.saveWordFromText(authStore.user.id, word, translation, store.targetLanguage, store.nativeLanguage)
+    addedWords.value.add(word)
+    panel.added = true
+  } catch (e) {
+    // Optionally show error
+  }
 }
 
-function playPronunciation(word) {
-  // TODO: Implement pronunciation functionality in next release
-  console.log('Pronunciation functionality will be implemented in next release:', word)
-}
-
-function playTextPronunciation() {
-  // TODO: Implement text pronunciation functionality in next release
-  console.log('Text pronunciation functionality will be implemented in next release')
-}
+// On mount, fetch already added words for this text/language
+onMounted(async () => {
+  if (!authStore.user) return
+  try {
+    const saved = await SavedWordsService.getUserSavedWords(authStore.user.id, store.targetLanguage)
+    saved.forEach(item => addedWords.value.add(item.word))
+  } catch (e) {}
+})
 </script>
 
 <style scoped>
@@ -657,11 +650,22 @@ function playTextPronunciation() {
 }
 
 .text-content {
+  position: relative;
   line-height: 1.8;
   font-size: 1.1rem;
   color: #2d3748;
   text-align: justify;
 }
+
+.text-content span {
+  display: inline-block;
+  line-height: 1.2;
+}
+
+.text-content span.word:not(:first-child) {
+  margin-left: 4px;
+}
+
 
 .paragraph {
   margin-right: 6px;
@@ -742,15 +746,21 @@ function playTextPronunciation() {
 }
 
 .word {
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 5px;
-  font-size: 1rem;
+  background: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 400;
+  transition: background 0.2s;
+  padding: 0 1px;
 }
-
-.translation {
-  color: #718096;
-  font-size: 0.9rem;
+.word:active, .word.selected {
+  background: #e2e8f0;
+}
+.word:hover {
+  background: #e2e8f0;
+}
+.punct {
+  color: #2d3748;
 }
 
 .dictionary-actions {
@@ -1001,39 +1011,80 @@ function playTextPronunciation() {
     font-size: 1rem;
   }
 }
-</style>
-
-<style>
-.highlighted-word {
-  background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
-  padding: 2px 4px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  position: relative;
+.word-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-top: 2px solid #667eea;
+  box-shadow: 0 -2px 16px rgba(102, 126, 234, 0.13);
+  padding: 22px 18px 18px 18px;
+  z-index: 2000;
+  font-size: 1.08rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: slideUp 0.22s cubic-bezier(.4,2,.3,1);
 }
-
-.highlighted-word::after {
-  content: '🔍';
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.panel-close {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  font-size: 10px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  right: 18px;
+  top: 12px;
+  background: none;
+  border: none;
+  font-size: 1.7em;
+  color: #667eea;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
 }
-
-.highlighted-word:hover::after {
-  opacity: 1;
+.panel-word {
+  font-weight: 700;
+  font-size: 1.15em;
+  margin-bottom: 8px;
+  color: #2d3748;
 }
-
-.highlighted-word.active,
-.highlighted-word:hover {
-  background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+.panel-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  transform: scale(1.12);
-  z-index: 2;
-  position: relative;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 6px;
+}
+.panel-btn:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+}
+.panel-loading {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 1.1em;
+}
+.panel-translation {
+  color: #2d3748;
+  font-size: 1.1em;
+  margin-bottom: 6px;
+  text-align: center;
+}
+@media (max-width: 600px) {
+  .word-panel {
+    font-size: 0.98rem;
+    padding: 16px 6px 12px 6px;
+  }
+  .panel-btn {
+    font-size: 0.98rem;
+    padding: 7px 10px;
+  }
 }
 </style> 

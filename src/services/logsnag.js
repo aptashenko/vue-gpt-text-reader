@@ -74,7 +74,6 @@ class AnalyticsService {
   // Отправка события
   async track(event, data = {}) {
     if (!this.isEnabled) {
-      console.log('Analytics disabled, event:', event, data)
       return
     }
 
@@ -97,7 +96,6 @@ class AnalyticsService {
       }
 
       await logsnagObject.track(eventData)
-      console.log('Analytics event tracked:', event, eventData)
     } catch (error) {
       console.error('Failed to track analytics event:', error)
     }
@@ -106,7 +104,6 @@ class AnalyticsService {
   // Отправка уведомления
   async notify(title, description, data = {}) {
     if (!this.isEnabled) {
-      console.log('Analytics disabled, notification:', title, description)
       return
     }
 
@@ -128,7 +125,6 @@ class AnalyticsService {
       }
 
       await logsnagObject.notify(notificationData)
-      console.log('Analytics notification sent:', title, notificationData)
     } catch (error) {
       console.error('Failed to send analytics notification:', error)
     }
@@ -137,7 +133,6 @@ class AnalyticsService {
   // Отправка инсайта
   async insight(title, value, data = {}) {
     if (!this.isEnabled) {
-      console.log('Analytics disabled, insight:', title, value)
       return
     }
 
@@ -158,7 +153,6 @@ class AnalyticsService {
       }
 
       await logsnagObject.insight(insightData)
-      console.log('Analytics insight sent:', title, value, insightData)
     } catch (error) {
       console.error('Failed to send analytics insight:', error)
     }
@@ -523,7 +517,6 @@ class AnalyticsService {
   // Получение инсайтов (метрик) из локального хранилища
   async getInsights(metric, options = {}) {
     if (!this.isEnabled) {
-      console.log('Analytics disabled, getInsights:', metric)
       return null
     }
     
@@ -548,7 +541,6 @@ class AnalyticsService {
   // Получение событий из локального хранилища
   async getEvents(options = {}) {
     if (!this.isEnabled) {
-      console.log('Analytics disabled, getEvents:', options)
       return { data: [] }
     }
     
@@ -624,7 +616,6 @@ class AnalyticsService {
   // Отслеживание метрики и сохранение в localStorage
   async trackMetric(metricName, value = 1, options = {}) {
     if (!this.isEnabled) {
-      console.log('Analytics disabled, trackMetric:', metricName, value)
       return
     }
 
@@ -635,7 +626,6 @@ class AnalyticsService {
       // Сохраняем локально для аналитики
       this.saveMetricLocally(metricName, value, options)
       
-      console.log('Metric tracked:', metricName, value)
     } catch (error) {
       console.error('Failed to track metric:', error)
       // Все равно сохраняем локально

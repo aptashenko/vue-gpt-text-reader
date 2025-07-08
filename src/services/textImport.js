@@ -170,8 +170,6 @@ export class TextImportService {
         }
       }
       
-      console.log('Successfully inserted texts:', insertedTexts)
-      
       // Only proceed with words and questions if texts were successfully inserted
       if (!insertedTexts || insertedTexts.length === 0) {
         return {
@@ -186,89 +184,10 @@ export class TextImportService {
         const insertedText = insertedTexts[i]
         
         if (!insertedText || !insertedText.id) {
-          console.error('Text was not properly inserted:', text.title)
           continue
         }
-        
-        console.log(`Processing text "${text.title}" with ID: ${insertedText.id}`)
-        
-        // Insert words into dictionary and link them to text
-        for (let j = 0; j < text.words.length; j++) {
-          const wordData = text.words[j]
-          
-          console.log(`Processing word ${j + 1}/${text.words.length}: "${wordData.word}"`)
-          
-          // First, insert or get the word from dictionary
-          const wordRecord = {
-            word: wordData.word,
-            language: text.target_language,
-            translation_en: wordData.translations.en || wordData.word,
-            translation_fr: wordData.translations.fr || wordData.word,
-            translation_es: wordData.translations.es || wordData.word,
-            translation_de: wordData.translations.de || wordData.word,
-            translation_uk: wordData.translations.uk || wordData.word,
-            translation_ru: wordData.translations.ru || wordData.word,
-            part_of_speech: wordData.part_of_speech || 'unknown',
-            difficulty: text.level,
-            created_at: new Date().toISOString()
-          }
-          
-          console.log('Word record to insert:', wordRecord)
-          
-          // Insert word into dictionary (upsert to avoid duplicates)
-          const { data: insertedWord, error: wordError } = await client
-            .from('dictionary')
-            .upsert([wordRecord], { 
-              onConflict: 'word,language',
-              ignoreDuplicates: false 
-            })
-            .select()
-            .single()
-          
-          if (wordError) {
-            console.error('Error inserting word:', wordError)
-            console.error('Word error details:', {
-              message: wordError.message,
-              details: wordError.details,
-              hint: wordError.hint,
-              code: wordError.code
-            })
-            continue
-          }
-          
-          console.log('Word inserted successfully:', insertedWord)
-          
-          // Link word to text using text_words table
-          if (insertedWord) {
-            const textWordRecord = {
-              text_id: insertedText.id,
-              word_id: insertedWord.id,
-              word_order: j + 1
-            }
-            
-            console.log('Linking word to text:', textWordRecord)
-            
-            const { error: textWordError } = await client
-              .from('text_words')
-              .insert(textWordRecord)
-            
-            if (textWordError) {
-              console.error('Error linking word to text:', textWordError)
-              console.error('Text word error details:', {
-                message: textWordError.message,
-                details: textWordError.details,
-                hint: textWordError.hint,
-                code: textWordError.code
-              })
-            } else {
-              console.log(`✅ Linked word "${wordData.word}" to text "${text.title}"`)
-            }
-          } else {
-            console.error('Word was not inserted, cannot link to text')
-          }
-        }
-        
-        // Insert questions for this specific text
+        // Removed all logic for inserting words into dictionary and linking to text
+        // Only insert questions for this specific text
         for (let j = 0; j < text.questions.length; j++) {
           const questionRecord = {
             text_id: insertedText.id, // Use the actual inserted text ID
@@ -278,14 +197,12 @@ export class TextImportService {
             difficulty: text.level,
             created_at: new Date().toISOString()
           }
-          
           questionsToInsert.push(questionRecord)
         }
       }
       
       // Insert questions
       if (questionsToInsert.length > 0) {
-        console.log('Attempting to insert questions:', questionsToInsert)
         const { data: insertedQuestions, error: questionError } = await client
           .from('text_questions')
           .insert(questionsToInsert)
@@ -303,8 +220,6 @@ export class TextImportService {
           // Don't fail the entire import if questions fail
           // Just log the error and continue
           console.warn('Question insertion failed, but continuing with text import')
-        } else {
-          console.log('Successfully inserted questions:', insertedQuestions)
         }
       }
       
@@ -351,7 +266,7 @@ export class TextImportService {
   
   // Validate text format
   validateText(text) {
-    const requiredFields = ['title', 'level', 'target_language', 'text', 'words', 'questions']
+    const requiredFields = ['title', 'level', 'target_language', 'text', 'questions']
     
     for (const field of requiredFields) {
       if (!text[field]) {
@@ -362,27 +277,10 @@ export class TextImportService {
       }
     }
     
-    if (!Array.isArray(text.words) || text.words.length === 0) {
-      return {
-        valid: false,
-        error: 'Поле words должно быть массивом и содержать хотя бы одно слово'
-      }
-    }
-    
     if (!Array.isArray(text.questions) || text.questions.length === 0) {
       return {
         valid: false,
         error: 'Поле questions должно быть массивом и содержать хотя бы один вопрос'
-      }
-    }
-    
-    // Validate words format
-    for (const word of text.words) {
-      if (!word.word || !word.translations) {
-        return {
-          valid: false,
-          error: 'Каждое слово должно содержать поле word и translations'
-        }
       }
     }
     

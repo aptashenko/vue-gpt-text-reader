@@ -88,6 +88,43 @@ export class GPTService {
     return data.choices[0].message.content
   }
 
+  // Translate a single word from targetLanguage to nativeLanguage, with optional context
+  async translateWord(word, targetLanguage, nativeLanguage, context = '') {
+    if (!this.apiKey) {
+      // Fallback: return the word itself as translation
+      return { translation: `[${word}]` }
+    }
+    const targetLangName = this.getLanguageName(targetLanguage)
+    const nativeLangName = this.getLanguageName(nativeLanguage)
+    const messages = [
+      { role: 'system', content: 'You are a helpful language learning assistant.' },
+    ]
+    if (context) {
+      messages.push({ role: 'user', content: `Here is the text for context:\n${context}` })
+    }
+    messages.push({
+      role: 'user',
+      content: `Translate the word "${word}" from ${targetLangName} to ${nativeLangName} in the context of the text above. Provide only the translation, no explanation.`
+    })
+    const response = await fetch(this.apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-mini',
+        messages,
+        temperature: 0.2,
+        max_tokens: 60
+      })
+    })
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data = await response.json()
+    // Return the translation as a string
+    return { translation: data.choices[0].message.content.trim() }
+  }
+
   buildPrompt(questions, userAnswers, targetLanguage, nativeLanguage, minimizedText) {
     const targetLangName = this.getLanguageName(targetLanguage)
     const nativeLangName = this.getLanguageName(nativeLanguage)

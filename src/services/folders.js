@@ -55,7 +55,6 @@ export class FoldersService {
       return await this.getFolderWords(userId, folderId, 'known')
     } catch (error) {
       // If word_status column doesn't exist, return empty array
-      console.log('getKnownWords failed, word_status column may not exist:', error.message)
       return []
     }
   }
@@ -66,7 +65,6 @@ export class FoldersService {
       return await this.getFolderWords(userId, folderId, 'unknown')
     } catch (error) {
       // If word_status column doesn't exist, return all words as unknown
-      console.log('getUnknownWords failed, falling back to all words:', error.message)
       return await this.getFolderWords(userId, folderId)
     }
   }
@@ -85,7 +83,6 @@ export class FoldersService {
       if (error) throw error
       return data[0]
     } catch (error) {
-      console.log('updateWordStatus failed, word_status column may not exist:', error.message)
       throw error
     }
   }
@@ -95,7 +92,6 @@ export class FoldersService {
     try {
       return await this.updateWordStatus(userId, folderId, wordId, 'known')
     } catch (error) {
-      console.log('markWordAsKnown failed:', error.message)
       throw error
     }
   }
@@ -105,7 +101,6 @@ export class FoldersService {
     try {
       return await this.updateWordStatus(userId, folderId, wordId, 'unknown')
     } catch (error) {
-      console.log('markWordAsUnknown failed:', error.message)
       throw error
     }
   }
@@ -128,7 +123,6 @@ export class FoldersService {
       
       return counts
     } catch (error) {
-      console.log('getFolderWordCountsByStatus failed, word_status column may not exist:', error.message)
       // Return default counts if column doesn't exist
       return { known: 0, unknown: 0 }
     }
@@ -160,6 +154,16 @@ export class FoldersService {
       .eq('word_id', wordId)
     
     if (error) throw error
+  }
+
+  // Clear all words from a folder for a user
+  static async clearFolder(userId, folderId) {
+    const { error } = await supabase
+      .from('user_folder_words')
+      .delete()
+      .eq('user_id', userId)
+      .eq('folder_id', folderId);
+    if (error) throw error;
   }
 
   // Get folder info
@@ -241,7 +245,6 @@ export class FoldersService {
           throw new Error('No valid JSON found in response')
         }
       } catch (parseError) {
-        console.error('Failed to parse GPT response:', response)
         throw new Error('Failed to parse generated words')
       }
 
@@ -290,14 +293,12 @@ export class FoldersService {
             })
           }
         } catch (wordError) {
-          console.error('Failed to add word:', wordData.word, wordError)
           // Continue with other words
         }
       }
 
       return addedWords
     } catch (error) {
-      console.error('Failed to generate words:', error)
       throw error
     }
   }

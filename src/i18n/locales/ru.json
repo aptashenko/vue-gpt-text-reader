@@ -83,7 +83,12 @@
     "answerPlaceholder": "Ваш ответ на вопрос {number}...",
     "checkingAnswers": "Проверяем ответы...",
     "errorCheckingAnswers": "Ошибка при проверке ответов. Попробуйте еще раз.",
-    "textPronunciationComingSoon": "Функция прослушивания текста появится в следующем обновлении"
+    "textPronunciationComingSoon": "Функция прослушивания текста появится в следующем обновлении",
+    "translateWithAI": "Получить перевод",
+    "translating": "Перевод...",
+    "addToFlashcards": "Добавить в карточки",
+    "addedToFlashcards": "Добавлено в карточки!",
+    "translationError": "Ошибка перевода. Попробуйте еще раз."
   },
   "resultPage": {
     "results": "Результаты",
@@ -410,6 +415,8 @@
     "folderEmpty": "Эта папка пуста.",
     "generatePrompt": "Нажмите кнопку ниже, чтобы сгенерировать 10 новых слов для этой темы.",
     "selectLevel": "Выбрать уровень сложности",
-    "chooseLevel": "Выбрать уровень"
+    "chooseLevel": "Выбрать уровень",
+    "clearFolder": "Очистить папку",
+    "removeWord": "Удалить слово"
   }
 }

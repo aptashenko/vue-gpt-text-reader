@@ -28,7 +28,7 @@
         >
           {{ $t('navigation.feedback') }}
         </button>
-        <button
+        <button 
           v-if="authStore.isAuthenticated || authStore.isGuestMode"
           @click="() => { goToSavedWords(); closeMobileMenu(); }"
           class="saved-words-button"

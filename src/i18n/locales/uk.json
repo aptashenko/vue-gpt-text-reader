@@ -83,7 +83,12 @@
     "answerPlaceholder": "Ваша відповідь на питання {number}...",
     "checkingAnswers": "Перевірка відповідей...",
     "errorCheckingAnswers": "Помилка перевірки відповідей. Спробуйте ще раз.",
-    "textPronunciationComingSoon": "Функція прослуховування тексту зʼявиться у наступному релізі"
+    "textPronunciationComingSoon": "Функція прослуховування тексту зʼявиться у наступному релізі",
+    "translateWithAI": "Отримати переклад",
+    "translating": "Переклад...",
+    "addToFlashcards": "Додати до карток",
+    "addedToFlashcards": "Додано до карток!",
+    "translationError": "Помилка перекладу. Спробуйте ще раз."
   },
   "resultPage": {
     "results": "Результати",
@@ -410,6 +415,8 @@
     "folderEmpty": "Ця папка порожня.",
     "generatePrompt": "Натисніть кнопку нижче, щоб згенерувати 10 нових слів для цієї теми.",
     "selectLevel": "Вибрати рівень складності",
-    "chooseLevel": "Вибрати рівень"
+    "chooseLevel": "Вибрати рівень",
+    "clearFolder": "Очистити папку",
+    "removeWord": "Видалити слово"
   }
 }

@@ -53,7 +53,6 @@ export const useLanguageLearningStore = defineStore('languageLearning', () => {
         targetLanguage.value = preferences.targetLanguage || ''
         nativeLanguage.value = preferences.nativeLanguage || ''
         level.value = preferences.level || ''
-        console.log(nativeLanguage.value, '1')
 
       } else {
         console.log('loadStoredPreferences - No stored preferences found')
@@ -98,7 +97,6 @@ export const useLanguageLearningStore = defineStore('languageLearning', () => {
     targetLanguage.value = target
     nativeLanguage.value = native
     level.value = userLevel
-    console.log(nativeLanguage.value, '2')
 
     savePreferencesToStorage()
     // Update i18n locale when native language changes
@@ -124,7 +122,6 @@ export const useLanguageLearningStore = defineStore('languageLearning', () => {
         const preferences = await UserPreferencesService.getUserPreferences(userId)
         if (preferences.native_language) {
           nativeLanguage.value = preferences.native_language
-          console.log(nativeLanguage.value, '3')
           savePreferencesToStorage()
         }
       } else {

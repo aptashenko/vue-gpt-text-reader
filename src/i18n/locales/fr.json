@@ -83,7 +83,12 @@
     "answerPlaceholder": "Votre réponse à la question {number}...",
     "checkingAnswers": "Vérification des réponses...",
     "errorCheckingAnswers": "Erreur lors de la vérification. Veuillez réessayer.",
-    "textPronunciationComingSoon": "La fonction d'écoute du texte sera disponible dans la prochaine version"
+    "textPronunciationComingSoon": "La fonction d'écoute du texte sera disponible dans la prochaine version",
+    "translateWithAI": "Obtenir la traduction",
+    "translating": "Traduction en cours...",
+    "addToFlashcards": "Ajouter aux flashcards",
+    "addedToFlashcards": "Ajouté aux flashcards !",
+    "translationError": "Échec de la traduction. Réessayez."
   },
   "resultPage": {
     "results": "Résultats",
@@ -410,6 +415,8 @@
     "folderEmpty": "Ce dossier est vide.",
     "generatePrompt": "Cliquez sur le bouton ci-dessous pour générer 10 nouveaux mots pour ce sujet.",
     "selectLevel": "Sélectionner le niveau de difficulté",
-    "chooseLevel": "Choisir un niveau"
+    "chooseLevel": "Choisir un niveau",
+    "clearFolder": "Vider le dossier",
+    "removeWord": "Supprimer le mot"
   }
 }

@@ -191,16 +191,7 @@ function downloadSample() {
       "level": "A1",
       "target_language": "fr",
       "text": "Это пример текста.\nОн содержит несколько абзацев.\nКаждый абзац на новой строке.",
-      "words": [
-        {
-          "word": "пример",
-          "translations": {
-            "uk": "приклад",
-            "en": "example",
-            "ru": "пример"
-          }
-        }
-      ],
+      // Removed 'words' field
       "questions": [
         "Какой это пример?",
         "Что содержится в тексте?"

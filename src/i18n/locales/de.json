@@ -38,6 +38,8 @@
     "folderEmpty": "Dieser Ordner ist leer.",
     "generatePrompt": "Klicke auf den Button unten, um 10 neue Wörter für dieses Thema zu generieren.",
     "selectLevel": "Schwierigkeitsgrad auswählen",
-    "chooseLevel": "Level wählen"
+    "chooseLevel": "Level wählen",
+    "clearFolder": "Ordner leeren",
+    "removeWord": "Wort entfernen"
   }
 }
