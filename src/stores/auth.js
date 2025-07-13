@@ -29,8 +29,8 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       // Get current session
-      const { data: { session } } = await supabase.auth.getSession()
-      
+      const { data: { session } } = await supabase.auth.getSession();
+
       if (session) {
         user.value = session.user
       }
@@ -49,7 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       // Store subscription for cleanup
       authSubscription.value = subscription
-      
+
     } catch (error) {
       console.error('Error initializing auth:', error)
     } finally {
@@ -81,15 +81,15 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       // Disable guest mode when signing in
       disableGuestMode()
-      
+
       const { data, error } = await auth.signIn(email, password)
-      
+
       if (error) {
         throw error
       }
 
       if (data.user) {
-        
+
         // Track user login for analytics
         try {
           await analyticsService.trackUserLogin(email, String(data.user.id))
@@ -109,9 +109,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       // Disable guest mode when signing up
       disableGuestMode()
-      
+
       const { data, error } = await auth.signUp(email, password)
-      
+
       if (error) {
         throw error
       }
@@ -139,23 +139,23 @@ export const useAuthStore = defineStore('auth', () => {
       const wasGuestMode = isGuestMode.value
       user.value = null
       isGuestMode.value = false
-      
+
       // Clear any stored session data
       localStorage.removeItem('supabase.auth.token')
       localStorage.removeItem('guestMode')
-      
+
       // If in guest mode, just return success
       if (wasGuestMode) {
         return { success: true }
       }
-      
+
       // Sign out from Supabase if authenticated
       const { error } = await supabase.auth.signOut()
-      
+
       if (error) {
         throw error
       }
-      
+
       return { success: true }
     } catch (error) {
       console.error('Sign out error:', error)
@@ -166,7 +166,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function resetPassword(email) {
     try {
       const { error } = await auth.resetPassword(email)
-      
+
       if (error) {
         throw error
       }
@@ -181,7 +181,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function updatePassword(password) {
     try {
       const { error } = await auth.updatePassword(password)
-      
+
       if (error) {
         throw error
       }
@@ -208,11 +208,11 @@ export const useAuthStore = defineStore('auth', () => {
     loading,
     initialized,
     isGuestMode,
-    
+
     // Computed
     isAuthenticated,
     canAccessProtectedRoutes,
-    
+
     // Actions
     initializeAuth,
     enableGuestMode,
@@ -224,4 +224,4 @@ export const useAuthStore = defineStore('auth', () => {
     updatePassword,
     cleanup
   }
-}) 
+})

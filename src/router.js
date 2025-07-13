@@ -10,12 +10,11 @@ const router = createRouter({
 // Navigation guard to check authentication
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  
   // Initialize auth if not already done
   if (!authStore.initialized) {
     await authStore.initializeAuth()
   }
-  
+
   // Wait for auth to initialize if it's still loading
   if (authStore.loading) {
     await new Promise(resolve => {
@@ -31,7 +30,7 @@ router.beforeEach(async (to, from, next) => {
   const isAuthenticated = authStore.isAuthenticated
   const isGuestMode = authStore.isGuestMode
   const canAccessProtectedRoutes = authStore.canAccessProtectedRoutes
-  
+
   // Check if route requires authentication
   const requiresAuth = to.meta.requiresAuth !== false // Default to requiring auth
   const isAuthPage = to.meta.isAuthPage === true
@@ -81,4 +80,4 @@ router.afterEach((to, from) => {
   })
 })
 
-export default router 
+export default router

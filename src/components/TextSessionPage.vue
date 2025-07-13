@@ -35,9 +35,9 @@
           <div class="section-header">
             <h2 class="section-title">{{ $t('textSession.textForReading') }}</h2>
           </div>
-          <button 
-              @click="playTextPronunciation()" 
-              class="text-pronunciation-btn" 
+          <button
+              @click="playTextPronunciation()"
+              class="text-pronunciation-btn"
               disabled
               :title="$t('textSession.textPronunciationComingSoon')"
             >
@@ -66,7 +66,7 @@
           </div>
           <div v-else>
             <div class="panel-translation">{{ panel.translation }}</div>
-            <button class="panel-btn" :disabled="panel.added" @click="addToFlashcards(panel.word, panel.translation)">
+            <button v-if="!authStore.isGuestMode" class="panel-btn" :disabled="panel.added" @click="addToFlashcards(panel.word, panel.translation)">
               <span v-if="panel.added">✅ {{ $t('textSession.addedToFlashcards') }}</span>
               <span v-else>{{ $t('textSession.addToFlashcards') }}</span>
             </button>
@@ -76,8 +76,8 @@
         <section class="questions-section">
           <h2 class="section-title">{{ $t('textSession.questions') }}</h2>
           <div class="questions-list">
-            <div 
-              v-for="(question, index) in currentTextQuestions" 
+            <div
+              v-for="(question, index) in currentTextQuestions"
               :key="index"
               class="question-item"
             >
@@ -92,8 +92,8 @@
               ></textarea>
             </div>
           </div>
-          
-          <button 
+
+          <button
             @click="checkAnswers"
             class="check-button"
             :disabled="!canSubmit || checking"
@@ -133,7 +133,7 @@ const fetchError = ref('')
 const addedWords = ref(new Set());
 
 // Load user preferences on mount
-onMounted(async () => {  
+onMounted(async () => {
   // Load preferences from localStorage (already done in store)
   // Also load from database if user is authenticated
   if (authStore.user) {
@@ -141,7 +141,7 @@ onMounted(async () => {
   }
 
   store.sessionStartTime = Date.now()
-  
+
   // If we have a text ID in the route, fetch the text
   if (route.params.id) {
     await fetchTextById(route.params.id)
@@ -218,7 +218,7 @@ const splitTextWithArticles = computed(() => {
 })
 
 const canSubmit = computed(() => {
-  return currentTextQuestions.value.length > 0 && 
+  return currentTextQuestions.value.length > 0 &&
          userAnswers.value.some(answer => answer && answer.trim())
 })
 
@@ -227,14 +227,14 @@ async function fetchTextById(id) {
   loadingText.value = true
   fetchError.value = ''
   try {
-    
+
     // Fetch text data
     const { data: textData, error: textError } = await supabase
       .from('texts')
       .select('*')
       .eq('id', id)
       .single()
-        
+
     if (textError) {
       console.error('Supabase text error:', textError)
       if (textError.code === 'PGRST116') {
@@ -245,26 +245,26 @@ async function fetchTextById(id) {
       store.currentText = null
       return
     }
-    
+
     if (!textData) {
       fetchError.value = 'Текст не найден или произошла ошибка.'
       store.currentText = null
       return
     }
-        
+
     // Fetch questions for this text
     const { data: questionsData, error: questionsError } = await supabase
       .from('text_questions')
       .select('*')
       .eq('text_id', id)
       .order('question_number')
-        
+
     if (questionsError) {
       console.error('Supabase questions error:', questionsError)
       // Don't fail the entire fetch if questions fail, just log the error
       console.warn('Failed to fetch questions, but continuing with text')
     }
-    
+
     // Fetch words for this text (from text_words table)
     const { data: textWordsData, error: textWordsError } = await supabase
       .from('text_words')
@@ -285,13 +285,13 @@ async function fetchTextById(id) {
       `)
       .eq('text_id', id)
       .order('word_order')
-        
+
     if (textWordsError) {
       console.error('Supabase text_words error:', textWordsError)
       // Don't fail the entire fetch if words fail, just log the error
       console.warn('Failed to fetch text words, but continuing with text')
     }
-    
+
     // Transform words data to match expected structure
     const transformedWords = (textWordsData || [])
       .filter(item => item.dictionary) // Filter out any null dictionary entries
@@ -309,7 +309,7 @@ async function fetchTextById(id) {
         difficulty: item.dictionary.difficulty,
         id: item.dictionary.id // Add the dictionary ID
       }))
-    
+
     // Normalize to match expected structure
     store.currentText = {
       ...textData,
@@ -317,16 +317,16 @@ async function fetchTextById(id) {
       words: transformedWords,
       questions: questionsData ? questionsData.map(q => q.question_text) : []
     }
-    
+
     // Initialize user answers array with the correct length
     userAnswers.value = new Array(store.currentText.questions.length).fill('')
     store.sessionResults = null
-    
+
     // Отслеживаем начало чтения текста
     try {
       await analyticsService.trackTextRead(
-        textData.title, 
-        textData.language, 
+        textData.title,
+        textData.language,
         getAnalyticsUserId(),
         store.nativeLanguage
       )
@@ -342,7 +342,7 @@ async function fetchTextById(id) {
         language: textData.language,
         user_id: getAnalyticsUserId()
       })
-      
+
       // Track active user when they start reading
       await analyticsService.trackActiveUser('daily', getAnalyticsUserId())
     } catch (analyticsError) {
@@ -352,7 +352,7 @@ async function fetchTextById(id) {
     console.error('Exception during text fetch:', err)
     fetchError.value = 'Ошибка при загрузке текста.'
     store.currentText = null
-    
+
     // Отслеживаем ошибку загрузки текста
     try {
       await analyticsService.trackAppError(err, 'text_session_fetch', getAnalyticsUserId())
@@ -391,12 +391,12 @@ async function checkAnswers() {
       currentText.value?.text || ''
     )
     store.setSessionResults(results)
-    
+
     // Отслеживаем завершение текста и ответы на вопросы
     try {
       const sessionDurationMs = Date.now() - (store.sessionStartTime || Date.now())
       const sessionDuration = formatDuration(sessionDurationMs)
-      
+
       // Отслеживаем завершение текста
       await analyticsService.trackTextCompleted(
         store.currentText.title,
@@ -404,12 +404,12 @@ async function checkAnswers() {
         getAnalyticsUserId(),
         sessionDuration
       )
-      
+
       // Отслеживаем ответы на вопросы
       for (let i = 0; i < currentTextQuestions.value.length; i++) {
         const isCorrect = results.answers[i]?.isCorrect || false
         await analyticsService.trackQuestionAnswered(i + 1, isCorrect, getAnalyticsUserId())
-        
+
         if (isCorrect) {
           await analyticsService.trackMetric('correct_answer', 1, {
             question_id: i + 1,
@@ -422,13 +422,13 @@ async function checkAnswers() {
           })
         }
       }
-      
+
       // Отслеживаем общую статистику
       await analyticsService.trackMetric('question_answered', currentTextQuestions.value.length, {
         text_id: store.currentText.id,
         user_id: getAnalyticsUserId()
       })
-      
+
       // Отслеживаем завершение сессии
       await analyticsService.trackTextSessionEnded(
         store.currentText.id,
@@ -437,24 +437,24 @@ async function checkAnswers() {
         sessionDuration,
         getAnalyticsUserId()
       )
-      
+
     } catch (analyticsError) {
       console.error('Analytics tracking error:', analyticsError)
     } finally {
       store.sessionStartTime = null
     }
-    
+
     router.push('/result')
   } catch (error) {
     console.error('Error checking answers:', error)
-    
+
     // Отслеживаем ошибку
     try {
       await analyticsService.trackAppError(error, 'text_session_check_answers', getAnalyticsUserId())
     } catch (analyticsError) {
       console.error('Analytics error tracking failed:', analyticsError)
     }
-    
+
     alert('Ошибка при проверке ответов. Попробуйте еще раз.')
   } finally {
     checking.value = false
@@ -838,7 +838,7 @@ onMounted(async () => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
 }
 .save-btn:active {
   transform: scale(0.97);
@@ -998,15 +998,15 @@ onMounted(async () => {
     padding: 20px;
     margin: 10px 0;
   }
-  
+
   .text-title {
     font-size: 1.5rem;
   }
-  
+
   .dictionary-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .text-content {
     font-size: 1rem;
   }
@@ -1087,4 +1087,4 @@ onMounted(async () => {
     padding: 7px 10px;
   }
 }
-</style> 
+</style>

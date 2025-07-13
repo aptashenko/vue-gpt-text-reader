@@ -4,13 +4,13 @@
       <!-- Folder View -->
       <div v-if="!currentFolder" class="folder-view">
         <h1 class="title">{{ $t('savedWords.title') }}</h1>
-        
+
         <!-- Language Filter -->
         <div class="language-filter">
           <label for="language-select">{{ $t('savedWords.languageFilter') }}:</label>
-          <select 
-            id="language-select" 
-            v-model="selectedLanguage" 
+          <select
+            id="language-select"
+            v-model="selectedLanguage"
             @change="filterByLanguage"
             class="language-select"
           >
@@ -21,10 +21,10 @@
         </div>
 
         <div v-if="loading" class="loading">{{ $t('savedWords.loading') }}</div>
-        
+
         <div v-else class="folders-grid">
-          <div 
-            v-for="folder in filteredFolders" 
+          <div
+            v-for="folder in filteredFolders"
             :key="folder.id"
             @click="openFolder(folder)"
             class="folder-card"
@@ -60,15 +60,15 @@
 
         <!-- Word Status Tabs -->
         <div class="word-status-tabs">
-          <button 
-            @click="setActiveTab('unknown')" 
+          <button
+            @click="setActiveTab('unknown')"
             class="tab-button"
             :class="{ active: activeTab === 'unknown' }"
           >
             {{ $t('savedWords.unknownWords') }} ({{ unknownWords.length }})
           </button>
-          <button 
-            @click="setActiveTab('known')" 
+          <button
+            @click="setActiveTab('known')"
             class="tab-button"
             :class="{ active: activeTab === 'known' }"
           >
@@ -79,13 +79,13 @@
         <!-- Generate Words Button for Thematic Folders -->
         <div v-if="!currentFolder.is_default && !generating && activeTab === 'unknown'" class="generate-section">
           <p class="generate-prompt">{{ $t('savedWords.generatePrompt') }}</p>
-          
+
           <!-- Level Selection -->
           <div class="level-selection">
             <label for="level-select">{{ $t('savedWords.selectLevel') }}:</label>
-            <select 
-              id="level-select" 
-              v-model="selectedLevel" 
+            <select
+              id="level-select"
+              v-model="selectedLevel"
               class="level-select"
               :disabled="generating"
             >
@@ -95,9 +95,9 @@
               <option value="B1">{{ $t('levels.B1') }}</option>
             </select>
           </div>
-          
-          <button 
-            @click="generateWords" 
+
+          <button
+            @click="generateWords"
             class="generate-button"
             :disabled="!selectedLevel || generating"
           >
@@ -136,7 +136,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Unknown Words Controls -->
           <div v-if="activeTab === 'unknown'" class="flashcard-controls unknown-controls">
             <button @click="markAsUnknown" class="control-button unknown-button">
@@ -152,7 +152,7 @@
               {{ $t('savedWords.removeWord') }}
             </button>
           </div>
-          
+
           <!-- Known Words Controls -->
           <div v-else class="flashcard-controls known-controls">
             <button @click="prevCard" :disabled="currentIndex === 0" class="control-button">
@@ -215,7 +215,7 @@ const currentCard = computed(() => currentWords.value[currentIndex.value] || {})
 
 const allLanguages = computed(() => {
   // Always show all default languages, plus any found in availableLanguages
-  const langs = new Set([...DEFAULT_LANGUAGES, ...(availableLanguages.value || [])])
+  const langs = new Set([...DEFAULT_LANGUAGES, ...(availableLanguages.value.filter(item => !['de', 'es'].includes(item)) || [])])
   return Array.from(langs).sort()
 })
 
@@ -250,8 +250,8 @@ function getLanguageName(code) {
   const languages = {
     fr: 'French',
     en: 'English',
-    es: 'Spanish',
-    de: 'German',
+    // es: 'Spanish',
+    // de: 'German',
     ru: 'Russian',
     uk: 'Ukrainian'
   }
@@ -263,7 +263,7 @@ async function loadFolders() {
   if (foldersCache.value[lang]) {
     const cache = foldersCache.value[lang];
     folders.value = cache.folders
-    availableLanguages.value = cache.availableLanguages
+    availableLanguages.value = cache.availableLanguages;
     folderWordCounts.value = cache.folderWordCounts
     folderWordCountsByLanguage.value = cache.folderWordCountsByLanguage
     loading.value = false
@@ -271,7 +271,8 @@ async function loadFolders() {
   }
   loading.value = true
   try {
-    const user = authStore.user
+    const user = authStore.user;
+    console.log(user)
     if (!user) {
       router.push('/login')
       return
@@ -341,31 +342,31 @@ async function loadFolderWords(folderId) {
   loading.value = true
   try {
     const user = authStore.user
-    
+
     // Load all words from the folder (temporarily without status filtering)
     const folderWordsData = await FoldersService.getFolderWords(user.id, folderId)
-    
+
     // Filter by selected language
-    const filteredWords = folderWordsData.filter(item => 
+    const filteredWords = folderWordsData.filter(item =>
       item.dictionary.language === targetLanguage.value
     )
-    
+
     // For now, treat all words as unknown until the database migration is applied
     // This will be updated once the word_status column is added
     const allWords = filteredWords.map(item => ({
       id: item.id,
       wordId: item.dictionary.id,
       word: item.dictionary.word,
-      translation: item.dictionary[`translation_${userNativeLanguage.value}`] || 
-                  item.dictionary.translation_en || 
+      translation: item.dictionary[`translation_${userNativeLanguage.value}`] ||
+                  item.dictionary.translation_en ||
                   item.dictionary.word,
       status: item.word_status || 'unknown' // Fallback to 'unknown' if column doesn't exist
     }))
-    
+
     // Split into known and unknown lists
     knownWords.value = allWords.filter(word => word.status === 'known')
     unknownWords.value = allWords.filter(word => word.status === 'unknown')
-    
+
     currentIndex.value = 0
     isFlipped.value = false
   } catch (e) {
@@ -377,20 +378,20 @@ async function loadFolderWords(folderId) {
 
 async function generateWords() {
   if (!currentFolder.value || currentFolder.value.is_default || !selectedLevel.value) return
-  
+
   generating.value = true
   try {
     const user = authStore.user
     const addedWords = await FoldersService.generateWordsForFolder(
-      user.id, 
-      currentFolder.value.id, 
+      user.id,
+      currentFolder.value.id,
       userNativeLanguage.value,
       targetLanguage.value,
       selectedLevel.value
     )
-    
+
     generatedCount.value = addedWords.length
-    
+
     // LogSnag: Track word generation event
     if (user && currentFolder.value) {
       analyticsService.track('words_generated', {
@@ -412,11 +413,11 @@ async function generateWords() {
     // Reload folder words and all folder counts in one go
     await loadFolderWords(currentFolder.value.id)
     await loadFolders() // This will refresh all counts and batch data
-    
+
     setTimeout(() => {
       generatedCount.value = 0
     }, 3000)
-    
+
   } catch (e) {
     console.error('Failed to generate words:', e)
   } finally {
@@ -426,30 +427,30 @@ async function generateWords() {
 
 async function markAsKnown() {
   if (!currentCard.value || activeTab.value !== 'unknown') return
-  
+
   try {
     const user = authStore.user
     const currentWord = currentCard.value
-    
+
     // Try to update the word status in the database (will fail gracefully if column doesn't exist)
     try {
       await FoldersService.markWordAsKnown(user.id, currentFolder.value.id, currentWord.wordId)
     } catch (dbError) {
       console.log('Database update failed (word_status column may not exist yet):', dbError.message)
     }
-    
+
     // Move word from unknown to known list
     const wordIndex = unknownWords.value.findIndex(w => w.id === currentWord.id)
     if (wordIndex !== -1) {
       const movedWord = unknownWords.value.splice(wordIndex, 1)[0]
       movedWord.status = 'known'
       knownWords.value.push(movedWord)
-      
+
       // If we're at the end of the unknown words, go back to the beginning
       if (currentIndex.value >= unknownWords.value.length) {
         currentIndex.value = Math.max(0, unknownWords.value.length - 1)
       }
-      
+
       isFlipped.value = false
     }
   } catch (e) {
@@ -459,7 +460,7 @@ async function markAsKnown() {
 
 async function markAsUnknown() {
   if (!currentCard.value || activeTab.value !== 'unknown') return
-  
+
   // Just move to the next card, word stays in unknown list
   nextCard()
 }
@@ -498,7 +499,7 @@ function flipCard() {
 
 function nextCard() {
   if (currentWords.value.length === 0) return
-  
+
   if (currentIndex.value < currentWords.value.length - 1) {
     currentIndex.value++
   } else {
@@ -510,7 +511,7 @@ function nextCard() {
 
 function prevCard() {
   if (currentWords.value.length === 0) return
-  
+
   if (currentIndex.value > 0) {
     currentIndex.value--
   } else {
@@ -1047,29 +1048,29 @@ onMounted(async () => {
   .remove-button {
     margin-left: 0;
   }
-  
+
   .word-status-tabs {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .tab-button {
     width: 100%;
   }
-  
+
   .flashcard-controls {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .control-button {
     width: 100%;
     max-width: 200px;
   }
-  
+
   .counter {
     order: -1;
     margin-bottom: 10px;
   }
 }
-</style> 
+</style>

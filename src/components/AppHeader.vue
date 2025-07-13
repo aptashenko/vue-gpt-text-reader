@@ -6,39 +6,39 @@
           {{ $t('app.title') }}
         </h1>
       </div>
-      
+
       <!-- Desktop Navigation -->
       <div class="header-right desktop-nav">
         <div class="user-info">
           <span class="user-email">{{ userEmail }}</span>
         </div>
-        <button 
+        <button
           v-if="isAdmin"
-          @click="() => { goToAdmin(); closeMobileMenu(); }" 
+          @click="() => { goToAdmin(); closeMobileMenu(); }"
           class="admin-button"
           :title="$t('navigation.admin')"
         >
           {{ $t('navigation.admin') }}
         </button>
-        <button 
-          v-if="!isAdmin" 
-          @click="() => { goToFeedback(); closeMobileMenu(); }" 
+        <button
+          v-if="false"
+          @click="() => { goToFeedback(); closeMobileMenu(); }"
           class="feedback-button"
           :title="$t('navigation.feedback')"
         >
           {{ $t('navigation.feedback') }}
         </button>
-        <button 
-          v-if="authStore.isAuthenticated || authStore.isGuestMode"
+        <button
+          v-if="authStore.isAuthenticated"
           @click="() => { goToSavedWords(); closeMobileMenu(); }"
           class="saved-words-button"
           :title="$t('navigation.savedWords')"
         >
           📚 {{ $t('navigation.savedWords') }}
         </button>
-        <button 
+        <button
           v-if="!isAdmin"
-          @click="() => { buyMeACoffee(); closeMobileMenu(); }" 
+          @click="() => { buyMeACoffee(); closeMobileMenu(); }"
           class="coffee-button"
           title="Buy me a coffee"
         >
@@ -55,8 +55,8 @@
 
       <!-- Mobile Burger Menu Button -->
       <div class="mobile-nav">
-        <button 
-          @click="toggleMobileMenu" 
+        <button
+          @click="toggleMobileMenu"
           class="burger-button"
           :class="{ 'active': isMobileMenuOpen }"
           aria-label="Toggle navigation menu"
@@ -69,14 +69,14 @@
     </div>
 
     <!-- Mobile Menu Overlay -->
-    <div 
-      v-if="isMobileMenuOpen" 
+    <div
+      v-if="isMobileMenuOpen"
       class="mobile-menu-overlay"
       @click="closeMobileMenu"
     ></div>
-    
+
     <!-- Mobile Menu -->
-    <div 
+    <div
       class="mobile-menu"
       :class="{ 'open': isMobileMenuOpen }"
     >
@@ -84,8 +84,8 @@
         <div class="mobile-user-info">
           <span class="mobile-user-email">{{ userEmail }}</span>
         </div>
-        <button 
-           
+        <button
+
           class="close-button"
           aria-label="Close menu"
           @click="closeMobileMenu"
@@ -93,50 +93,51 @@
           ✕
         </button>
       </div>
-      
+
       <nav class="mobile-nav-links">
-        <button 
-          @click="() => { goToFeedback(); closeMobileMenu(); }" 
+        <button
+          v-if="false"
+          @click="() => { goToFeedback(); closeMobileMenu(); }"
           class="mobile-nav-item"
-          
+
         >
           <span class="mobile-nav-icon">💬</span>
           {{ $t('navigation.feedback') }}
         </button>
         <button
-          v-if="authStore.isAuthenticated || authStore.isGuestMode"
+          v-if="authStore.isAuthenticated"
           @click="() => { goToSavedWords(); closeMobileMenu(); }"
           class="mobile-nav-item"
         >
           <span class="mobile-nav-icon">📚</span>
           {{ $t('navigation.savedWords') }}
         </button>
-        <button 
+        <button
           v-if="isAdmin"
-          @click="() => { goToAdmin(); closeMobileMenu(); }" 
+          @click="() => { goToAdmin(); closeMobileMenu(); }"
           class="mobile-nav-item"
-          
+
         >
           <span class="mobile-nav-icon">⚙️</span>
           {{ $t('navigation.admin') }}
         </button>
-        <button 
+        <button
         v-if="!isAdmin"
-          @click="() => { buyMeACoffee(); closeMobileMenu(); }" 
+          @click="() => { buyMeACoffee(); closeMobileMenu(); }"
           class="mobile-nav-item"
         >
           <span class="mobile-nav-icon">☕</span>
           Buy me a coffee
         </button>
-        
+
         <div class="mobile-nav-divider"></div>
-        <LogoutButton 
+        <LogoutButton
         v-if="authStore.isAuthenticated || authStore.isGuestMode"
           variant="mobile"
           :text="$t('navigation.logout')"
           @logout-success="() => { handleLogoutSuccess(); closeMobileMenu(); }"
           @logout-error="handleLogoutError"
-          
+
         />
       </nav>
     </div>
@@ -167,20 +168,20 @@ const userEmail = computed(() => {
 const isAdmin = computed(() => {
   const user = authStore.user
   if (!user) return false
-  
+
   // Check if user has admin role in user_metadata
   const userMetadata = user.user_metadata
   if (userMetadata && userMetadata.role === 'admin') {
     return true
   }
-  
+
   // Check by email
   const adminEmails = [
     'aptashenko2019@gmail.com',
     'your-email@example.com',
     'admin@example.com'
   ]
-  
+
   return adminEmails.includes(user.email)
 })
 
@@ -207,9 +208,9 @@ function buyMeACoffee() {
     console.log('user_id', getAnalyticsUserId())
     analyticsService.track('coffee_button_clicked', {
       description: 'User clicked Buy me a coffee button',
-      tags: { 
+      tags: {
         user_id: getAnalyticsUserId(),
-        page: route.path 
+        page: route.path
       },
       icon: '☕',
       user_id: getAnalyticsUserId()
@@ -401,15 +402,15 @@ onUnmounted(() => {
   .header-content {
     padding: 0 16px;
   }
-  
+
   .app-title {
     font-size: 1.2rem;
   }
-  
+
   .desktop-nav {
     display: none !important;
   }
-  
+
   .mobile-nav {
     display: block !important;
   }
