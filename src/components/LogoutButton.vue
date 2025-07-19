@@ -15,6 +15,7 @@
 import { ref, nextTick } from 'vue'
 import { logout } from '../utils/auth'
 import { useRouter } from 'vue-router'
+import {useAuthStore1} from "../stores/auth.store.js";
 
 // Props
 const props = defineProps({
@@ -38,34 +39,13 @@ const emit = defineEmits(['logout-success', 'logout-error'])
 
 // Local state
 const loading = ref(false)
-const router = useRouter()
+const router = useRouter();
+const authStore = useAuthStore1();
 
 // Methods
-async function handleLogout() {
-  loading.value = true
-  
-  try {
-    const result = await logout(props.redirectToLogin)
-    
-    if (result.success) {
-      emit('logout-success')
-      
-      // Force navigation if redirect is requested
-      if (props.redirectToLogin) {
-        // Use nextTick to ensure state updates are processed
-        await nextTick()
-        router.push('/login')
-      }
-    } else {
-      emit('logout-error', result.error)
-      console.error('Logout failed:', result.error)
-    }
-  } catch (error) {
-    emit('logout-error', error.message)
-    console.error('Logout error:', error)
-  } finally {
-    loading.value = false
-  }
+const handleLogout = async () => {
+  await authStore.logoutUser()
+  await router.push({name: 'login'})
 }
 </script>
 
@@ -177,10 +157,10 @@ async function handleLogout() {
     padding: 6px 12px;
     font-size: 0.8rem;
   }
-  
+
   .logout-button.icon {
     padding: 6px;
     min-width: 32px;
   }
 }
-</style> 
+</style>
