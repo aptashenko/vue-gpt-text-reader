@@ -29,7 +29,7 @@
           {{ $t('navigation.feedback') }}
         </button>
         <button
-          v-if="authStore.isAuthenticated"
+          v-if="userStore.isLogged"
           @click="() => { goToSavedWords(); closeMobileMenu(); }"
           class="saved-words-button"
           :title="$t('navigation.savedWords')"
@@ -45,7 +45,7 @@
           ☕ Buy me a coffee
         </button>
         <LogoutButton
-        v-if="authStore.isAuthenticated || authStore.isGuestMode"
+        v-if="userStore.isLogged || userStore.isGuest"
           variant="text"
           :text="$t('navigation.logout')"
           @logout-success="() => { handleLogoutSuccess(); closeMobileMenu(); }"
@@ -105,7 +105,7 @@
           {{ $t('navigation.feedback') }}
         </button>
         <button
-          v-if="authStore.isAuthenticated"
+          v-if="userStore.isLogged"
           @click="() => { goToSavedWords(); closeMobileMenu(); }"
           class="mobile-nav-item"
         >
@@ -131,14 +131,7 @@
         </button>
 
         <div class="mobile-nav-divider"></div>
-        <LogoutButton
-        v-if="authStore.isAuthenticated || authStore.isGuestMode"
-          variant="mobile"
-          :text="$t('navigation.logout')"
-          @logout-success="() => { handleLogoutSuccess(); closeMobileMenu(); }"
-          @logout-error="handleLogoutError"
 
-        />
       </nav>
     </div>
   </header>
@@ -152,10 +145,14 @@ import LogoutButton from './LogoutButton.vue'
 import analyticsService from '../services/logsnag.js'
 import { getAnalyticsUserId } from '../utils/analytics.js'
 import { useRoute } from 'vue-router'
+import {useAuthStore1} from "../stores/auth.store.js";
+import {useUserStore} from "../stores/user.store.js";
 
 const router = useRouter()
 const route = useRoute()
-const authStore = useAuthStore()
+const authStore = useAuthStore();
+const authStore1 = useAuthStore1();
+const userStore = useUserStore();
 
 // Reactive data
 const isMobileMenuOpen = ref(false)

@@ -2,7 +2,7 @@ export default [
   {
     path: '/',
     name: 'Landing',
-    component: () => import('./components/LandingPage.vue'),
+    component: () => import('../views/landing.vue'),
     meta: {
       requiresAuth: false,
       isPublicPage: true
@@ -10,16 +10,16 @@ export default [
   },
   {
     path: '/app',
-    name: 'App',
-    component: () => import('./components/StartPage.vue'),
+    name: 'app',
+    component: () => import('../views/start-page.vue'),
     meta: {
       requiresAuth: true // Requires authentication or guest mode
     }
   },
   {
     path: '/login',
-    name: 'Login',
-    component: () => import('./components/LoginPage.vue'),
+    name: 'login',
+    component: () => import('../views/login.vue'),
     meta: {
       requiresAuth: false,
       isAuthPage: true,
@@ -29,7 +29,7 @@ export default [
   {
     path: '/signup',
     name: 'SignUp',
-    component: () => import('./components/SignUpPage.vue'),
+    component: () => import('../views/registration.vue'),
     meta: {
       requiresAuth: false,
       isAuthPage: true,
@@ -39,7 +39,7 @@ export default [
   {
     path: '/session/:id',
     name: 'TextSession',
-    component: () => import('./components/TextSessionPage.vue'),
+    component: () => import('../views/text-session-page.vue'),
     meta: {
       requiresAuth: true // Requires authentication or guest mode
     }
@@ -47,7 +47,7 @@ export default [
   {
     path: '/result',
     name: 'Result',
-    component: () => import('./components/ResultPage.vue'),
+    component: () => import('../components/ResultPage.vue'),
     meta: {
       requiresAuth: true // Requires authentication or guest mode
     }
@@ -55,7 +55,7 @@ export default [
   {
     path: '/feedback',
     name: 'Feedback',
-    component: () => import('./components/FeedbackPage.vue'),
+    component: () => import('../components/FeedbackPage.vue'),
     meta: {
       requiresAuth: true // Requires authentication or guest mode
     }
@@ -63,7 +63,7 @@ export default [
   {
     path: '/admin',
     name: 'Admin',
-    component: () => import('./components/AdminPage.vue'),
+    component: () => import('../components/AdminPage.vue'),
     meta: {
       requiresAuth: true // Requires authentication or guest mode
     }
@@ -71,7 +71,7 @@ export default [
   {
     path: '/admin/feedback',
     name: 'AdminFeedback',
-    component: () => import('./components/AdminFeedbackPage.vue'),
+    component: () => import('../components/AdminFeedbackPage.vue'),
     meta: {
       requiresAuth: true // Requires authentication or guest mode
     }
@@ -79,7 +79,7 @@ export default [
   {
     path: '/import',
     name: 'TextImporter',
-    component: () => import('./components/TextImporter.vue'),
+    component: () => import('../components/TextImporter.vue'),
     meta: {
       requiresAuth: true // Requires authentication or guest mode
     }
@@ -87,7 +87,7 @@ export default [
   {
     path: '/saved-words',
     name: 'SavedWords',
-    component: () => import('./components/SavedWordsPage.vue'),
+    component: () => import('../components/SavedWordsPage.vue'),
     meta: {
       requiresAuth: true
     }
@@ -95,10 +95,10 @@ export default [
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    component: () => import('./components/NotFoundPage.vue'),
+    component: () => import('../components/NotFoundPage.vue'),
     meta: {
       requiresAuth: false,
       isPublicPage: true
     }
   }
-] 
+]

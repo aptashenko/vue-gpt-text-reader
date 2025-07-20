@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.2",
+    "axios": "^1.10.0",
     "dotenv": "^16.6.0",
     "logsnag": "^1.0.0",
     "openai": "^5.8.1",

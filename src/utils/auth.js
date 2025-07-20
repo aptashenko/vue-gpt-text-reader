@@ -7,15 +7,15 @@ import { useAuthStore } from '../stores/auth'
  */
 export async function logout(redirectToLogin = true) {
   const authStore = useAuthStore()
-  
+
   try {
     // Sign out from Supabase
     const result = await authStore.signOut()
-    
+
     if (result.success) {
       // Clear any additional app state if needed
       // For example, clear language learning store if it has user-specific data
-      
+
       return { success: true }
     } else {
       return { success: false, error: result.error }
@@ -31,8 +31,8 @@ export async function logout(redirectToLogin = true) {
  * @returns {boolean}
  */
 export function isAuthenticated() {
-  const authStore = useAuthStore()
-  return authStore.isAuthenticated
+  const token = localStorage.getItem('access_token');
+  return !!token;
 }
 
 /**
@@ -49,15 +49,15 @@ export function getCurrentUser() {
  */
 export async function forceLogout() {
   const authStore = useAuthStore()
-  
+
   // Clear user data immediately
   authStore.user = null
   authStore.isGuestMode = false
-  
+
   // Clear any stored data
   localStorage.removeItem('supabase.auth.token')
   localStorage.removeItem('guestMode')
   sessionStorage.clear()
-  
+
   return { success: true }
-} 
+}
