@@ -15,24 +15,10 @@ const messages = {
   ru
 }
 
-// Get user's preferred language from localStorage or default to English
-function getDefaultLocale() {
-  try {
-    const stored = localStorage.getItem('languageLearningPreferences')
-    if (stored) {
-      const preferences = JSON.parse(stored)
-      const locale = preferences.nativeLanguage || preferences.NativeLanguage || 'en'
-      return locale
-    }
-  } catch (error) {
-    console.error('Error loading stored preferences for i18n:', error)
-  }
-  return 'en'
-}
 
 export const i18n = createI18n({
   legacy: false, // Use Composition API
-  locale: getDefaultLocale(),
+  locale: localStorage.getItem('language_native') ?? 'en',
   fallbackLocale: 'en',
   messages,
   globalInjection: true,
@@ -41,25 +27,19 @@ export const i18n = createI18n({
 
 // Function to change locale and save to localStorage
 export function setLocale(locale) {
-  
+
   if (!i18n.global.messages.value[locale]) {
     console.error('Locale not found:', locale)
     return
   }
-  
-  i18n.global.locale.value = locale
-  
+
   try {
-    const stored = localStorage.getItem('languageLearningPreferences')
-    const preferences = stored ? JSON.parse(stored) : {}
-    preferences.nativeLanguage = locale
-    localStorage.setItem('languageLearningPreferences', JSON.stringify(preferences))
+    const stored = localStorage.getItem('language_native');
+    const localeValue = locale ? locale : stored;
+    i18n.global.locale.value = localeValue;
+    localStorage.setItem('language_native', localeValue);
+
   } catch (error) {
     console.error('Error saving locale preference:', error)
   }
 }
-
-// Function to get current locale
-export function getCurrentLocale() {
-  return i18n.global.locale.value
-} 

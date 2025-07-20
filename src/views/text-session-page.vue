@@ -6,43 +6,26 @@
         <div class="header-top">
           <BackButton :text="$t('textSession.backToTexts')" small />
           <div class="language-info">
-            <span class="language-badge">{{ store.getLanguageName(store.targetLanguage) }}</span>
-            <span class="level-badge">{{ store.level }}</span>
+            <span class="language-badge">{{ textsStore.currentText?.language.toUpperCase() }}</span>
+            <span class="level-badge">{{ textsStore.currentText?.level }}</span>
           </div>
         </div>
-        <h1 class="text-title">{{ currentText?.title }}</h1>
+        <h1 class="text-title">{{ textsStore.currentText?.title }}</h1>
       </header>
 
       <!-- Loading State -->
-      <div v-if="loadingText" class="loading">
+      <div v-if="textsStore.textLoader" class="loading">
         <div class="spinner"></div>
         <p>{{ $t('textSession.loadingText') }}</p>
       </div>
 
-      <!-- Error State -->
-      <div v-else-if="fetchError" class="no-text">
-        <h2>{{ $t('textSession.textNotFound') }}</h2>
-        <p>{{ fetchError }}</p>
-        <button @click="goBack" class="back-button">
-          {{ $t('app.back') }}
-        </button>
-      </div>
-
       <!-- Text Content -->
-      <div v-else-if="currentText" class="content">
+      <div v-else-if="textsStore.currentText" class="content">
         <!-- Text Reading Section -->
         <section class="text-section">
           <div class="section-header">
             <h2 class="section-title">{{ $t('textSession.textForReading') }}</h2>
           </div>
-          <button
-              @click="playTextPronunciation()"
-              class="text-pronunciation-btn"
-              disabled
-              :title="$t('textSession.textPronunciationComingSoon')"
-            >
-              🔊
-            </button>
           <div class="text-content" ref="textContentRef">
             <span v-for="(word, pIdx) in splitTextWithArticles" :key="pIdx" :class="{'word': !punctuation.includes(word)}"
               @click="!punctuation.includes(word) && openWordPanel(word)"
@@ -77,12 +60,12 @@
           <h2 class="section-title">{{ $t('textSession.questions') }}</h2>
           <div class="questions-list">
             <div
-              v-for="(question, index) in currentTextQuestions"
+              v-for="(question, index) in textsStore.currentText.questions"
               :key="index"
               class="question-item"
             >
               <label class="question-label">
-                {{ index + 1 }}. {{ question }}
+                {{ index + 1 }}. {{ question.question_text }}
               </label>
               <textarea
                 v-model="userAnswers[index]"
@@ -111,46 +94,27 @@
 <script setup>
 import { computed, ref, watch, onMounted, nextTick, reactive, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useLanguageLearningStore } from '../stores/languageLearning'
-import { useAuthStore } from '../stores/auth'
-import { gptService } from '../services/gpt'
-import { supabase } from '../supabase.js'
-import BackButton from './BackButton.vue'
-import analyticsService from '../services/logsnag.js'
-import { getAnalyticsUserId } from '../utils/analytics.js'
+import { useLanguageLearningStore } from '../stores/languageLearning.js'
+import { useAuthStore } from '../stores/auth.js'
+import { gptService } from '../services/gpt.js'
+import BackButton from '../components/BackButton.vue'
 import { SavedWordsService } from '../services/savedWords.js'
+import {useUserStore} from "../stores/user.store.js";
+import {useTextsStore} from "../stores/texts.store.js";
 
 const router = useRouter()
 const route = useRoute()
 const store = useLanguageLearningStore()
-const authStore = useAuthStore()
+const authStore = useAuthStore();
+const userStore = useUserStore();
+const textsStore = useTextsStore();
 
 // Local state
 const userAnswers = ref([])
 const checking = ref(false)
-const loadingText = ref(true)
-const fetchError = ref('')
 const addedWords = ref(new Set());
 
-// Load user preferences on mount
-onMounted(async () => {
-  // Load preferences from localStorage (already done in store)
-  // Also load from database if user is authenticated
-  if (authStore.user) {
-    await store.loadUserPreferencesFromDB(authStore.user.id)
-  }
-
-  store.sessionStartTime = Date.now()
-
-  // If we have a text ID in the route, fetch the text
-  if (route.params.id) {
-    await fetchTextById(route.params.id)
-  }
-})
-
 // Computed properties
-const currentText = computed(() => store.currentText)
-const currentTextQuestions = computed(() => store.currentTextQuestions);
 const punctuation = [
   // Стандартные знаки
   '.', ',', '!', '?', ';', ':',
@@ -189,7 +153,7 @@ const articles = [
 ];
 
 const splitTextWithArticles = computed(() => {
-  const text = currentText.value?.text || '';
+  const text = textsStore.currentText?.content || '';
 
   // Разбиваем текст на слова и знаки препинания
   const tokens = text.match(/[^\s\w\d]|[\p{L}\p{M}’'-]+/gu);
@@ -218,165 +182,25 @@ const splitTextWithArticles = computed(() => {
 })
 
 const canSubmit = computed(() => {
-  return currentTextQuestions.value.length > 0 &&
+  return textsStore.currentText.questions.length > 0 &&
          userAnswers.value.some(answer => answer && answer.trim())
 })
 
-// Fetch text by id from Supabase
-async function fetchTextById(id) {
-  loadingText.value = true
-  fetchError.value = ''
-  try {
-
-    // Fetch text data
-    const { data: textData, error: textError } = await supabase
-      .from('texts')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (textError) {
-      console.error('Supabase text error:', textError)
-      if (textError.code === 'PGRST116') {
-        fetchError.value = 'Текст не найден. Возможно, база данных пуста или текст с таким ID не существует.'
-      } else {
-        fetchError.value = `Ошибка при загрузке текста: ${textError.message}`
-      }
-      store.currentText = null
-      return
-    }
-
-    if (!textData) {
-      fetchError.value = 'Текст не найден или произошла ошибка.'
-      store.currentText = null
-      return
-    }
-
-    // Fetch questions for this text
-    const { data: questionsData, error: questionsError } = await supabase
-      .from('text_questions')
-      .select('*')
-      .eq('text_id', id)
-      .order('question_number')
-
-    if (questionsError) {
-      console.error('Supabase questions error:', questionsError)
-      // Don't fail the entire fetch if questions fail, just log the error
-      console.warn('Failed to fetch questions, but continuing with text')
-    }
-
-    // Fetch words for this text (from text_words table)
-    const { data: textWordsData, error: textWordsError } = await supabase
-      .from('text_words')
-      .select(`
-        word_order,
-        dictionary (
-          id,
-          word,
-          translation_en,
-          translation_fr,
-          translation_es,
-          translation_de,
-          translation_uk,
-          translation_ru,
-          part_of_speech,
-          difficulty
-        )
-      `)
-      .eq('text_id', id)
-      .order('word_order')
-
-    if (textWordsError) {
-      console.error('Supabase text_words error:', textWordsError)
-      // Don't fail the entire fetch if words fail, just log the error
-      console.warn('Failed to fetch text words, but continuing with text')
-    }
-
-    // Transform words data to match expected structure
-    const transformedWords = (textWordsData || [])
-      .filter(item => item.dictionary) // Filter out any null dictionary entries
-      .map(item => ({
-        word: item.dictionary.word,
-        translations: {
-          en: item.dictionary.translation_en,
-          fr: item.dictionary.translation_fr,
-          es: item.dictionary.translation_es,
-          de: item.dictionary.translation_de,
-          uk: item.dictionary.translation_uk,
-          ru: item.dictionary.translation_ru
-        },
-        part_of_speech: item.dictionary.part_of_speech,
-        difficulty: item.dictionary.difficulty,
-        id: item.dictionary.id // Add the dictionary ID
-      }))
-
-    // Normalize to match expected structure
-    store.currentText = {
-      ...textData,
-      text: textData.content || textData.text,
-      words: transformedWords,
-      questions: questionsData ? questionsData.map(q => q.question_text) : []
-    }
-
-    // Initialize user answers array with the correct length
-    userAnswers.value = new Array(store.currentText.questions.length).fill('')
-    store.sessionResults = null
-
-    // Отслеживаем начало чтения текста
-    try {
-      await analyticsService.trackTextRead(
-        textData.title,
-        textData.language,
-        getAnalyticsUserId(),
-        store.nativeLanguage
-      )
-      await analyticsService.trackTextSessionStarted(
-        textData.id,
-        textData.title,
-        textData.language,
-        getAnalyticsUserId()
-      )
-      await analyticsService.trackMetric('text_read', 1, {
-        text_id: textData.id,
-        title: textData.title,
-        language: textData.language,
-        user_id: getAnalyticsUserId()
-      })
-
-      // Track active user when they start reading
-      await analyticsService.trackActiveUser('daily', getAnalyticsUserId())
-    } catch (analyticsError) {
-      console.error('Analytics tracking error:', analyticsError)
-    }
-  } catch (err) {
-    console.error('Exception during text fetch:', err)
-    fetchError.value = 'Ошибка при загрузке текста.'
-    store.currentText = null
-
-    // Отслеживаем ошибку загрузки текста
-    try {
-      await analyticsService.trackAppError(err, 'text_session_fetch', getAnalyticsUserId())
-    } catch (analyticsError) {
-      console.error('Analytics error tracking failed:', analyticsError)
-    }
-  } finally {
-    loadingText.value = false
-  }
-}
-
 // Watch for route param changes
 watch(() => route.params.id, (id) => {
-  if (id) fetchTextById(id)
-}, { immediate: false })
+  if (id) {
+
+    const payload = {
+      language_learning: route.query.language_learning,
+      language_native: route.query.language_native,
+      level: route.query.level
+    };
+
+    textsStore.getTextById(id, payload)
+  }
+}, { immediate: true })
 
 
-// Helper to format ms to mm:ss
-function formatDuration(ms) {
-  const totalSeconds = Math.floor(ms / 1000)
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-}
 
 async function checkAnswers() {
   if (!canSubmit.value || checking.value) return
@@ -384,85 +208,19 @@ async function checkAnswers() {
   try {
     store.setUserAnswers(userAnswers.value)
     const results = await gptService.checkAnswers(
-      currentTextQuestions.value,
+        textsStore.currentText.questions.value,
       userAnswers.value,
-      store.targetLanguage,
-      store.nativeLanguage,
-      currentText.value?.text || ''
+      userStore.user.language_learning,
+      userStore.user.language_native,
+        textsStore.currentText?.text || ''
     )
-    store.setSessionResults(results)
-
-    // Отслеживаем завершение текста и ответы на вопросы
-    try {
-      const sessionDurationMs = Date.now() - (store.sessionStartTime || Date.now())
-      const sessionDuration = formatDuration(sessionDurationMs)
-
-      // Отслеживаем завершение текста
-      await analyticsService.trackTextCompleted(
-        store.currentText.title,
-        store.currentText.language,
-        getAnalyticsUserId(),
-        sessionDuration
-      )
-
-      // Отслеживаем ответы на вопросы
-      for (let i = 0; i < currentTextQuestions.value.length; i++) {
-        const isCorrect = results.answers[i]?.isCorrect || false
-        await analyticsService.trackQuestionAnswered(i + 1, isCorrect, getAnalyticsUserId())
-
-        if (isCorrect) {
-          await analyticsService.trackMetric('correct_answer', 1, {
-            question_id: i + 1,
-            user_id: getAnalyticsUserId()
-          })
-        } else {
-          await analyticsService.trackMetric('incorrect_answer', 1, {
-            question_id: i + 1,
-            user_id: getAnalyticsUserId()
-          })
-        }
-      }
-
-      // Отслеживаем общую статистику
-      await analyticsService.trackMetric('question_answered', currentTextQuestions.value.length, {
-        text_id: store.currentText.id,
-        user_id: getAnalyticsUserId()
-      })
-
-      // Отслеживаем завершение сессии
-      await analyticsService.trackTextSessionEnded(
-        store.currentText.id,
-        store.currentText.title,
-        store.currentText.language,
-        sessionDuration,
-        getAnalyticsUserId()
-      )
-
-    } catch (analyticsError) {
-      console.error('Analytics tracking error:', analyticsError)
-    } finally {
-      store.sessionStartTime = null
-    }
 
     router.push('/result')
   } catch (error) {
     console.error('Error checking answers:', error)
-
-    // Отслеживаем ошибку
-    try {
-      await analyticsService.trackAppError(error, 'text_session_check_answers', getAnalyticsUserId())
-    } catch (analyticsError) {
-      console.error('Analytics error tracking failed:', analyticsError)
-    }
-
-    alert('Ошибка при проверке ответов. Попробуйте еще раз.')
   } finally {
     checking.value = false
   }
-}
-
-function goBack() {
-  router.push('/')
 }
 
 // Remove popup logic, add panel state

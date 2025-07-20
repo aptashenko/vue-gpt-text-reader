@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <LoadingSpinner 
-      :show="authStore.loading" 
+    <LoadingSpinner
+      :show="authStore.loading"
       message="Loading..."
     />
     <AppHeader v-if="!authStore.loading" />
@@ -10,51 +10,16 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
 import LoadingSpinner from './components/LoadingSpinner.vue'
 import AppHeader from './components/AppHeader.vue'
-import analyticsService from './services/logsnag.js'
-import { getAnalyticsUserId } from './utils/analytics.js'
+import {useTextsStore} from "./stores/texts.store.js";
 
-const authStore = useAuthStore()
-const route = useRoute()
+const authStore = useAuthStore();
+const textsStore = useTextsStore();
 
-const isLandingPage = computed(() => {
-  return route.path === '/' || route.path === '/landing'
-})
-
-function buyMeACoffee() {
-  // Track coffee button click
-  try {
-    analyticsService.trackMetric('coffee_button_clicked', 1, {
-      user_id: getAnalyticsUserId(),
-      page: route.path
-    })
-    analyticsService.track('coffee_button_clicked', {
-      description: 'User clicked Buy me a coffee button',
-      tags: { 
-        user_id: getAnalyticsUserId(),
-        page: route.path 
-      },
-      icon: '☕'
-    })
-  } catch (analyticsError) {
-    console.error('Analytics tracking error:', analyticsError)
-  }
-  
-
-  window.open('https://coff.ee/aptashenko', '_blank')
-}
-
-onMounted(async () => {
-  await authStore.initializeAuth()
-})
-
-onUnmounted(() => {
-  authStore.cleanup()
-})
+textsStore.getLanguages()
+textsStore.getLevels();
 </script>
 
 <style>

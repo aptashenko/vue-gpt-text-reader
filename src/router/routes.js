@@ -39,7 +39,7 @@ export default [
   {
     path: '/session/:id',
     name: 'TextSession',
-    component: () => import('../components/TextSessionPage.vue'),
+    component: () => import('../views/text-session-page.vue'),
     meta: {
       requiresAuth: true // Requires authentication or guest mode
     }

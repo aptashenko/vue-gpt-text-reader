@@ -38,6 +38,7 @@ function handleClick(e) {
   justify-content: center;
   gap: 8px;
   border: none;
+  width: 100%;
 }
 
 /* Primary (фиолетовая) */

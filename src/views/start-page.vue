@@ -10,29 +10,30 @@
 
       <form @submit.prevent="startLearning" class="setup-form">
 
-        <!-- Target Language Selection -->
         <div class="form-section">
           <label class="form-label">{{ targetLanguageLabel }}</label>
           <div class="language-grid">
-            <button
-                v-for="lang in availableLanguages"
-                :key="lang.code"
-                type="button"
-                class="language-card"
-                :class="{
-                active: targetLanguage === lang.code,
-                disabled: ['es', 'de'].includes(lang.code)
-              }"
-                @click="['es', 'de'].includes(lang.code) ? null : targetLanguage = lang.code"
-                :disabled="['es', 'de'].includes(lang.code)"
-                :title="['es', 'de'].includes(lang.code) ? $t('startPage.comingSoon') : ''"
-            >
-              <div class="language-flag">{{ getFlag(lang.code) }}</div>
-              <div class="language-name">{{ getLanguageName(lang.code) }}</div>
-              <div v-if="['es', 'de'].includes(lang.code)" class="coming-soon-badge">
-                {{ $t('startPage.comingSoon') }}
-              </div>
-            </button>
+            <template v-for="langItem in textsStore.languagesList">
+              <button
+                  v-for="(isActive, lang) in langItem"
+                  :key="lang"
+                  type="button"
+                  class="language-card"
+                  :class="{
+                    active: userStore.user.language_learning === lang,
+                    disabled: !isActive
+                  }"
+                  @click="selectSetting(isActive, 'language_learning', lang)"
+                  :disabled="!isActive"
+                  :title="!isActive ? $t('startPage.comingSoon') : ''"
+              >
+                <div class="language-flag">{{ getFlag(lang) }}</div>
+                <div class="language-name">{{ getLanguageName(lang) }}</div>
+                <div v-if="!isActive" class="coming-soon-badge">
+                  {{ $t('startPage.comingSoon') }}
+                </div>
+              </button>
+            </template>
           </div>
         </div>
 
@@ -40,25 +41,27 @@
         <div class="form-section">
           <label class="form-label">{{ nativeLanguageLabel }}</label>
           <div class="language-grid">
-            <button
-                v-for="lang in availableLanguages"
-                :key="lang.code"
-                type="button"
-                class="language-card"
-                :class="{
-                active: nativeLanguage === lang.code,
-                disabled: ['es', 'de'].includes(lang.code)
-              }"
-                @click="['es', 'de'].includes(lang.code) ? null : selectNativeLanguage(lang.code)"
-                :disabled="['es', 'de'].includes(lang.code)"
-                :title="['es', 'de'].includes(lang.code) ? $t('startPage.comingSoon') : ''"
-            >
-              <div class="language-flag">{{ getFlag(lang.code) }}</div>
-              <div class="language-name">{{ getLanguageName(lang.code) }}</div>
-              <div v-if="['es', 'de'].includes(lang.code)" class="coming-soon-badge">
-                {{ $t('startPage.comingSoon') }}
-              </div>
-            </button>
+            <template v-for="langItem in textsStore.languagesList">
+              <button
+                  v-for="(isActive, lang) in langItem"
+                  :key="lang"
+                  type="button"
+                  class="language-card"
+                  :class="{
+                    active: userStore.user.language_native === lang,
+                    disabled: !isActive
+                  }"
+                  @click="selectSetting(isActive, 'language_native', lang)"
+                  :disabled="!isActive"
+                  :title="!isActive ? $t('startPage.comingSoon') : ''"
+              >
+                <div class="language-flag">{{ getFlag(lang) }}</div>
+                <div class="language-name">{{ getLanguageName(lang) }}</div>
+                <div v-if="!isActive" class="coming-soon-badge">
+                  {{ $t('startPage.comingSoon') }}
+                </div>
+              </button>
+            </template>
           </div>
         </div>
 
@@ -66,54 +69,38 @@
         <div class="form-section">
           <label class="form-label">{{ levelLabel }}</label>
           <div class="level-grid">
-            <button
-                v-for="level in availableLevels"
-                :key="level.code"
-                type="button"
-                class="level-card"
-                :class="{
-                active: selectedLevel === level.code,
-                disabled: ['B2', 'C1', 'C2'].includes(level.code)
-              }"
-                @click="['B2', 'C1', 'C2'].includes(level.code) ? null : selectedLevel = level.code"
-                :disabled="['B2', 'C1', 'C2'].includes(level.code)"
-                :title="['B2', 'C1', 'C2'].includes(level.code) ? $t('startPage.comingSoon') : ''"
-            >
-              <div class="level-code">{{ level.code }}</div>
-              <div class="level-name">{{ $t(level.nameKey) }}</div>
-              <div class="level-description">{{ $t(level.descriptionKey) }}</div>
-              <div v-if="['B2', 'C1', 'C2'].includes(level.code)" class="coming-soon-badge">
-                {{ $t('startPage.comingSoon') }}
-              </div>
-            </button>
+            <template v-for="levelItem in textsStore.levelsList">
+              <button
+                  v-for="(isActive, level) in levelItem"
+                  :key="level"
+                  type="button"
+                  class="level-card"
+                  :class="{
+                    active: userStore.user.level === level,
+                    disabled: !isActive
+                  }"
+                  @click="selectSetting(isActive, 'level', level)"
+                  :disabled="!isActive"
+                  :title="!isActive ? $t('startPage.comingSoon') : ''"
+              >
+                <div class="level-code">{{ level.toUpperCase() }}</div>
+                <div class="level-name">
+                  {{$t(`levels.${level.toUpperCase()}`)}}
+                </div>
+                <div class="level-description">{{$t(`levelDescriptions.${level.toUpperCase()}`)}}</div>
+                <div v-if="!isActive" class="coming-soon-badge">
+                  {{ $t('startPage.comingSoon') }}
+                </div>
+              </button>
+            </template>
           </div>
-        </div>
-
-        <!-- Text Count Display -->
-        <div v-if="isFormValid" class="form-section">
-          <div v-if="store.textCountLoading">{{ t('startPage.loadingTexts') }}</div>
-          <div v-else>{{ t('startPage.availableTexts', { count: store.textCount }) }}</div>
         </div>
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-          <button
-              type="submit"
-              class="start-button"
-              :disabled="!isFormValid"
-              :class="{ disabled: !isFormValid }"
-          >
+          <base-button type="submit" :disabled="disableButton" :pending="textsStore.textLoader">
             {{ startLearningText }}
-          </button>
-
-          <button
-              v-if="isAdmin"
-              type="button"
-              @click="goToImport"
-              class="import-button"
-          >
-            {{ importTextsText }}
-          </button>
+          </base-button>
         </div>
       </form>
     </div>
@@ -121,27 +108,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
-import { useLanguageLearningStore } from '../stores/languageLearning'
-import { setLocale } from '../i18n'
+import {useTextsStore} from "../stores/texts.store.js";
+import BaseButton from "../shared/ui/BaseButton.vue";
+import {useUserStore} from "../stores/user.store.js";
+import {useRouter} from "vue-router";
+import {setLocale} from "../i18n/index.js";
+const router = useRouter();
 
-const router = useRouter()
-const store = useLanguageLearningStore()
-const { t, locale } = useI18n()
+const textsStore = useTextsStore();
+const userStore = useUserStore();
 
-// Admin state
-const isAdmin = ref(false)
-
-// Form data
-const targetLanguage = ref(store.targetLanguage)
-const nativeLanguage = ref(store.nativeLanguage)
-const selectedLevel = ref(store.level)
-
-// Get available options from store
-const availableLanguages = store.availableLanguages
-const availableLevels = store.availableLevels
+const { t, locale } = useI18n();
 
 // Computed translations to ensure reactivity
 const pageTitle = computed(() => t('startPage.title'))
@@ -150,42 +129,24 @@ const targetLanguageLabel = computed(() => t('startPage.targetLanguage'))
 const nativeLanguageLabel = computed(() => t('startPage.nativeLanguage'))
 const levelLabel = computed(() => t('startPage.level'))
 const startLearningText = computed(() => t('startPage.startLearning'))
-const importTextsText = computed(() => t('startPage.importTexts'))
 
-// Computed function for language names
 const getLanguageName = computed(() => (code) => t('languages.' + code))
-
-// Watch for native language changes and update i18n locale
-watch(nativeLanguage, async (newLanguage) => {
-  if (newLanguage) {
-    // Set the locale using the i18n setLocale function
-    setLocale(newLanguage)
-    // Also update the reactive locale
-    locale.value = newLanguage
+const selectSetting = (active, key, lang) => {
+  if (!active) return;
+  if (key === 'language_native') {
+    locale.value = lang;
+    setLocale(lang)
   }
-}, { immediate: true })
+  userStore.setUser({[key]: lang})
+}
 
-// Computed properties
-const isFormValid = computed(() => {
-  return targetLanguage.value &&
-      nativeLanguage.value &&
-      selectedLevel.value &&
-      targetLanguage.value !== nativeLanguage.value &&
-      store.textCount > 0
-})
+const disableButton = computed(() =>
+    !userStore.user.language_native ||
+    !userStore.user.language_learning ||
+    !userStore.user.level ||
+    userStore.user.language_learning === userStore.user.language_native
+)
 
-// Watch for changes and fetch text count
-watch([targetLanguage, selectedLevel], ([lang, level]) => {
-  if (lang && level) {
-    store.targetLanguage = lang
-    store.level = level
-    store.fetchTextCount()
-  } else {
-    store.textCount = 0
-  }
-}, { immediate: true })
-
-// Methods
 function getFlag(langCode) {
   const flags = {
     'en': '🇺🇸',
@@ -198,40 +159,20 @@ function getFlag(langCode) {
   return flags[langCode] || '🏳️'
 }
 
-async function startLearning() {
-  if (!isFormValid.value) return
+const startLearning = async () => {
+  try {
+    const payload = {
+      level: userStore.user.level,
+      language_learning: userStore.user.language_learning,
+      language_native: userStore.user.language_native
+    }
 
-  // Save user preferences to store
-  store.setUserPreferences(
-      targetLanguage.value,
-      nativeLanguage.value,
-      selectedLevel.value
-  )
-
-  // Load random text and navigate to session
-  await store.loadRandomText()
-  router.push(`/session/${store.currentText.id}`)
+    await textsStore.getRandomText(payload);
+    router.push({name: 'TextSession', params: {id: textsStore.currentText.id}, query: payload})
+  } catch (err) {
+    console.log(err)
+  }
 }
-
-function goToImport() {
-  router.push('/import')
-}
-
-function selectNativeLanguage(langCode) {
-
-  nativeLanguage.value = langCode
-  // Update the store's nativeLanguage using the proper method
-  store.setUserPreferences(
-      store.targetLanguage,
-      langCode,
-      store.level
-  )
-
-  // Immediately set the locale
-  setLocale(langCode)
-  locale.value = langCode
-}
-
 </script>
 
 <style scoped>
