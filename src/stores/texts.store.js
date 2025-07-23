@@ -14,7 +14,12 @@ export const useTextsStore = defineStore('texts', () => {
 
     const getLanguages = async () => {
         try {
-           languagesList.value = await texts.getLanguagesList();
+           const response = await texts.getLanguagesList();
+           languagesList.value = response.sort((a, b) => {
+               const aValue = Object.values(a)[0];
+               const bValue = Object.values(b)[0];
+               return (aValue === bValue) ? 0 : aValue ? -1 : 1;
+           });
         } catch (error) {
             console.error(error);
         }

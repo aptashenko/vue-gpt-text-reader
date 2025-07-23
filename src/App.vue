@@ -14,12 +14,37 @@ import { useAuthStore } from './stores/auth.js'
 import LoadingSpinner from './components/LoadingSpinner.vue'
 import AppHeader from './components/AppHeader.vue'
 import {useTextsStore} from "./stores/texts.store.js";
+import {useUserStore} from "./stores/user.store.js";
+import {useRoute, useRouter} from "vue-router";
+import {isAuthenticated} from "./utils/auth.js";
+import {onMounted, watch} from "vue";
+import {useAuthStore1} from "./stores/auth.store.js";
 
 const authStore = useAuthStore();
+const authStore1 = useAuthStore1();
 const textsStore = useTextsStore();
+const userStore = useUserStore();
+const router = useRouter();
+const route = useRoute();
 
 textsStore.getLanguages()
 textsStore.getLevels();
+
+watch(() => route.path, async(val) => {
+
+  const isAuth = isAuthenticated();
+  const isGuest = localStorage.getItem('guest');
+  if (isGuest && !userStore.user.email) {
+    authStore1.loginAsGuest();
+  }
+  if (isAuth && !route.meta.isAuthPage && !userStore.isGuest) {
+    await userStore.getUserInfo();
+  }
+  if (isAuth && (!userStore.user.language || !userStore.user.level) && route.name !== 'profile') {
+    router.push({ name: 'profile' });
+  }
+}, {immediate: true})
+
 </script>
 
 <style>

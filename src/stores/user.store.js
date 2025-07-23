@@ -1,29 +1,66 @@
 import {defineStore} from "pinia";
-import {computed, reactive} from "vue";
+import {computed, reactive, ref} from "vue";
+import {ProfileService} from "../services/api/modules/profile.js";
+import {useRouter} from "vue-router";
+
+const profileApi = new ProfileService();
 
 export const useUserStore = defineStore('user', () => {
+    const router = useRouter();
     const user = reactive({
+        user_id: '',
         email: '',
-        role: localStorage.getItem('guest') || '',
-        token: localStorage.getItem('access_token') || '',
-        language_native: localStorage.getItem('language_native') || '',
-        language_learning: '',
-        level: ''
+        subscription: '',
+        created_at: '',
+        role: '',
+        updated_at: '',
+        language: null,
+        level: null
     })
+
+    const userCopy = ref({});
 
     const isGuest = computed(() => user.role === 'guest')
     const isLogged = computed(() => user.role);
 
-    const setUser = (userData) => {
+    const getUserInfo = async () => {
+        try {
+            const {data} = await profileApi.get();
+            setUser(data);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const updateUserInfo = async (payload) => {
+        try {
+            let data;
+            if (!isGuest.value) {
+                const response = await profileApi.update(payload);
+                data = response.data;
+                setUser(data);
+            } else {
+                setUser(payload, userCopy);
+                setUser(payload, user);
+            }
+            await router.push('/app')
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const setUser = (userData, userForm = userCopy.value) => {
         const entries = Object.entries(userData);
         entries.forEach(([key, value]) => {
             if (key in user) {
                 user[key] = value
+                userForm[key] = value
             }
         })
     }
 
     const clearUser = () => {
+        user.id = '';
         user.email = '';
         user.role = '';
         user.token = '';
@@ -36,7 +73,10 @@ export const useUserStore = defineStore('user', () => {
         user,
         isGuest,
         isLogged,
+        getUserInfo,
         setUser,
+        updateUserInfo,
+        userCopy,
         clearUser
     }
 })

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {useAuthStore1} from "../../../stores/auth.store.js";
 
 export const createHttpClient = (withAuth) => {
     const instance = axios.create({
@@ -17,6 +18,16 @@ export const createHttpClient = (withAuth) => {
             }
             return config;
         });
+
+        instance.interceptors.response.use(
+            (config) => config,
+            (error) => {
+                const authStore = useAuthStore1();
+                if (error.status === 401) {
+                    authStore.logoutUser()
+                }
+            }
+        )
     }
 
     return instance;

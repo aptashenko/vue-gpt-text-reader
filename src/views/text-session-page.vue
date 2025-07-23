@@ -49,65 +49,31 @@
           </div>
           <div v-else>
             <div class="panel-translation">{{ panel.translation }}</div>
-            <button v-if="!authStore.isGuestMode" class="panel-btn" :disabled="panel.added" @click="addToFlashcards(panel.word, panel.translation)">
+            <button v-if="!userStore.isGuest" class="panel-btn" :disabled="panel.added" @click="addToFlashcards(panel.word, panel.translation)">
               <span v-if="panel.added">✅ {{ $t('textSession.addedToFlashcards') }}</span>
               <span v-else>{{ $t('textSession.addToFlashcards') }}</span>
             </button>
           </div>
         </div>
-        <!-- Questions Section -->
-        <section class="questions-section">
-          <h2 class="section-title">{{ $t('textSession.questions') }}</h2>
-          <div class="questions-list">
-            <div
-              v-for="(question, index) in textsStore.currentText.questions"
-              :key="index"
-              class="question-item"
-            >
-              <label class="question-label">
-                {{ index + 1 }}. {{ question.question_text }}
-              </label>
-              <textarea
-                v-model="userAnswers[index]"
-                class="answer-input"
-                :placeholder="$t('textSession.answerPlaceholder', { number: index + 1 })"
-                rows="3"
-              ></textarea>
-            </div>
-          </div>
-
-          <button
-            @click="checkAnswers"
-            class="check-button"
-            :disabled="!canSubmit || checking"
-            :class="{ disabled: !canSubmit || checking }"
-          >
-            <span v-if="checking" class="loader"></span>
-            {{ checking ? $t('textSession.checkingAnswers') : $t('textSession.checkAnswers') }}
-          </button>
-        </section>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch, onMounted, nextTick, reactive, onBeforeUnmount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useLanguageLearningStore } from '../stores/languageLearning.js'
-import { useAuthStore } from '../stores/auth.js'
-import { gptService } from '../services/gpt.js'
+import { computed, ref, watch, reactive } from 'vue'
+import { useRoute } from 'vue-router'
 import BackButton from '../components/BackButton.vue'
-import { SavedWordsService } from '../services/savedWords.js'
 import {useUserStore} from "../stores/user.store.js";
 import {useTextsStore} from "../stores/texts.store.js";
+import {useWordsStore} from "../stores/words.store.js";
+import {useI18n} from "vue-i18n";
 
-const router = useRouter()
 const route = useRoute()
-const store = useLanguageLearningStore()
-const authStore = useAuthStore();
 const userStore = useUserStore();
 const textsStore = useTextsStore();
+const wordsStore = useWordsStore();
+const { t } = useI18n();
 
 // Local state
 const userAnswers = ref([])
@@ -139,7 +105,7 @@ const punctuation = [
 ];
 const articles = [
   // 🇫🇷 French
-  'le', 'la', 'les', 'l’', 'un', 'une', 'des', 'du', 'de la', 'de l’',
+  'le', 'la', 'les', 'l’', 'un', 'une', 'des', 'du', 'de la', 'de l’', 'se', 'me',
 
   // 🇪🇸 Spanish
   'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'al', 'del',
@@ -156,7 +122,7 @@ const splitTextWithArticles = computed(() => {
   const text = textsStore.currentText?.content || '';
 
   // Разбиваем текст на слова и знаки препинания
-  const tokens = text.match(/[^\s\w\d]|[\p{L}\p{M}’'-]+/gu);
+  const tokens = text.match(/[\p{L}\p{N}’'-]+|[.,!?;:()]/gu);
 
   const result = [];
   let i = 0;
@@ -181,11 +147,6 @@ const splitTextWithArticles = computed(() => {
   return result
 })
 
-const canSubmit = computed(() => {
-  return textsStore.currentText.questions.length > 0 &&
-         userAnswers.value.some(answer => answer && answer.trim())
-})
-
 // Watch for route param changes
 watch(() => route.params.id, (id) => {
   if (id) {
@@ -200,28 +161,6 @@ watch(() => route.params.id, (id) => {
   }
 }, { immediate: true })
 
-
-
-async function checkAnswers() {
-  if (!canSubmit.value || checking.value) return
-  checking.value = true
-  try {
-    store.setUserAnswers(userAnswers.value)
-    const results = await gptService.checkAnswers(
-        textsStore.currentText.questions.value,
-      userAnswers.value,
-      userStore.user.language_learning,
-      userStore.user.language_native,
-        textsStore.currentText?.text || ''
-    )
-
-    router.push('/result')
-  } catch (error) {
-    console.error('Error checking answers:', error)
-  } finally {
-    checking.value = false
-  }
-}
 
 // Remove popup logic, add panel state
 const panel = reactive({
@@ -249,41 +188,23 @@ async function translateWord(word) {
   panel.loading = true
   panel.translation = ''
   try {
+    const splittedText = textsStore.currentText.content.split('.')
+    const sentenceContext = splittedText.find(sentence => sentence.includes(word))
     // Pass the current text as context
-    const result = await gptService.translateWord(
-      word,
-      store.targetLanguage,
-      store.nativeLanguage,
-      currentText.value?.text || ''
+    const result = await wordsStore.translateWord(
+        sentenceContext || '',
+        word,
+      textsStore.currentText.language,
+      userStore.user.language
     )
     panel.translation = result.translation || result || ''
   } catch (e) {
-    panel.translation = $t('textSession.translationError')
+    panel.translation = t('textSession.translationError')
   } finally {
     panel.loading = false
   }
 }
 
-// Add to flashcards (All Words folder)
-async function addToFlashcards(word, translation) {
-  if (!authStore.user) return
-  try {
-    await SavedWordsService.saveWordFromText(authStore.user.id, word, translation, store.targetLanguage, store.nativeLanguage)
-    addedWords.value.add(word)
-    panel.added = true
-  } catch (e) {
-    // Optionally show error
-  }
-}
-
-// On mount, fetch already added words for this text/language
-onMounted(async () => {
-  if (!authStore.user) return
-  try {
-    const saved = await SavedWordsService.getUserSavedWords(authStore.user.id, store.targetLanguage)
-    saved.forEach(item => addedWords.value.add(item.word))
-  } catch (e) {}
-})
 </script>
 
 <style scoped>

@@ -9,9 +9,6 @@
 
       <!-- Desktop Navigation -->
       <div class="header-right desktop-nav">
-        <div class="user-info">
-          <span class="user-email">{{ userEmail }}</span>
-        </div>
         <button
           v-if="isAdmin"
           @click="() => { goToAdmin(); closeMobileMenu(); }"
@@ -22,19 +19,19 @@
         </button>
         <button
           v-if="false"
-          @click="() => { goToFeedback(); closeMobileMenu(); }"
-          class="feedback-button"
-          :title="$t('navigation.feedback')"
-        >
-          {{ $t('navigation.feedback') }}
-        </button>
-        <button
-          v-if="userStore.isLogged"
           @click="() => { goToSavedWords(); closeMobileMenu(); }"
           class="saved-words-button"
           :title="$t('navigation.savedWords')"
         >
           📚 {{ $t('navigation.savedWords') }}
+        </button>
+        <button
+            v-if="userStore.isLogged"
+            @click="() => { goToProfile(); closeMobileMenu(); }"
+            class="saved-words-button"
+            :title="$t('navigation.savedWords')"
+        >
+          📚 Profile
         </button>
         <button
           v-if="!isAdmin"
@@ -45,7 +42,7 @@
           ☕ Buy me a coffee
         </button>
         <LogoutButton
-        v-if="userStore.isLogged || userStore.isGuest"
+        v-if="userStore.isLogged"
           variant="text"
           :text="$t('navigation.logout')"
           @logout-success="() => { handleLogoutSuccess(); closeMobileMenu(); }"
@@ -105,12 +102,20 @@
           {{ $t('navigation.feedback') }}
         </button>
         <button
-          v-if="userStore.isLogged"
+          v-if="false"
           @click="() => { goToSavedWords(); closeMobileMenu(); }"
           class="mobile-nav-item"
         >
           <span class="mobile-nav-icon">📚</span>
           {{ $t('navigation.savedWords') }}
+        </button>
+        <button
+            v-if="userStore.isLogged"
+            @click="() => { goToProfile(); closeMobileMenu(); }"
+            class="mobile-nav-item"
+        >
+          <span class="mobile-nav-icon">📚</span>
+         Profile
         </button>
         <button
           v-if="isAdmin"
@@ -159,27 +164,14 @@ const isMobileMenuOpen = ref(false)
 
 // Computed
 const userEmail = computed(() => {
-  return authStore.user?.email || 'User'
+  return userStore.user?.email || 'User'
 })
 
 const isAdmin = computed(() => {
-  const user = authStore.user
+  const user = userStore.user
   if (!user) return false
 
-  // Check if user has admin role in user_metadata
-  const userMetadata = user.user_metadata
-  if (userMetadata && userMetadata.role === 'admin') {
-    return true
-  }
-
-  // Check by email
-  const adminEmails = [
-    'aptashenko2019@gmail.com',
-    'your-email@example.com',
-    'admin@example.com'
-  ]
-
-  return adminEmails.includes(user.email)
+  return userStore.user.role === 'admin'
 })
 
 // Methods
@@ -202,7 +194,6 @@ function buyMeACoffee() {
       page: route.path
     })
 
-    console.log('user_id', getAnalyticsUserId())
     analyticsService.track('coffee_button_clicked', {
       description: 'User clicked Buy me a coffee button',
       tags: {
@@ -221,6 +212,10 @@ function buyMeACoffee() {
 
 function goToSavedWords() {
   router.push('/saved-words')
+}
+
+function goToProfile() {
+  router.push('/profile')
 }
 
 function toggleMobileMenu() {

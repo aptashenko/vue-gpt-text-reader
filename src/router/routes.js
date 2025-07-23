@@ -9,6 +9,11 @@ export default [
     }
   },
   {
+    path: '/profile',
+    name: 'profile',
+    component: () => import('../views/profile.vue'),
+  },
+  {
     path: '/app',
     name: 'app',
     component: () => import('../views/start-page.vue'),
@@ -53,25 +58,9 @@ export default [
     }
   },
   {
-    path: '/feedback',
-    name: 'Feedback',
-    component: () => import('../components/FeedbackPage.vue'),
-    meta: {
-      requiresAuth: true // Requires authentication or guest mode
-    }
-  },
-  {
     path: '/admin',
     name: 'Admin',
-    component: () => import('../components/AdminPage.vue'),
-    meta: {
-      requiresAuth: true // Requires authentication or guest mode
-    }
-  },
-  {
-    path: '/admin/feedback',
-    name: 'AdminFeedback',
-    component: () => import('../components/AdminFeedbackPage.vue'),
+    component: () => import('../views/admin-page.vue'),
     meta: {
       requiresAuth: true // Requires authentication or guest mode
     }

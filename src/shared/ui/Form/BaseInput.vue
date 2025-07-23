@@ -1,5 +1,5 @@
 <template>
-  <div class="form-group">
+  <div class="form-group" :class="{disabled}">
     <label v-if="label" :for="name" class="form-label">{{ label }}</label>
 
     <input
@@ -7,6 +7,7 @@
         :name="name"
         :type="type"
         v-model="model"
+        :disabled="disabled"
         :placeholder="placeholder"
         :class="['form-input', { error: localError }]"
         @focus="onFocus"
@@ -24,6 +25,7 @@ const props = defineProps({
   name: String,
   label: String,
   placeholder: String,
+  disabled: Boolean,
   type: {
     type: String,
     default: 'text',
@@ -54,6 +56,10 @@ function onFocus(e) {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.form-group.disabled input {
+  opacity: 0.3;
 }
 
 .form-label {
