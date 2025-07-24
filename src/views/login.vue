@@ -2,20 +2,16 @@
   <div class="login-page">
     <div class="login-container">
       <div class="login-card">
-        <!-- Header -->
         <header class="login-header">
-          <h1 class="app-title">{{ $t('app.title') }}</h1>
-          <p class="app-description">
-            {{ $t('auth.loginDescription') }}
-          </p>
+          <h1 class="app-title">LangReader</h1>
+          <p class="app-description">Login to continue learning with context.</p>
         </header>
 
-        <!-- Login Form -->
         <form @submit.prevent="handleLogin" class="login-form">
           <BaseInput
               name="email"
               v-model="email"
-              :label="$t('auth.email')"
+              label="Email"
               placeholder="Enter your email"
               :error="errors.email"
           />
@@ -24,33 +20,31 @@
               name="password"
               v-model="password"
               type="password"
-              :label="$t('auth.password')"
+              label="Password"
               placeholder="Enter your password"
               :error="errors.password"
           />
 
-          <base-button
+          <BaseButton
               type="submit"
-              variant="primary"
               :pending="authStore.authLoader"
               :disabled="authStore.authLoader"
           >
-            {{ authStore.authLoader ? $t('app.loading') : $t('auth.login') }}
-          </base-button>
+            {{ authStore.authLoader ? 'Loading...' : 'Login' }}
+          </BaseButton>
 
-          <base-button
+          <BaseButton
               type="button"
               variant="guest"
               @click="handleGuestLogin"
           >
-            {{ $t('auth.continueAsGuest') }}
-          </base-button>
+            Continue as Guest
+          </BaseButton>
         </form>
 
-        <!-- Sign Up Link -->
         <div class="signup-link">
-          {{ $t('auth.dontHaveAccount') }}
-          <router-link to="/signup" class="signup-text">{{ $t('auth.signup') }}</router-link>
+          Don’t have an account?
+          <router-link to="/signup" class="signup-text">Sign up</router-link>
         </div>
       </div>
     </div>
@@ -58,28 +52,25 @@
 </template>
 
 <script setup>
-import {reactive, ref} from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import {useAuthStore1} from "../stores/auth.store.js";
-import BaseInput from "../shared/ui/Form/BaseInput.vue";
-import BaseButton from "../shared/ui/BaseButton.vue";
-import {useValidationErrors} from "../composables/validationErrors.js";
+import { useAuthStore1 } from '../stores/auth.store.js'
+import BaseInput from '../shared/ui/Form/BaseInput.vue'
+import BaseButton from '../shared/ui/BaseButton.vue'
+import { useValidationErrors } from '../composables/validationErrors.js'
+import {generateUUID} from "../utils/get-uuid.js";
+
 const router = useRouter()
-const authStore = useAuthStore1();
-
-const errors = reactive({
-  password: '',
-  email: ''
-})
-
-const { applyErrorsFromBackend, resetErrors } = useValidationErrors(errors)
+const authStore = useAuthStore1()
 
 const email = ref('')
 const password = ref('')
+const errors = reactive({ email: '', password: '' })
 
-// Login method
+const { applyErrorsFromBackend, resetErrors } = useValidationErrors(errors)
+
 async function handleLogin() {
-  resetErrors();
+  resetErrors()
 
   if (!email.value.includes('@')) {
     errors.email = 'Invalid email format'
@@ -87,27 +78,24 @@ async function handleLogin() {
   }
 
   try {
-    await authStore.userSignIn({
-      email: email.value,
-      password: password.value
-    })
+    await authStore.userSignIn({ email: email.value, password: password.value })
     router.push('/app')
   } catch (error) {
-    console.error(error)
     applyErrorsFromBackend(error)
   }
 }
 
-const handleGuestLogin = () => {
-  authStore.loginAsGuest();
-  router.push('/app')
+function handleGuestLogin() {
+  const uuid = generateUUID();
+  authStore.loginAsGuest(uuid)
+  router.push(`/app?guest=${uuid}`)
 }
 </script>
 
 <style scoped>
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -120,7 +108,7 @@ const handleGuestLogin = () => {
 }
 
 .login-card {
-  background: white;
+  background: #fff;
   border-radius: 16px;
   padding: 40px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -139,10 +127,8 @@ const handleGuestLogin = () => {
 }
 
 .app-description {
-  color: #718096;
   font-size: 1rem;
-  line-height: 1.5;
-  margin: 0;
+  color: #718096;
 }
 
 .login-form {
@@ -152,42 +138,21 @@ const handleGuestLogin = () => {
 }
 
 .signup-link {
-  color: #2d3748;
   text-align: center;
   margin-top: 24px;
-  padding-top: 24px;
   border-top: 1px solid #e2e8f0;
-}
-
-.signup-link p {
-  color: #718096;
-  font-size: 0.9rem;
-  margin: 0;
+  padding-top: 24px;
+  font-size: 0.95rem;
 }
 
 .signup-text {
+  margin-left: 4px;
   color: #667eea;
-  text-decoration: none;
   font-weight: 600;
-  transition: color 0.2s ease;
+  text-decoration: none;
 }
 
 .signup-text:hover {
-  color: #5a67d8;
   text-decoration: underline;
-}
-
-@media (max-width: 480px) {
-  .login-card {
-    padding: 24px;
-  }
-
-  .app-title {
-    font-size: 1.75rem;
-  }
-
-  .app-description {
-    font-size: 0.9rem;
-  }
 }
 </style>

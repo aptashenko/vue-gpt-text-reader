@@ -32,12 +32,9 @@ export const useAuthStore1 = defineStore('auth1', () => {
         }
     }
 
-    const loginAsGuest = () => {
-        const generateGuestId = generateUUID();
-        localStorage.setItem('access_token', generateGuestId);
-        localStorage.setItem('guest', 'guest');
-        userStore.setUser({email: generateGuestId, role: 'guest', token: generateGuestId});
-        userStore.setUser({email: generateGuestId, role: 'guest', token: generateGuestId}, userStore.userCopy);
+    const loginAsGuest = (uuid) => {
+        localStorage.setItem('access_token', uuid);
+        userStore.setUser({email: uuid, role: 'guest', token: uuid}, userStore.userCopy);
     }
 
     const logoutUser = async () => {

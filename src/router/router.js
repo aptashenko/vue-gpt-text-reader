@@ -7,7 +7,33 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach(authGuard);
+let lastQuery = {}
+
+export function preserveQuery(to) {
+  // если в маршруте есть query — сохраняем его
+  if (Object.keys(to.query).length > 0) {
+    lastQuery = { ...lastQuery, ...to.query }
+    return true
+  }
+
+  // если маршрут не содержит query, но есть сохранённый — добавим
+  if (Object.keys(lastQuery).length > 0) {
+    return {
+      ...to,
+      query: lastQuery
+    }
+  }
+
+  return true
+}
+
+router.beforeEach(async (to) => {
+  const authResult = await authGuard(to)
+
+  if (authResult !== true) return authResult
+
+  return preserveQuery(to)
+})
 
 // Global afterEach hook to scroll to top after route changes
 router.afterEach((to, from) => {

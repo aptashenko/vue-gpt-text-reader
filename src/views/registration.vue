@@ -4,7 +4,7 @@
       <div v-if="!success" class="signup-card">
         <!-- Header -->
         <header class="signup-header">
-          <h1 class="signup-title">{{ $t('auth.signup') }}</h1>
+          <h1 class="signup-title">Sign up</h1>
           <p class="signup-description">
             Join Read & Learn to track your progress and save your learning history.
           </p>
@@ -15,7 +15,7 @@
           <BaseInput
               name="email"
               v-model="email"
-              :label="$t('auth.email')"
+              label="Email"
               placeholder="Enter your email"
               :error="errors.email"
           />
@@ -24,7 +24,7 @@
               name="password"
               v-model="password"
               type="password"
-              :label="$t('auth.password')"
+              label="Password"
               placeholder="Create a password"
               :error="errors.password"
           />
@@ -33,31 +33,29 @@
               name="confirmPassword"
               v-model="confirmPassword"
               type="password"
-              :label="$t('auth.confirmPassword')"
+              label="Confirm Password"
               placeholder="Confirm your password"
               :error="errors.confirm_password"
           />
-          <!-- Button -->
+
           <BaseButton
               type="submit"
-              variant="primary"
               :pending="authStore.authLoader"
               :disabled="authStore.authLoader"
           >
-            {{ authStore.authLoader ? $t('app.loading') : $t('auth.signup') }}
+            {{ authStore.authLoader ? 'Loading...' : 'Sign up' }}
           </BaseButton>
         </form>
 
-        <!-- Login Link -->
+        <!-- Link to Login -->
         <div class="login-link">
-          {{ $t('auth.alreadyHaveAccount') }}
-          <router-link to="/login" class="login-text">{{ $t('auth.login') }}</router-link>
+          Already have an account?
+          <router-link to="/login" class="login-text">Login</router-link>
         </div>
       </div>
+
       <div v-else class="signup-card">
-        <h2>
-          Thank you! Check your email to confirm your registration
-        </h2>
+        <h2>Thank you! Check your email to confirm your registration.</h2>
       </div>
     </div>
   </div>
@@ -72,7 +70,7 @@ import BaseButton from '../shared/ui/BaseButton.vue'
 
 const authStore = useAuthStore1()
 
-const success = ref(false);
+const success = ref(false)
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
@@ -107,16 +105,16 @@ function validateForm() {
 }
 
 async function handleSignUp() {
-  if (!validateForm()) {
-    console.log(errors)
-    return
-  }
+  if (!validateForm()) return
 
   try {
-    await authStore.userSignUp({email: email.value, password: password.value, confirm_password: confirmPassword.value})
-    success.value = true;
+    await authStore.userSignUp({
+      email: email.value,
+      password: password.value,
+      confirm_password: confirmPassword.value
+    })
+    success.value = true
   } catch (error) {
-    console.error(error)
     applyErrorsFromBackend(error)
   }
 }
@@ -125,7 +123,7 @@ async function handleSignUp() {
 <style scoped>
 .signup-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -138,11 +136,11 @@ async function handleSignUp() {
 }
 
 .signup-card {
-  color: #1a1a1a;
   background: white;
   border-radius: 16px;
   padding: 40px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  color: #1a1a1a;
 }
 
 .signup-header {
@@ -158,10 +156,9 @@ async function handleSignUp() {
 }
 
 .signup-description {
-  color: #718096;
   font-size: 1rem;
+  color: #718096;
   line-height: 1.5;
-  margin: 0;
 }
 
 .signup-form {
@@ -170,52 +167,25 @@ async function handleSignUp() {
   gap: 20px;
 }
 
-
-.signup-error {
-  background: #fed7d7;
-  color: #742a2a;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid #feb2b2;
-  font-size: 0.9rem;
-}
-
-.success-message {
-  background: #c6f6d5;
-  color: #22543d;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid #9ae6b4;
-  font-size: 0.9rem;
-}
-
 .login-link {
-  text-align: center;
   margin-top: 24px;
   padding-top: 24px;
   border-top: 1px solid #e2e8f0;
-  color: #2d3748;
-
-}
-
-.login-link p {
-  font-size: 0.9rem;
-  margin: 0;
+  text-align: center;
+  font-size: 0.95rem;
 }
 
 .login-text {
+  margin-left: 4px;
   color: #667eea;
-  text-decoration: none;
   font-weight: 600;
-  transition: color 0.2s ease;
+  text-decoration: none;
 }
 
 .login-text:hover {
-  color: #5a67d8;
   text-decoration: underline;
 }
 
-/* Responsive design */
 @media (max-width: 480px) {
   .signup-card {
     padding: 24px;

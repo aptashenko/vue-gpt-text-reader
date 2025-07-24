@@ -13,6 +13,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  color: #1a1a1a;
+}
+
 h1, h2, h3, h4, h5, h6, p {
   margin: 0;
 }
@@ -69,7 +73,7 @@ button:focus-visible {
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-  
+
   @media (max-width: 768px) {
     padding: 0.5rem;
   }

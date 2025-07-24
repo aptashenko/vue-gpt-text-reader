@@ -1,6 +1,6 @@
 <template>
-  <button 
-    @click="goBack" 
+  <button
+    @click="goBack"
     class="back-button"
     :class="{ 'back-button--small': small }"
     type="button"
@@ -46,7 +46,7 @@ function goBack() {
   align-items: center;
   gap: 8px;
   background: #667eea;
-  color: white;
+  color: white !important;
   border: none;
   border-radius: 8px;
   padding: 12px 16px;
@@ -84,6 +84,7 @@ function goBack() {
 
 .back-text {
   white-space: nowrap;
+  color: #f5f7fb;
 }
 
 /* Responsive */
@@ -92,10 +93,10 @@ function goBack() {
     padding: 10px 14px;
     font-size: 0.9rem;
   }
-  
+
   .back-button--small {
     padding: 6px 10px;
     font-size: 0.8rem;
   }
 }
-</style> 
+</style>

@@ -1,50 +1,57 @@
 <template>
   <div id="app">
-    <LoadingSpinner
-      :show="authStore.loading"
-      message="Loading..."
-    />
-    <AppHeader v-if="!authStore.loading" />
-    <router-view v-if="!authStore.loading" />
+    <loading-spinner v-if="authStore.loading" message="Loading..." />
+    <template v-else>
+      <app-header />
+      <router-view />
+    </template>
   </div>
 </template>
 
 <script setup>
-import { useAuthStore } from './stores/auth.js'
-import LoadingSpinner from './components/LoadingSpinner.vue'
-import AppHeader from './components/AppHeader.vue'
-import {useTextsStore} from "./stores/texts.store.js";
-import {useUserStore} from "./stores/user.store.js";
-import {useRoute, useRouter} from "vue-router";
+import {onBeforeMount, onMounted} from 'vue'
+import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import {isAuthenticated} from "./utils/auth.js";
-import {onMounted, watch} from "vue";
+import {useAuthStore} from "./stores/auth.js";
 import {useAuthStore1} from "./stores/auth.store.js";
+import {useUserStore} from "./stores/user.store.js";
+import LoadingSpinner from "./components/LoadingSpinner.vue";
+import AppHeader from "./components/AppHeader.vue";
+import {useTextsStore} from "./stores/texts.store.js";
 
-const authStore = useAuthStore();
-const authStore1 = useAuthStore1();
-const textsStore = useTextsStore();
-const userStore = useUserStore();
-const router = useRouter();
-const route = useRoute();
+const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
+const authStore1 = useAuthStore1()
+const userStore = useUserStore()
+const textStore = useTextsStore()
 
-textsStore.getLanguages()
-textsStore.getLevels();
+router.isReady().then(isReady => {
+  textStore.getLevels();
+  textStore.getLanguages();
+  handleAuthFlow(route)
+})
 
-watch(() => route.path, async(val) => {
+onBeforeRouteUpdate(async (to, from, next) => {
+  await handleAuthFlow(to)
+  next()
+})
 
-  const isAuth = isAuthenticated();
-  const isGuest = localStorage.getItem('guest');
-  if (isGuest && !userStore.user.email) {
-    authStore1.loginAsGuest();
+async function handleAuthFlow(currentRoute) {
+  const isAuth = await isAuthenticated()
+  const isGuest = route.query.guest;
+  if (isAuth && !isGuest) {
+    await userStore.getUserInfo()
   }
-  if (isAuth && !route.meta.isAuthPage && !userStore.isGuest) {
-    await userStore.getUserInfo();
-  }
-  if (isAuth && (!userStore.user.language || !userStore.user.level) && route.name !== 'profile') {
-    router.push({ name: 'profile' });
-  }
-}, {immediate: true})
 
+  if (
+      isAuth &&
+      (!userStore.user.language || !userStore.user.level) &&
+      currentRoute.name !== 'profile'
+  ) {
+    router.push({ name: 'profile' })
+  }
+}
 </script>
 
 <style>

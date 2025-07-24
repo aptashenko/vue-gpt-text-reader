@@ -1,63 +1,64 @@
 <template>
-  <div class="landing-page">
-    <div class="container">
-      <!-- Header -->
-      <header class="header">
-        <h1 class="title">{{ $t('landing.title') }}</h1>
-        <p class="subtitle">{{ $t('landing.subtitle') }}</p>
-      </header>
-      <!-- CTA Section -->
-      <section class="cta-section">
-        <div class="cta-content">
-          <h2 class="cta-title">{{ $t('landing.cta') }}</h2>
-          <p class="cta-subtitle">{{ $t('landing.ctaSubtitle') }}</p>
-          <button class="cta-button" @click="startLearning">
-            {{ $t('landing.cta') }}
-          </button>
-        </div>
-      </section>
-      <!-- Benefits Section -->
-      <section class="benefits">
-        <h2 class="benefits-title">{{ $t('landing.benefits.title') }}</h2>
-        <div class="benefits-grid">
-          <div class="benefit-item">
-            <div class="benefit-icon">📚</div>
-            <h3>{{ $t('landing.benefits.simple') }}</h3>
-          </div>
-          <div class="benefit-item">
-            <div class="benefit-icon">📖</div>
-            <h3>{{ $t('landing.benefits.dictionary') }}</h3>
-          </div>
-          <div class="benefit-item">
-            <div class="benefit-icon">❓</div>
-            <h3>{{ $t('landing.benefits.questions') }}</h3>
-          </div>
-          <div class="benefit-item">
-            <div class="benefit-icon">🤖</div>
-            <h3>{{ $t('landing.benefits.ai') }}</h3>
-          </div>
-        </div>
-      </section>
+  <div class="landing-wrapper">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1 class="hero-title">Read. Understand. Remember.</h1>
+      <p class="hero-subtitle">Learn languages by reading texts with AI-powered word translation and smart vocabulary tracking.</p>
+      <button class="hero-cta" @click="startLearning">Start learning →</button>
+    </section>
 
-      <section class="cta-section">
-        <div class="cta-content">
-          <h2 class="cta-title">{{ $t('landing.cta') }}</h2>
-          <p class="cta-subtitle">{{ $t('landing.ctaSubtitle') }}</p>
-          <button class="cta-button" @click="startLearning">
-            {{ $t('landing.cta') }}
-          </button>
+    <!-- How it works -->
+    <section class="flow">
+      <h2 class="flow-title">How it works</h2>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-icon">🌐</div>
+          <p>Choose your native & target language</p>
         </div>
-      </section>
-    </div>
+        <div class="flow-step">
+          <div class="flow-icon">📄</div>
+          <p>Start reading short, adapted texts</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-icon">🧠</div>
+          <p>Click any word to see the meaning in context</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-icon">📥</div>
+          <p>Save difficult words to your personal dictionary</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+      <h2 class="features-title">Why learners love it</h2>
+      <div class="features-grid">
+        <Feature icon="⚡️" text="Instant AI-powered translations" />
+        <Feature icon="🗂️" text="Your personal smart dictionary" />
+        <Feature icon="🎯" text="Focus on context, not just words" />
+        <Feature icon="📈" text="Track your learning progress" />
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="cta-final">
+      <h2 class="cta-title">No grammar drills. Just real language in real context.</h2>
+      <button class="hero-cta" @click="startLearning">Start now</button>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Created with ❤️ for language lovers</p>
+      <button class="coffee-button" @click="buyMeACoffee">☕ Buy me a coffee</button>
+    </footer>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
+import {useRouter} from 'vue-router'
 
 const router = useRouter()
-const { t } = useI18n()
 
 function startLearning() {
   router.push('/app')
@@ -68,232 +69,145 @@ function buyMeACoffee() {
 }
 </script>
 
+<script>
+export default {
+  components: {
+    Feature: {
+      props: ['icon', 'text'],
+      template: `
+        <div class="feature-item">
+          <div class="feature-icon">{{ icon }}</div>
+          <p>{{ text }}</p>
+        </div>
+      `
+    }
+  }
+}
+</script>
+
 <style scoped>
-.landing-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.container {
-  max-width: 1200px;
-  width: 100%;
-  background: white;
-  border-radius: 20px;
-  padding: 60px 40px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-/* Header */
-.header {
-  margin-bottom: 30px;
-}
-
-.title {
-  font-size: 3rem;
-  font-weight: 700;
-  color: #2d3748;
-  margin-bottom: 20px;
-  line-height: 1.2;
-}
-
-.subtitle {
-  font-size: 1.25rem;
-  color: #718096;
-  max-width: 600px;
+.landing-wrapper {
+  max-width: 960px;
   margin: 0 auto;
-  line-height: 1.6;
+  padding: 60px 20px;
+  font-family: system-ui, sans-serif;
+  color: #1a202c;
 }
 
-/* Benefits */
-.benefits {
+/* Hero */
+.hero {
+  text-align: center;
   margin-bottom: 60px;
 }
 
-.benefits-title {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 40px;
-}
-
-.benefits-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 30px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.benefit-item {
-  padding: 30px 20px;
-  background: #f7fafc;
-  border-radius: 12px;
-  border: 2px solid #e2e8f078;
-  transition: all 0.3s ease;
-}
-
-.benefit-icon {
+.hero-title {
   font-size: 3rem;
-  margin-bottom: 20px;
+  font-weight: 800;
+  margin-bottom: 16px;
 }
 
-.benefit-item h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2d3748;
-  margin: 0;
-  line-height: 1.4;
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: #4a5568;
+  margin-bottom: 32px;
 }
 
-/* CTA Section */
-.cta-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba278 100%);
-  margin: 0 auto 40px;
-  padding: 40px;
-  border-radius: 20px;
+.hero-cta {
+  background: #667eea;
   color: white;
-
-  width: fit-content;
-}
-
-.cta-content {
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.cta-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-  line-height: 1;
-}
-
-.cta-subtitle {
   font-size: 1.1rem;
-  opacity: 0.9;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.hero-cta:hover {
+  background: #5a67d8;
+}
+
+/* How it works */
+.flow-title {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
   margin-bottom: 30px;
 }
 
-.cta-button {
-  background: white;
-  color: #667eea;
-  border: none;
-  padding: 16px 40px;
-  font-size: 1.2rem;
-  font-weight: 600;
+.flow-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-around;
+}
+
+.flow-step {
+  flex: 1 1 200px;
+  text-align: center;
+  padding: 20px;
+}
+
+.flow-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+/* Features */
+.features-title {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 60px 0 30px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.feature-item {
+  background: #f7fafc;
   border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
 }
 
-.cta-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+.feature-icon {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  color: #667eea;
 }
 
-.cta-button:active {
-  transform: translateY(0);
-}
-
-/* Coffee Button */
-.coffee-section {
-  margin-top: 40px;
+/* CTA Final */
+.cta-final {
+  margin-top: 60px;
   text-align: center;
 }
 
+.cta-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: 60px;
+  color: #718096;
+}
+
 .coffee-button {
-  background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+  background: #8b4513;
   color: white;
   border: none;
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: 500;
+  padding: 10px 20px;
   border-radius: 8px;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2);
-}
-
-.coffee-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(139, 69, 19, 0.3);
-}
-
-.coffee-button:active {
-  transform: translateY(0);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .container {
-    padding: 40px 20px;
-  }
-
-  .title {
-    font-size: 2.2rem;
-  }
-
-  .subtitle {
-    font-size: 1.1rem;
-  }
-
-  .benefits-title {
-    font-size: 1.5rem;
-  }
-
-  .benefits-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .benefit-item {
-    padding: 25px 15px;
-  }
-
-  .benefit-icon {
-    font-size: 2.5rem;
-  }
-
-  .cta-section {
-    margin: 0 auto 20px;
-    padding: 20px;
-  }
-
-  .cta-title {
-    font-size: 2rem;
-  }
-
-  .cta-button {
-    padding: 14px 30px;
-    font-size: 1.1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .landing-page {
-    padding: 10px;
-  }
-
-  .container {
-    padding: 30px 15px;
-  }
-
-  .title {
-    font-size: 1.8rem;
-  }
-
-  .subtitle {
-    font-size: 1rem;
-  }
-
-  .cta-title {
-    font-size: 1.6rem;
-  }
+  margin-top: 10px;
 }
 </style>

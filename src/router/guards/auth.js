@@ -1,7 +1,7 @@
 import {isAuthenticated} from "../../utils/auth.js";
 
 export const authGuard= async (to) => {
-    const isAuth = isAuthenticated();
+    const isAuth = await isAuthenticated();
     const requiresAuth = to.meta.requiresAuth === true;
     const isAuthPage = to.meta.isAuthPage === true;
 

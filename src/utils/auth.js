@@ -30,9 +30,11 @@ export async function logout(redirectToLogin = true) {
  * Check if user is authenticated
  * @returns {boolean}
  */
-export function isAuthenticated() {
-  const token = localStorage.getItem('access_token');
-  return !!token;
+export async function isAuthenticated() {
+  const token = new Promise((resolve, reject) => setTimeout(() => {
+    resolve(!!localStorage.getItem('access_token'))
+  }), 600)
+  return token;
 }
 
 /**
